@@ -9,7 +9,6 @@ import brinquedosImg from '../assets/Brinquedos Avulsos-home.webp';
 import linhaPetImg from '../assets/LinhaPet-Home.webp';
 import jardimImg from '../assets/Jardim e mobili-home.webp';
 import sobreImg from '../assets/SOBRE.webp';
-import QuoteForm from '../components/QuoteForm';
 
 const HeroSection = () => {
   return (
@@ -180,8 +179,14 @@ const CategoryPreview = () => {
           ))}
         </div>
 
-        <div className="mt-20">
-          <QuoteForm />
+        <div className="mt-20 text-center">
+          <a
+            href="/#/quote"
+            className="inline-flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black text-xl rounded-2xl shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-1 transition-all duration-300"
+          >
+            SOLICITAR ORÇAMENTO COMPLETO
+            <ArrowRight strokeWidth={3} />
+          </a>
         </div>
       </div>
     </section>
