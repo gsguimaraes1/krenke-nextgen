@@ -23,20 +23,40 @@ const allAssets = import.meta.glob('../assets/**/*', { eager: true, as: 'url' })
 const findProductAssets = (productName: string) => {
   if (!productName || productName.length < 3) return { main: '', gallery: [] as string[] };
 
-  const normalizedName = productName.toLowerCase().replace(/\s+/g, '');
+  const normalize = (s: string) => s.toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, '');
+
+  const normalizedName = normalize(productName);
   const matches: string[] = [];
 
   Object.entries(allAssets).forEach(([path, url]) => {
+    const normalizedPath = normalize(path);
+
     // Check if path contains the normalized name
-    // e.g. assets/KMP0101/image.jpg contains kmp0101
-    if (path.toLowerCase().replace(/\s+/g, '').includes(normalizedName)) {
+    if (normalizedPath.includes(normalizedName)) {
+      matches.push(url as string);
+    }
+
+    // Special mapping for LINHA TEMÁTICA to thematic folder
+    if (normalizedName === 'linhatematica' && normalizedPath.includes('tematica2025')) {
       matches.push(url as string);
     }
   });
 
+  // Sort to prioritize main product image
+  const sortedMatches = [...matches].sort((a, b) => {
+    const aName = normalize(a.split('/').pop() || '');
+    const bName = normalize(b.split('/').pop() || '');
+    if (aName === normalizedName + '.jpg' || aName === normalizedName + '.png' || aName === normalizedName + '.webp') return -1;
+    if (bName === normalizedName + '.jpg' || bName === normalizedName + '.png' || bName === normalizedName + '.webp') return 1;
+    return 0;
+  });
+
   return {
-    main: matches.length > 0 ? matches[0] : '',
-    gallery: matches
+    main: sortedMatches.length > 0 ? sortedMatches[0] : '',
+    gallery: sortedMatches
   };
 };
 

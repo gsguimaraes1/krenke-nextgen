@@ -398,6 +398,42 @@ export const INITIAL_PRODUCTS: Product[] = [
     "images": []
   },
   {
+    "id": "lt-aviao",
+    "name": "AVI\u00c3O",
+    "category": "Playgrounds Completos",
+    "description": "Playground tem\u00e1tico em formato de Avi\u00e3o, parte da nossa Linha Tem\u00e1tica 2025. Design l\u00fadico que estimula a imagina\u00e7\u00e3o.",
+    "specs": "<h2 class=\"product_title entry-title\">AVI\u00c3O</h2><div class=\"description\">Playground tem\u00e1tico em formato de Avi\u00e3o. Parte da Linha Tem\u00e1tica 2025.</div>",
+    "image": "",
+    "images": []
+  },
+  {
+    "id": "lt-barco",
+    "name": "BARCO",
+    "category": "Playgrounds Completos",
+    "description": "Playground tem\u00e1tico em formato de Barco Pirata, parte da nossa Linha Tem\u00e1tica 2025. Divers\u00e3o garantida em alto mar.",
+    "specs": "<h2 class=\"product_title entry-title\">BARCO</h2><div class=\"description\">Playground tem\u00e1tico em formato de Barco. Parte da Linha Tem\u00e1tica 2025.</div>",
+    "image": "",
+    "images": []
+  },
+  {
+    "id": "lt-trator",
+    "name": "TRATOR",
+    "category": "Playgrounds Completos",
+    "description": "Playground tem\u00e1tico em formato de Trator, parte da nossa Linha Tem\u00e1tica 2025. Para os pequenos agricultores e construtores.",
+    "specs": "<h2 class=\"product_title entry-title\">TRATOR</h2><div class=\"description\">Playground tem\u00e1tico em formato de Trator. Parte da Linha Tem\u00e1tica 2025.</div>",
+    "image": "",
+    "images": []
+  },
+  {
+    "id": "lt-trem",
+    "name": "TREM",
+    "category": "Playgrounds Completos",
+    "description": "Playground tem\u00e1tico em formato de Trem, parte da nossa Linha Tem\u00e1tica 2025. Um convite para uma viagem de divers\u00e3o.",
+    "specs": "<h2 class=\"product_title entry-title\">TREM</h2><div class=\"description\">Playground tem\u00e1tico em formato de Trem. Parte da Linha Tem\u00e1tica 2025.</div>",
+    "image": "",
+    "images": []
+  },
+  {
     "id": "klp-0101",
     "name": "KLP 0101",
     "category": "Little Play",
