@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import HomePage from './pages/Home';
 import AboutPage from './pages/About';
@@ -9,12 +9,21 @@ import ProjectsPage from './pages/Projects';
 import AdminPage from './pages/Admin';
 
 
-// Scroll to top on route change
+// Scroll to top on route change and trigger GTM pageview
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   React.useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+
+    // Notify GTM about the page change
+    if ((window as any).dataLayer) {
+      (window as any).dataLayer.push({
+        event: 'pageview',
+        path: pathname + search,
+        title: document.title
+      });
+    }
+  }, [pathname, search]);
   return null;
 };
 
