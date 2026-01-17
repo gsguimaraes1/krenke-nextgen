@@ -6,6 +6,8 @@ import AboutPage from './pages/About';
 import ProductsPage from './pages/Products';
 import QuotePage from './pages/Quote';
 import ProjectsPage from './pages/Projects';
+import AdminPage from './pages/Admin';
+
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -26,7 +28,10 @@ const App: React.FC = () => {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
+
+          <Route path="/pgadmin" element={<AdminPage />} />
           <Route path="/quote" element={<QuotePage />} />
+
           {/* Fallback redirects */}
           <Route path="*" element={<HomePage />} />
         </Routes>

@@ -10,18 +10,15 @@ const CATEGORIES = [
   'Little Play',
   'Brinquedos Avulsos',
   'Linha Pet',
-  'Mobiliário Urbano e Jardim',
-  'Pisos de Borracha',
-  'Terceirização',
-  'Rotomoldagem'
+  'Mobiliário Urbano e Jardim'
 ];
 
 // Load all assets using Vite's glob import
-const allAssets = import.meta.glob('../assets/**/*', { eager: true, as: 'url' });
+const allAssets = import.meta.glob('../assets/**/*', { eager: true, query: '?url', import: 'default' });
 
 // Helper to find images for a product
 const findProductAssets = (productName: string) => {
-  if (!productName || productName.length < 3) return { main: '', gallery: [] as string[] };
+  if (!productName || productName.length < 2) return { main: '', gallery: [] as string[] };
 
   const normalize = (s: string) => s.toLowerCase()
     .normalize("NFD")
@@ -34,23 +31,56 @@ const findProductAssets = (productName: string) => {
   Object.entries(allAssets).forEach(([path, url]) => {
     const normalizedPath = normalize(path);
 
-    // Check if path contains the normalized name
+    // Basic match: path contains name
     if (normalizedPath.includes(normalizedName)) {
       matches.push(url as string);
     }
 
-    // Special mapping for LINHA TEMÁTICA to thematic folder
-    if (normalizedName === 'linhatematica' && normalizedPath.includes('tematica2025')) {
-      matches.push(url as string);
-    }
+    // Reverse match: for specific thematic products, also look into thematic folder
+    const thematicKeywords = ['aviao', 'barco', 'trator', 'trem'];
+    thematicKeywords.forEach(keyword => {
+      // If the product name contains the keyword, and the path is in tematica2025 and contains the keyword
+      if ((normalizedName.includes(keyword) || (normalizedName === 'barcopirata' && keyword === 'barco')) &&
+        (normalizedPath.includes('tematica2025') || normalizedPath.includes('tematica')) &&
+        normalizedPath.includes(keyword)) {
+        if (!matches.includes(url as string)) {
+          matches.push(url as string);
+        }
+      }
+    });
   });
 
   // Sort to prioritize main product image
   const sortedMatches = [...matches].sort((a, b) => {
-    const aName = normalize(a.split('/').pop() || '');
-    const bName = normalize(b.split('/').pop() || '');
-    if (aName === normalizedName + '.jpg' || aName === normalizedName + '.png' || aName === normalizedName + '.webp') return -1;
-    if (bName === normalizedName + '.jpg' || bName === normalizedName + '.png' || bName === normalizedName + '.webp') return 1;
+    const aLower = a.toLowerCase();
+    const bLower = b.toLowerCase();
+
+    // Priority 1: Files with "capa" in filename
+    const aIsCapa = aLower.includes('capa');
+    const bIsCapa = bLower.includes('capa');
+
+    if (aIsCapa && !bIsCapa) return -1;
+    if (!aIsCapa && bIsCapa) return 1;
+
+    // Priority 2: Files that exactly match the normalized name (or are the generic one in the folder)
+    const aFile = a.split('/').pop()?.split('.')[0] || '';
+    const bFile = b.split('/').pop()?.split('.')[0] || '';
+    const aFileNorm = normalize(aFile);
+    const bFileNorm = normalize(bFile);
+
+    // If normalizedName is "barcopirata", and aFileNorm is "barco", it's a very good match
+    const aIsGoodMatch = aFileNorm === normalizedName || normalizedName === aFileNorm + 'pirata' || normalizedName === 'pirata' + aFileNorm;
+    const bIsGoodMatch = bFileNorm === normalizedName || normalizedName === bFileNorm + 'pirata' || normalizedName === 'pirata' + bFileNorm;
+
+    if (aIsGoodMatch && !bIsGoodMatch) return -1;
+    if (!aIsGoodMatch && bIsGoodMatch) return 1;
+
+    // Priority 3: Contains the keyword as part of the name
+    const aIncludes = normalizedName.includes(aFileNorm);
+    const bIncludes = normalizedName.includes(bFileNorm);
+    if (aIncludes && !bIncludes) return -1;
+    if (!aIncludes && bIncludes) return 1;
+
     return 0;
   });
 
@@ -539,7 +569,7 @@ const ProductModal: React.FC<{ product: Product | null; onClose: () => void }> =
         {/* Modal Panel */}
         <div className="relative inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full animate-fade-in-up">
           <div className="absolute top-4 right-4 z-10">
-            <button onClick={onClose} className="bg-white/80 hover:bg-white text-gray-400 hover:text-gray-500 rounded-full p-2 focus:outline-none backdrop-blur-sm shadow-sm">
+            <button onClick={onClose} className="bg-white/80 hover:bg-white text-gray-400 hover:text-gray-500 rounded-full p-2 focus:outline-none backdrop-blur-sm shadow-sm gtm-modal-close">
               <X size={24} />
             </button>
           </div>
@@ -576,7 +606,7 @@ const ProductModal: React.FC<{ product: Product | null; onClose: () => void }> =
                   {product.category}
                 </span>
               </div>
-              <h2 className="text-3xl font-black text-gray-900 mb-6">{product.name}</h2>
+              <h2 className="text-3xl font-black text-gray-900 mb-6 uppercase tracking-tight">{product.name}</h2>
 
               {/* Custom Styles for Table */}
               <style>{`
@@ -617,7 +647,7 @@ const ProductModal: React.FC<{ product: Product | null; onClose: () => void }> =
 
               <div className="mt-auto pt-6 border-t border-gray-100">
                 <button
-                  className="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-900/20 flex items-center justify-center gap-2"
+                  className="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-900/20 flex items-center justify-center gap-2 gtm-modal-button-quote"
                   onClick={() => window.location.href = '/#/quote'}
                 >
                   Solicitar Orçamento Deste Item
@@ -774,32 +804,40 @@ const INITIAL_PRODUCTS: Product[] = ${JSON.stringify(products, null, 2)};`;
       )}
 
       {/* Header Banner */}
-      <div className="bg-white border-b border-gray-100 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-              <span>Home</span>
-              <ChevronRight size={14} />
-              <span className="text-krenke-orange font-bold">Produtos</span>
+      <div className="relative h-[350px] md:h-[450px] overflow-hidden flex items-center bg-[#1E1B4B] mb-20">
+        {/* Background Image/Pattern */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 animate-pulse-slow"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-krenke-purple via-[#2a2175] to-blue-900 opacity-95"></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8">
+            <div className="flex flex-col items-start">
+              <div className="flex items-center gap-2 text-sm text-gray-300 mb-6 bg-white/5 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
+                <span>Home</span>
+                <ChevronRight size={14} />
+                <span className="text-krenke-orange font-bold">Produtos</span>
+              </div>
+
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white/80 text-xs font-bold uppercase tracking-widest mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-krenke-orange"></span>
+                Qualidade e Segurança
+              </div>
+
+              <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-4 drop-shadow-2xl">
+                Produtos
+              </h1>
+              <div className="h-2 w-32 bg-gradient-to-r from-krenke-orange to-yellow-400 rounded-full"></div>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900">Catálogo 2026</h1>
-            <p className="text-gray-600 mt-2">Qualidade e segurança em cada detalhe.</p>
-          </div>
 
-          <div className="flex gap-4">
-            <button
-              onClick={() => setIsEditMode(!isEditMode)}
-              className={`px-4 py-2 rounded-lg font-bold transition-all ${isEditMode ? 'bg-purple-100 text-purple-700' : 'text-gray-400 hover:text-gray-600'}`}
-            >
-              {isEditMode ? 'Modo Edição Ativo' : 'Admin'}
-            </button>
 
-            <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-krenke-orange text-white px-8 py-4 rounded-xl font-bold hover:bg-orange-600 transition-all shadow-lg hover:shadow-orange-200">
-              <Download size={20} />
-              Baixar Catálogo PDF
-            </button>
           </div>
         </div>
+
+        {/* Decorative Bottom Fade */}
+        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-50 to-transparent z-10"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -916,7 +954,7 @@ const INITIAL_PRODUCTS: Product[] = ${JSON.stringify(products, null, 2)};`;
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeCategory === cat
+                    className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all gtm-product-filter-${cat.toLowerCase().replace(/\s+/g, '-')}-desktop ${activeCategory === cat
                       ? 'bg-krenke-orange text-white shadow-md'
                       : 'text-gray-600 hover:bg-orange-50 hover:text-krenke-orange'
                       }`}
@@ -937,7 +975,7 @@ const INITIAL_PRODUCTS: Product[] = ${JSON.stringify(products, null, 2)};`;
                 <input
                   type="text"
                   placeholder="O que você procura?"
-                  className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-krenke-orange focus:border-transparent shadow-sm"
+                  className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-krenke-orange focus:border-transparent shadow-sm gtm-product-search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -949,7 +987,7 @@ const INITIAL_PRODUCTS: Product[] = ${JSON.stringify(products, null, 2)};`;
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`whitespace-nowrap px-5 py-2.5 rounded-full font-medium text-sm transition-all flex-shrink-0 ${activeCategory === cat
+                    className={`whitespace-nowrap px-5 py-2.5 rounded-full font-medium text-sm transition-all flex-shrink-0 gtm-product-filter-${cat.toLowerCase().replace(/\s+/g, '-')}-mobile ${activeCategory === cat
                       ? 'bg-krenke-orange text-white shadow-md'
                       : 'bg-white text-gray-600 border border-gray-200'
                       }`}
@@ -986,7 +1024,7 @@ const INITIAL_PRODUCTS: Product[] = ${JSON.stringify(products, null, 2)};`;
                       </div>
                     )}
 
-                    <div className="relative aspect-square overflow-hidden bg-gray-100 cursor-pointer" onClick={() => setSelectedProduct(product)}>
+                    <div className="relative aspect-square overflow-hidden bg-gray-100 cursor-pointer gtm-product-image-click" onClick={() => setSelectedProduct(product)}>
                       <img
                         src={product.image}
                         alt={product.name}
@@ -996,19 +1034,19 @@ const INITIAL_PRODUCTS: Product[] = ${JSON.stringify(products, null, 2)};`;
                         }}
                       />
                       <div className="absolute top-3 left-3">
-                        <span className="bg-white/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-krenke-orange rounded-full shadow-sm border border-orange-100">
+                        <span className="bg-white/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-krenke-orange rounded-full shadow-sm border border-orange-100 gtm-product-category-label">
                           {product.category}
                         </span>
                       </div>
                     </div>
                     <div className="p-6 flex-grow flex flex-col">
-                      <h3 className="font-bold text-lg text-gray-900 mb-2 leading-tight group-hover:text-krenke-orange transition-colors">{product.name}</h3>
+                      <h3 className="font-bold text-lg text-gray-900 mb-2 leading-tight group-hover:text-krenke-orange transition-colors gtm-product-title uppercase tracking-tight">{product.name}</h3>
                       <p className="text-sm text-gray-500 mb-6 line-clamp-2 flex-grow">
                         {(product.description || '').replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim()}
                       </p>
                       <button
                         onClick={() => setSelectedProduct(product)}
-                        className="w-full py-3 border-2 border-gray-100 text-gray-700 font-bold rounded-xl group-hover:border-krenke-orange group-hover:bg-krenke-orange group-hover:text-white transition-all duration-300"
+                        className="w-full py-3 border-2 border-gray-100 text-gray-700 font-bold rounded-xl group-hover:border-krenke-orange group-hover:bg-krenke-orange group-hover:text-white transition-all duration-300 gtm-product-details-button"
                       >
                         Ver Detalhes
                       </button>

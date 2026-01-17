@@ -1,9 +1,9 @@
 import React from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
-import heroVideo from '../assets/FabricaKrenke.mp4';
-import image36Anos from '../assets/36anos-krenke.jpg.webp';
-import imageFachada from '../assets/Fachada.webp';
-import imageNordeste from '../assets/KrenkeNordeste.webp';
+import heroVideo from '../assets/Sobre/FabricaKrenke.mp4';
+import image36Anos from '../assets/Sobre/36anos-krenke.jpg.webp';
+import imageFachada from '../assets/Sobre/Fachada.webp';
+import imageNordeste from '../assets/Sobre/KrenkeNordeste.webp';
 
 const AboutPage: React.FC = () => {
   return (

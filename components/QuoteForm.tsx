@@ -3,7 +3,7 @@ import { INITIAL_PRODUCTS } from '../products_data';
 import { Check, Search } from 'lucide-react';
 
 // Load all assets using Vite's glob import
-const allAssets = import.meta.glob('../assets/**/*', { eager: true, as: 'url' });
+const allAssets = import.meta.glob('../assets/**/*', { eager: true, query: '?url', import: 'default' });
 
 // Helper to find images for a product
 const findProductAssets = (productName: string) => {
@@ -273,6 +273,49 @@ const QuoteForm: React.FC = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #94a3b8;
         }
+
+        @media (max-width: 768px) {
+          .form-container {
+            padding: 40px 20px;
+            border-radius: 24px;
+            gap: 24px;
+          }
+
+          .product-selector {
+            grid-template-columns: 1fr;
+            padding: 12px;
+            max-height: 400px;
+          }
+
+          .product-item {
+            padding: 12px;
+            gap: 12px;
+          }
+
+          .product-img-wrapper {
+            width: 60px;
+            height: 60px;
+          }
+
+          .form-submit-btn {
+            padding: 18px 24px;
+            font-size: 16px;
+          }
+
+          .form-container h2 {
+            font-size: 1.5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .form-container {
+            padding: 30px 16px;
+          }
+
+          .product-item span.font-bold {
+            font-size: 14px;
+          }
+        }
       `}</style>
 
       <div className="form-container">
@@ -282,17 +325,17 @@ const QuoteForm: React.FC = () => {
         <form className="form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">Nome Completo</label>
-            <input type="text" id="name" name="name" placeholder="Seu nome" required />
+            <input type="text" id="name" name="name" placeholder="Seu nome" required className="gtm-quote-input-name" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="form-group">
               <label htmlFor="phone">WhatsApp</label>
-              <input type="tel" id="phone" name="phone" placeholder="(00) 00000-0000" required />
+              <input type="tel" id="phone" name="phone" placeholder="(00) 00000-0000" required className="gtm-quote-input-phone" />
             </div>
             <div className="form-group">
               <label htmlFor="email">E-mail</label>
-              <input type="email" id="email" name="email" placeholder="seu@email.com" required />
+              <input type="email" id="email" name="email" placeholder="seu@email.com" required className="gtm-quote-input-email" />
             </div>
           </div>
 
@@ -302,7 +345,7 @@ const QuoteForm: React.FC = () => {
               <Search size={16} className="search-icon" />
               <input
                 type="text"
-                className="search-input"
+                className="search-input gtm-quote-search-products"
                 placeholder="Buscar produtos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -316,7 +359,7 @@ const QuoteForm: React.FC = () => {
                 return (
                   <div
                     key={product.id}
-                    className={`product-item ${selectedProducts.includes(product.id) ? 'selected' : ''}`}
+                    className={`product-item ${selectedProducts.includes(product.id) ? 'selected' : ''} gtm-quote-product-item-${product.id}`}
                     onClick={() => toggleProduct(product.id)}
                   >
                     <div className="checkbox-custom">
@@ -328,8 +371,8 @@ const QuoteForm: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col min-w-0">
-                      <span className="font-bold text-base tracking-tight truncate text-slate-900">{product.name}</span>
-                      <span className="text-[11px] text-slate-500 uppercase font-semibold">{product.category}</span>
+                      <span className="font-bold text-base tracking-tight truncate text-slate-900 gtm-quote-product-name uppercase">{product.name}</span>
+                      <span className="text-[11px] text-slate-500 uppercase font-semibold gtm-quote-product-category">{product.category}</span>
                     </div>
                   </div>
                 );
@@ -342,10 +385,10 @@ const QuoteForm: React.FC = () => {
 
           <div className="form-group">
             <label htmlFor="message">Observações (Opcional)</label>
-            <textarea id="message" name="message" placeholder="Conte-nos mais sobre seu projeto..."></textarea>
+            <textarea id="message" name="message" placeholder="Conte-nos mais sobre seu projeto..." className="gtm-quote-input-message"></textarea>
           </div>
 
-          <button type="submit" className="form-submit-btn">
+          <button type="submit" className="form-submit-btn gtm-quote-button-submit">
             ENVIAR SOLICITAÇÃO
           </button>
         </form>

@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard } from 'lucide-react';
 import { ShowcaseCard } from '../components/ui/ShowcaseCard';
-import heroVideo from '../assets/videokrenke.mp4';
+import heroVideo from '../assets/Home/videokrenke.mp4';
 import { ImageCarousel } from '../components/ImageCarousel';
-import playgroundsImg from '../assets/Playgrounds Completos-home.webp';
-import brinquedosImg from '../assets/Brinquedos Avulsos-home.webp';
-import linhaPetImg from '../assets/LinhaPet-Home.webp';
-import jardimImg from '../assets/Jardim e mobili-home.webp';
-import sobreImg from '../assets/SOBRE.webp';
+import playgroundsImg from '../assets/Home/Playgrounds Completos-home.webp';
+import brinquedosImg from '../assets/Home/Brinquedos Avulsos-home.webp';
+import linhaPetImg from '../assets/Home/LinhaPet-Home.webp';
+import jardimImg from '../assets/Home/Jardim e mobili-home.webp';
+import sobreImg from '../assets/Sobre/SOBRE.webp';
 
 const HeroSection = () => {
   return (
@@ -63,7 +63,7 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-5 justify-center pt-6">
             <Link
               to="/products"
-              className="group relative px-8 py-4 bg-krenke-orange text-white font-bold text-lg rounded-full overflow-hidden shadow-xl shadow-orange-500/20 hover:shadow-orange-500/40 transition-all hover:scale-105"
+              className="group relative px-8 py-4 bg-krenke-orange text-white font-bold text-lg rounded-full overflow-hidden shadow-xl shadow-orange-500/20 hover:shadow-orange-500/40 transition-all hover:scale-105 gtm-home-hero-button-products"
             >
               <span className="relative z-10 flex items-center gap-2">
                 Ver Produtos <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -73,7 +73,7 @@ const HeroSection = () => {
 
             <Link
               to="/quote"
-              className="px-8 py-4 bg-white/5 backdrop-blur-md border border-white/30 text-white font-bold text-lg rounded-full hover:bg-white hover:text-krenke-purple transition-all flex items-center justify-center shadow-lg"
+              className="px-8 py-4 bg-white/5 backdrop-blur-md border border-white/30 text-white font-bold text-lg rounded-full hover:bg-white hover:text-krenke-purple transition-all flex items-center justify-center shadow-lg gtm-home-hero-button-quote"
             >
               Solicitar Orçamento
             </Link>
@@ -88,29 +88,31 @@ const Features = () => (
   <section className="py-20 bg-white relative z-10 -mt-16">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid md:grid-cols-3 gap-6">
-        {[
-          {
-            icon: Award,
-            title: "Desde 1987",
-            desc: "A maior fábrica de playgrounds do Brasil.",
-            bg: "bg-krenke-purple text-white border-krenke-purple"
-          },
-          {
-            icon: CheckCircle,
-            title: "Certificado de Segurança e Qualidade",
-            desc: "Brinquedos avaliados e certificados pela ABNT.",
-            bg: "bg-krenke-orange text-white border-krenke-orange"
-          },
-          {
-            icon: PenTool,
-            title: "Plástico Rotomoldado",
-            desc: "Material resistente, durável e que não desbota.",
-            bg: "bg-krenke-purple text-white border-krenke-purple"
-          }
+        {[{
+          icon: Award,
+          title: "Desde 1987",
+          desc: "A maior fábrica de playgrounds do Brasil.",
+          bg: "bg-krenke-purple text-white border-krenke-purple",
+          slug: "desde-1987"
+        },
+        {
+          icon: CheckCircle,
+          title: "Certificado de Segurança e Qualidade",
+          desc: "Brinquedos avaliados e certificados pela ABNT.",
+          bg: "bg-krenke-orange text-white border-krenke-orange",
+          slug: "abnt"
+        },
+        {
+          icon: PenTool,
+          title: "Plástico Rotomoldado",
+          desc: "Material resistente, durável e que não desbota.",
+          bg: "bg-krenke-purple text-white border-krenke-purple",
+          slug: "rotomoldagem"
+        }
         ].map((feature, idx) => (
           <div
             key={idx}
-            className={`${feature.bg} p-8 rounded-xl shadow-2xl border-2 border-dashed border-white/30 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300`}
+            className={`${feature.bg} p-8 rounded-xl shadow-2xl border-2 border-dashed border-white/30 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300 gtm-home-feature-${feature.slug}`}
           >
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-6 backdrop-blur-sm">
               <feature.icon size={32} strokeWidth={2} />
@@ -182,7 +184,7 @@ const CategoryPreview = () => {
         <div className="mt-20 text-center">
           <a
             href="/#/quote"
-            className="inline-flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black text-xl rounded-2xl shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-1 transition-all duration-300"
+            className="inline-flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black text-xl rounded-2xl shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-1 transition-all duration-300 gtm-home-category-button-full-quote"
           >
             SOLICITAR ORÇAMENTO COMPLETO
             <ArrowRight strokeWidth={3} />

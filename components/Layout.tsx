@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, Youtube, ChevronDown } from 'lucide-react';
-import logoBranco from '../assets/logo branco_krenke.png';
-import logoMarcaBranco from '../assets/krenke_marca_em_branco.png';
+import logoBranco from '../assets/Logos/logo branco_krenke.png';
+import logoMarcaBranco from '../assets/Logos/krenke_marca_em_branco.png';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,10 +29,7 @@ export const Navbar: React.FC = () => {
     "Little Play",
     "Brinquedos Avulsos",
     "Linha Pet",
-    "Mobiliário Urbano e Jardim",
-    "Pisos de Borracha",
-    "Terceirização",
-    "Rotomoldagem"
+    "Mobiliário Urbano e Jardim"
   ];
 
   return (
@@ -41,13 +38,13 @@ export const Navbar: React.FC = () => {
       <div className={`hidden lg:block border-b border-white/10 ${isScrolled ? 'h-0 overflow-hidden border-none' : 'h-10 mb-2'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center text-sm text-gray-200">
           <div className="flex items-center gap-6">
-            <span className="flex items-center gap-2 hover:text-white transition-colors"><Phone size={14} /> (47) 3373-0693</span>
-            <span className="flex items-center gap-2 hover:text-white transition-colors"><Mail size={14} /> contato@krenke.com.br</span>
+            <span className="flex items-center gap-2 hover:text-white transition-colors gtm-topbar-phone"><Phone size={14} /> (47) 3373-0693</span>
+            <span className="flex items-center gap-2 hover:text-white transition-colors gtm-topbar-email"><Mail size={14} /> contato@krenke.com.br</span>
           </div>
           <div className="flex items-center gap-4">
-            <a href="#" className="hover:text-krenke-orange transition-colors"><Instagram size={16} /></a>
-            <a href="#" className="hover:text-krenke-orange transition-colors"><Facebook size={16} /></a>
-            <a href="#" className="hover:text-krenke-orange transition-colors"><Youtube size={16} /></a>
+            <a href="#" className="hover:text-krenke-orange transition-colors gtm-social-instagram-top"><Instagram size={16} /></a>
+            <a href="#" className="hover:text-krenke-orange transition-colors gtm-social-facebook-top"><Facebook size={16} /></a>
+            <a href="#" className="hover:text-krenke-orange transition-colors gtm-social-youtube-top"><Youtube size={16} /></a>
           </div>
         </div>
       </div>
@@ -55,7 +52,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex-shrink-0">
+          <Link to="/" className="flex-shrink-0 gtm-nav-logo">
             <img
               src={logoBranco}
               alt="Krenke Brinquedos"
@@ -65,13 +62,13 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center gap-8">
-            <Link to="/" className="text-white font-medium hover:text-krenke-orange transition-colors">Home</Link>
-            <Link to="/about" className="text-white font-medium hover:text-krenke-orange transition-colors">Empresa</Link>
+            <Link to="/" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-home">Home</Link>
+            <Link to="/about" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-about">Empresa</Link>
 
             {/* Products Dropdown */}
             <div className="relative group">
               <button
-                className="flex items-center gap-1 text-white font-medium group-hover:text-krenke-orange transition-colors py-2"
+                className="flex items-center gap-1 text-white font-medium group-hover:text-krenke-orange transition-colors py-2 gtm-nav-dropdown-products"
               >
                 Produtos <ChevronDown size={16} />
               </button>
@@ -80,7 +77,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     key={idx}
                     to={`/products?category=${encodeURIComponent(cat)}`}
-                    className="block px-6 py-3 text-gray-700 hover:bg-orange-50 hover:text-krenke-orange transition-colors border-b border-gray-50 last:border-none"
+                    className={`block px-6 py-3 text-gray-700 hover:bg-orange-50 hover:text-krenke-orange transition-colors border-b border-gray-50 last:border-none gtm-nav-category-${cat.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {cat}
                   </Link>
@@ -89,10 +86,10 @@ export const Navbar: React.FC = () => {
             </div>
 
 
-            <Link to="/downloads" className="text-white font-medium hover:text-krenke-orange transition-colors">Downloads</Link>
-            <Link to="/projects" className="text-white font-medium hover:text-krenke-orange transition-colors">Projetos</Link>
+            <Link to="/downloads" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-downloads">Downloads</Link>
+            <Link to="/projects" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-projects">Projetos</Link>
 
-            <Link to="/quote" className="px-6 py-2.5 bg-krenke-orange text-white font-bold rounded-full hover:bg-orange-500 transition-all transform hover:scale-105 shadow-lg shadow-orange-900/20">
+            <Link to="/quote" className="px-6 py-2.5 bg-krenke-orange text-white font-bold rounded-full hover:bg-orange-500 transition-all transform hover:scale-105 shadow-lg shadow-orange-900/20 gtm-nav-button-quote">
               Orçamento
             </Link>
           </div>
@@ -109,13 +106,13 @@ export const Navbar: React.FC = () => {
       {/* Mobile Menu */}
       <div className={`lg:hidden fixed inset-0 bg-krenke-purple z-40 transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} pt-24 px-6`}>
         <div className="flex flex-col gap-6 text-lg">
-          <Link to="/" className="text-white font-medium border-b border-white/10 pb-4">Home</Link>
-          <Link to="/about" className="text-white font-medium border-b border-white/10 pb-4">Empresa</Link>
+          <Link to="/" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-home">Home</Link>
+          <Link to="/about" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-about">Empresa</Link>
 
           <div>
             <button
               onClick={() => setProductsOpen(!productsOpen)}
-              className="flex items-center justify-between w-full text-white font-medium border-b border-white/10 pb-4"
+              className="flex items-center justify-between w-full text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-products-toggle"
             >
               Produtos <ChevronDown size={20} className={`transform transition-transform ${productsOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -125,7 +122,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     key={idx}
                     to={`/products?category=${encodeURIComponent(cat)}`}
-                    className="block text-gray-300 hover:text-krenke-orange text-sm"
+                    className={`block text-gray-300 hover:text-krenke-orange text-sm gtm-nav-mobile-category-${cat.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {cat}
                   </Link>
@@ -135,9 +132,10 @@ export const Navbar: React.FC = () => {
           </div>
 
 
-          <Link to="/downloads" className="text-white font-medium border-b border-white/10 pb-4">Downloads</Link>
-          <Link to="/projects" className="text-white font-medium border-b border-white/10 pb-4">Projetos</Link>
-          <Link to="/quote" className="text-center py-4 bg-krenke-orange text-white font-bold rounded-xl shadow-lg">
+
+          <Link to="/downloads" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-downloads">Downloads</Link>
+          <Link to="/projects" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-projects">Projetos</Link>
+          <Link to="/quote" className="text-center py-4 bg-krenke-orange text-white font-bold rounded-xl shadow-lg gtm-nav-mobile-button-quote">
             Solicitar Orçamento
           </Link>
         </div>
@@ -157,37 +155,37 @@ export const Footer: React.FC = () => {
               Diversão, segurança e confiabilidade são sinônimos dos produtos da Krenke Brinquedos. O melhor jeito de brincar!
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-krenke-orange transition-colors">
+              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-krenke-orange transition-colors gtm-social-instagram-footer">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-krenke-orange transition-colors">
+              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-krenke-orange transition-colors gtm-social-facebook-footer">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-krenke-orange transition-colors">
+              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-krenke-orange transition-colors gtm-social-youtube-footer">
                 <Youtube size={20} />
               </a>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg font-bold mb-6 border-l-4 border-krenke-orange pl-4">Menu Rápido</h3>
+            <h3 className="text-lg font-bold mb-6 border-l-4 border-krenke-orange pl-4 gtm-footer-title-menu">Menu Rápido</h3>
             <ul className="space-y-3 text-gray-300">
-              <li><Link to="/" className="hover:text-krenke-orange transition-colors">Home</Link></li>
-              <li><Link to="/about" className="hover:text-krenke-orange transition-colors">Empresa</Link></li>
-              <li><Link to="/products" className="hover:text-krenke-orange transition-colors">Produtos</Link></li>
+              <li><Link to="/" className="hover:text-krenke-orange transition-colors gtm-footer-link-home">Home</Link></li>
+              <li><Link to="/about" className="hover:text-krenke-orange transition-colors gtm-footer-link-about">Empresa</Link></li>
+              <li><Link to="/products" className="hover:text-krenke-orange transition-colors gtm-footer-link-products">Produtos</Link></li>
 
-              <li><Link to="/quote" className="hover:text-krenke-orange transition-colors">Orçamento</Link></li>
-              <li><a href="#" className="hover:text-krenke-orange transition-colors">Política de privacidade</a></li>
+              <li><Link to="/quote" className="hover:text-krenke-orange transition-colors gtm-footer-link-quote">Orçamento</Link></li>
+              <li><a href="#" className="hover:text-krenke-orange transition-colors gtm-footer-link-privacy">Política de privacidade</a></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-lg font-bold mb-6 border-l-4 border-krenke-orange pl-4">Contato</h3>
+            <h3 className="text-lg font-bold mb-6 border-l-4 border-krenke-orange pl-4 gtm-footer-title-contact">Contato</h3>
             <ul className="space-y-4 text-gray-300">
-              <li className="flex items-center gap-3"><Phone className="text-krenke-orange" size={20} /> (47) 3373-0693</li>
-              <li className="flex items-center gap-3"><Phone className="text-krenke-orange" size={20} /> (47) 3373-0893</li>
-              <li className="flex items-center gap-3"><div className="bg-green-500 p-1 rounded-full"><Phone size={12} className="text-white" /></div> (47) 98803-3068</li>
-              <li className="flex items-center gap-3"><Mail className="text-krenke-orange" size={20} /> contato@krenke.com.br</li>
+              <li className="flex items-center gap-3 gtm-footer-contact-phone-1"><Phone className="text-krenke-orange" size={20} /> (47) 3373-0693</li>
+              <li className="flex items-center gap-3 gtm-footer-contact-phone-2"><Phone className="text-krenke-orange" size={20} /> (47) 3373-0893</li>
+              <li className="flex items-center gap-3 gtm-footer-contact-whatsapp"><div className="bg-green-500 p-1 rounded-full"><Phone size={12} className="text-white" /></div> (47) 98803-3068</li>
+              <li className="flex items-center gap-3 gtm-footer-contact-email"><Mail className="text-krenke-orange" size={20} /> contato@krenke.com.br</li>
             </ul>
           </div>
 
