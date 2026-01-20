@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard } from 'lucide-react';
+import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard, X } from 'lucide-react';
 import { ShowcaseCard } from '../components/ui/ShowcaseCard';
 import heroVideo from '../assets/Home/videokrenke.mp4';
 import { ImageCarousel } from '../components/ImageCarousel';
@@ -329,6 +329,102 @@ const Differentials = () => (
   </section>
 );
 
+const ComparativeTable = () => {
+  const comparisons = [
+    { feature: "Polímero Rotomoldado (Parede dupla de alta densidade)", common: false, krenke: true },
+    { feature: "100% à prova de ferrugem e apodrecimento", common: false, krenke: true },
+    { feature: "Conforto térmico (Não aquece como metal)", common: false, krenke: true },
+    { feature: "Totalmente livre de farpas (Madeira zero)", common: false, krenke: true },
+    { feature: "Alta durabilidade (Sol, Chuva e Maresia)", common: "Baixa", krenke: true },
+    { feature: "Manutenção Zero (Dispensa pintura e verniz)", common: false, krenke: true },
+    { feature: "Pigmentação UV Industrial (Não desbota fácil)", common: "Algumas", krenke: true },
+    { feature: "Cantos arredondados (Segurança anti-impacto)", common: false, krenke: true },
+    { feature: "Material atóxico e 100% Reciclável", common: false, krenke: true },
+    { feature: "Certificação de Segurança ABNT", common: "Raras", krenke: true },
+  ];
+
+  return (
+    <section className="py-24 bg-white overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-black text-krenke-purple mb-4 uppercase tracking-tight">
+            Por que escolher a <span className="text-krenke-orange text-transparent bg-clip-text bg-gradient-to-r from-krenke-orange to-orange-400">Krenke?</span>
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Compare e veja por que somos a referência nacional em playgrounds de alta performance.
+          </p>
+          <div className="w-24 h-1.5 bg-krenke-orange mx-auto mt-6 rounded-full"></div>
+        </div>
+
+        <div className="relative group overflow-x-auto rounded-3xl shadow-2xl border border-gray-100 bg-white">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="text-white text-sm md:text-base">
+                <th className="bg-krenke-purple p-6 md:p-8 text-left font-black uppercase tracking-wider w-1/2 rounded-tl-3xl border-r border-white/10">
+                  Diferenciais Técnicos
+                </th>
+                <th className="bg-gray-500 p-6 md:p-8 text-center font-black uppercase tracking-wider w-1/4 border-r border-white/10">
+                  Parques Comuns
+                </th>
+                <th className="bg-krenke-orange p-4 md:p-6 text-center font-black uppercase tracking-wider w-1/4 rounded-tr-3xl relative overflow-hidden">
+                  <div className="flex justify-center items-center h-full">
+                    <img
+                      src="https://krenke.netlify.app/assets/logo%20branco_krenke-Cke-155N.png"
+                      alt="Krenke Brinquedos"
+                      className="h-8 md:h-12 w-auto object-contain drop-shadow-md"
+                    />
+                  </div>
+                  {/* Decorative indicator */}
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-krenke-orange z-10"></div>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {comparisons.map((row, idx) => (
+                <tr key={idx} className="group hover:bg-gray-50/50 transition-colors">
+                  <td className="p-6 md:px-8 text-gray-700 font-bold md:text-lg border-r border-gray-100">
+                    {row.feature}
+                  </td>
+                  <td className="p-6 text-center border-r border-gray-100">
+                    {row.common === true ? (
+                      <div className="mx-auto w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-500/20">
+                        <CheckCircle size={24} />
+                      </div>
+                    ) : row.common === false ? (
+                      <div className="mx-auto w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/20">
+                        <X size={24} />
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 italic font-medium">{row.common}</span>
+                    )}
+                  </td>
+                  <td className="p-6 text-center bg-orange-50/30">
+                    <div className="mx-auto w-10 h-10 rounded-full bg-krenke-orange text-white flex items-center justify-center shadow-lg shadow-orange-500/30 transform group-hover:scale-110 transition-transform duration-300">
+                      <CheckCircle size={28} strokeWidth={3} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-8 flex justify-center items-center gap-4 text-sm text-gray-500 font-medium">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-krenke-orange"></div>
+            <span>Padrão Krenke de Qualidade</span>
+          </div>
+          <div className="w-1 h-1 rounded-full bg-gray-300"></div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+            <span>Padrão de Mercado</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const HomePage: React.FC = () => {
   return (
     <div className="animate-fade-in">
@@ -337,6 +433,7 @@ const HomePage: React.FC = () => {
       <CategoryPreview />
       <StatsSection />
       <Differentials />
+      <ComparativeTable />
       <ImageCarousel />
     </div>
   );

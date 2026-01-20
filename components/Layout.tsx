@@ -3,6 +3,39 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, Youtube, ChevronDown } from 'lucide-react';
 import logoBranco from '../assets/Logos/logo branco_krenke.png';
 import logoMarcaBranco from '../assets/Logos/krenke_marca_em_branco.png';
+import { CookieConsent } from './CookieConsent';
+
+const LanguageSelector: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
+  const languages = [
+    { code: 'pt', label: 'BR', flag: 'https://flagcdn.com/w40/br.png' },
+    { code: 'en', label: 'EN', flag: 'https://flagcdn.com/w40/us.png' },
+    { code: 'es', label: 'ES', flag: 'https://flagcdn.com/w40/es.png' },
+    { code: 'fr', label: 'FR', flag: 'https://flagcdn.com/w40/fr.png' },
+    { code: 'de', label: 'DE', flag: 'https://flagcdn.com/w40/de.png' },
+  ];
+
+  return (
+    <div className={`flex items-center gap-2 ${isMobile ? 'justify-center py-4 border-t border-white/10 mt-4' : ''}`}>
+      {!isMobile && <span className="text-[10px] font-bold text-white/40 mr-1 uppercase">🌐</span>}
+      <div className="flex gap-2.5">
+        {languages.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => (window as any).doGTranslate(lang.code)}
+            className="group relative transition-all hover:scale-125 focus:outline-none"
+            title={lang.label}
+          >
+            <img
+              src={lang.flag}
+              alt={lang.label}
+              className="w-7 h-5 object-cover rounded shadow-md border border-white/20 group-hover:border-krenke-orange language-flag"
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,6 +75,8 @@ export const Navbar: React.FC = () => {
             <span className="flex items-center gap-2 hover:text-white transition-colors gtm-topbar-email"><Mail size={14} /> contato@krenke.com.br</span>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSelector />
+            <div className="w-px h-4 bg-white/10 mx-2"></div>
             <a href="#" className="hover:text-krenke-orange transition-colors gtm-social-instagram-top"><Instagram size={16} /></a>
             <a href="#" className="hover:text-krenke-orange transition-colors gtm-social-facebook-top"><Facebook size={16} /></a>
             <a href="#" className="hover:text-krenke-orange transition-colors gtm-social-youtube-top"><Youtube size={16} /></a>
@@ -105,7 +140,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       <div className={`lg:hidden fixed inset-0 bg-krenke-purple z-40 transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} pt-24 px-6`}>
-        <div className="flex flex-col gap-6 text-lg">
+        <div className="flex flex-col gap-6 text-lg overflow-y-auto max-h-screen pb-20">
           <Link to="/" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-home">Home</Link>
           <Link to="/about" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-about">Empresa</Link>
 
@@ -131,13 +166,16 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-
-
           <Link to="/downloads" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-downloads">Downloads</Link>
           <Link to="/projects" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-projects">Projetos</Link>
           <Link to="/quote" className="text-center py-4 bg-krenke-orange text-white font-bold rounded-xl shadow-lg gtm-nav-mobile-button-quote">
             Solicitar Orçamento
           </Link>
+
+          <div className="text-center">
+            <span className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">Seleção de Idioma</span>
+            <LanguageSelector isMobile />
+          </div>
         </div>
       </div>
     </nav>
@@ -175,7 +213,8 @@ export const Footer: React.FC = () => {
               <li><Link to="/products" className="hover:text-krenke-orange transition-colors gtm-footer-link-products">Produtos</Link></li>
 
               <li><Link to="/quote" className="hover:text-krenke-orange transition-colors gtm-footer-link-quote">Orçamento</Link></li>
-              <li><a href="#" className="hover:text-krenke-orange transition-colors gtm-footer-link-privacy">Política de privacidade</a></li>
+              <li><Link to="/politica-de-privacidade" className="hover:text-krenke-orange transition-colors gtm-footer-link-privacy">Política de Privacidade</Link></li>
+              <li><Link to="/termos-de-uso" className="hover:text-krenke-orange transition-colors gtm-footer-link-terms">Termos de Uso</Link></li>
             </ul>
           </div>
 
@@ -214,12 +253,13 @@ export const Footer: React.FC = () => {
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen font-sans text-gray-900">
+    <div className="flex flex-col min-h-screen font-sans text-gray-900 overflow-x-hidden">
       <Navbar />
-      <main className="flex-grow pt-20">
+      <main className="flex-grow pt-20 overflow-x-hidden">
         {children}
       </main>
       <Footer />
+      <CookieConsent />
     </div>
   );
 };

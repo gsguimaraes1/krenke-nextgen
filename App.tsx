@@ -7,6 +7,8 @@ import ProductsPage from './pages/Products';
 import QuotePage from './pages/Quote';
 import ProjectsPage from './pages/Projects';
 import AdminPage from './pages/Admin';
+import PrivacyPage from './pages/Privacy';
+import TermsPage from './pages/Terms';
 
 
 // Scroll to top on route change and trigger GTM pageview
@@ -40,6 +42,8 @@ const App: React.FC = () => {
 
           <Route path="/pgadmin" element={<AdminPage />} />
           <Route path="/quote" element={<QuotePage />} />
+          <Route path="/politica-de-privacidade" element={<PrivacyPage />} />
+          <Route path="/termos-de-uso" element={<TermsPage />} />
 
           {/* Fallback redirects */}
           <Route path="*" element={<HomePage />} />
