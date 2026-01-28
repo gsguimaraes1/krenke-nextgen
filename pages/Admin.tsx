@@ -50,6 +50,14 @@ interface Post {
     created_at: string;
 }
 
+interface Profile {
+    id: string;
+    email: string;
+    role: 'super' | 'restricted';
+    full_name: string | null;
+    created_at: string;
+}
+
 // --- Dashboard View Component ---
 const DashboardView = ({ stats }: { stats: any }) => (
     <div className="space-y-8">
@@ -58,7 +66,7 @@ const DashboardView = ({ stats }: { stats: any }) => (
                 { label: 'Total de Produtos', value: stats.totalProducts, icon: Package, color: 'bg-blue-500' },
                 { label: 'Novos Orçamentos', value: stats.totalLeads, icon: Mail, color: 'bg-orange-500' },
                 { label: 'Artigos no Blog', value: stats.totalPosts || 0, icon: FileText, color: 'bg-purple-500' },
-                { label: 'Status do Site', value: 'Online', icon: TrendingUp, color: 'bg-green-500' },
+                { label: 'Usuários', value: stats.totalUsers || 0, icon: Users, color: 'bg-indigo-500' },
             ].map((stat, i) => (
                 <div key={i} className="bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-4">
                     <div className={`${stat.color} p-3 rounded-xl text-white`}>
@@ -116,6 +124,56 @@ const DashboardView = ({ stats }: { stats: any }) => (
     </div>
 );
 
+// --- Users View Component ---
+const UsersView = ({ users, onUpdateRole }: { users: Profile[], onUpdateRole: (id: string, role: 'super' | 'restricted') => void }) => (
+    <div className="space-y-6">
+        <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-black text-krenke-blue">Gestão de Usuários</h1>
+        </div>
+
+        <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            <table className="w-full text-left">
+                <thead className="bg-gray-50 border-b">
+                    <tr>
+                        <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Usuário</th>
+                        <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Email</th>
+                        <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Nível de Acesso</th>
+                        <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Data de Cadastro</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y">
+                    {users.map((u) => (
+                        <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${u.role === 'super' ? 'bg-krenke-orange' : 'bg-krenke-blue'}`}>
+                                        {u.email[0].toUpperCase()}
+                                    </div>
+                                    <span className="font-bold text-gray-900">{u.full_name || 'Usuário Krenke'}</span>
+                                </div>
+                            </td>
+                            <td className="px-6 py-4 font-medium text-gray-600">{u.email}</td>
+                            <td className="px-6 py-4">
+                                <select
+                                    value={u.role}
+                                    onChange={(e) => onUpdateRole(u.id, e.target.value as any)}
+                                    className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-full border-none focus:ring-2 focus:ring-krenke-orange/20 cursor-pointer ${u.role === 'super' ? 'bg-orange-100 text-krenke-orange' : 'bg-blue-100 text-krenke-blue'}`}
+                                >
+                                    <option value="super">Super Admin</option>
+                                    <option value="restricted">Acesso Restrito</option>
+                                </select>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                                {new Date(u.created_at).toLocaleDateString()}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+);
+
 // --- Main Page Component ---
 const AdminPage: React.FC = () => {
     const location = useLocation();
@@ -123,6 +181,7 @@ const AdminPage: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [leads, setLeads] = useState<Lead[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
+    const [profiles, setProfiles] = useState<Profile[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -142,9 +201,35 @@ const AdminPage: React.FC = () => {
         await Promise.all([
             fetchProducts(),
             fetchLeads(),
-            fetchPosts()
+            fetchPosts(),
+            fetchProfiles()
         ]);
         setLoading(false);
+    };
+
+    const fetchProfiles = async () => {
+        if (!supabase) return;
+        try {
+            const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            setProfiles(data || []);
+        } catch (err) {
+            console.error('Error fetching profiles:', err);
+        }
+    };
+
+    const updateUserRole = async (id: string, role: 'super' | 'restricted') => {
+        if (!supabase) return;
+        if (!confirm(`Deseja alterar o nível de acesso deste usuário para ${role === 'super' ? 'Super Admin' : 'Acesso Restrito'}?`)) return;
+
+        try {
+            const { error } = await supabase.from('profiles').update({ role }).eq('id', id);
+            if (error) throw error;
+            alert('Permissão atualizada com sucesso!');
+            fetchProfiles();
+        } catch (err: any) {
+            alert('Erro ao atualizar permissão: ' + err.message);
+        }
     };
 
     const fetchLeads = async () => {
@@ -174,6 +259,7 @@ const AdminPage: React.FC = () => {
         if (path.endsWith('/produtos')) setActiveView('produtos');
         else if (path.endsWith('/blog')) setActiveView('blog');
         else if (path.endsWith('/leads')) setActiveView('leads');
+        else if (path.endsWith('/usuarios')) setActiveView('usuarios');
         else setActiveView('dashboard');
     }, [location]);
 
@@ -450,9 +536,13 @@ const AdminPage: React.FC = () => {
                             totalProducts: products.length,
                             totalLeads: leads.length,
                             totalPosts: posts.length,
+                            totalUsers: profiles.length,
                             recentLeads: leads.slice(0, 5),
                             recentPosts: posts.slice(0, 5)
                         }} />
+                    )}
+                    {activeView === 'usuarios' && (
+                        <UsersView users={profiles} onUpdateRole={updateUserRole} />
                     )}
                     {activeView === 'produtos' && (
                         <div className="grid lg:grid-cols-12 gap-8 h-[calc(100vh-160px)]">

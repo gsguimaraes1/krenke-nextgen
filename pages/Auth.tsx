@@ -3,15 +3,39 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, LogIn, UserPlus, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.png';
 
 const AuthPage: React.FC = () => {
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [mfaCode, setMfaCode] = useState('');
+    const [mfaChallengeId, setMfaChallengeId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
+
+    const handleMFAVerify = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        if (!supabase || !mfaChallengeId) return;
+
+        try {
+            const { error } = await supabase.auth.mfa.verify({
+                challengeId: mfaChallengeId,
+                code: mfaCode,
+            });
+            if (error) throw error;
+            navigate('/pgadmin');
+        } catch (err: any) {
+            setError(err.message || 'Código MFA inválido.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,10 +50,33 @@ const AuthPage: React.FC = () => {
 
         try {
             if (isLogin) {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
-                navigate('/pgadmin');
+
+                // Check for MFA
+                const { data: factors, error: mfaError } = await supabase.auth.mfa.listFactors();
+                if (mfaError) throw mfaError;
+
+                const totpFactor = factors.all.find(f => f.factor_type === 'totp' && f.status === 'verified');
+
+                if (totpFactor) {
+                    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+                        factorId: totpFactor.id,
+                    });
+                    if (challengeError) throw challengeError;
+                    setMfaChallengeId(challenge.id);
+                } else {
+                    navigate('/pgadmin');
+                }
             } else {
+                // Email Restriction check
+                const isKrenkeEmail = email.toLowerCase().endsWith('@kreke.com.br');
+                const isSuperAdmin = email.toLowerCase() === 'gabriel.gbr.fire@gmail.com';
+
+                if (!isKrenkeEmail && !isSuperAdmin) {
+                    throw new Error('Apenas e-mails corporativos (@kreke.com.br) podem ser cadastrados.');
+                }
+
                 const { error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
                 setSuccess(true);
@@ -62,11 +109,11 @@ const AuthPage: React.FC = () => {
                         <div className="inline-flex p-4 bg-gradient-to-tr from-krenke-orange to-orange-400 rounded-3xl shadow-lg shadow-orange-500/20 mb-6 group transition-transform hover:scale-110 duration-300">
                             <ShieldCheck size={32} className="text-white" />
                         </div>
-                        <h1 className="text-3xl font-black text-white mb-2 tracking-tight">
-                            Painel <span className="text-krenke-orange">Krenke</span>
-                        </h1>
-                        <p className="text-gray-400 text-sm font-medium uppercase tracking-widest">
-                            {isLogin ? 'Acesso Restrito' : 'Cadastro de Admin'}
+                        <div className="flex justify-center mb-4">
+                            <img src={logoBranco} alt="Krenke Brinquedos" className="h-10 object-contain" />
+                        </div>
+                        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+                            {isLogin ? 'Autenticação Segura' : 'Solicitar Acesso'}
                         </p>
                     </div>
 
@@ -97,52 +144,95 @@ const AuthPage: React.FC = () => {
                     </AnimatePresence>
 
                     {/* Form */}
-                    <form onSubmit={handleAuth} className="space-y-5">
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">E-mail Corporativo</label>
-                            <div className="relative group">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-krenke-orange transition-colors" size={20} />
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-krenke-orange/50 focus:ring-4 focus:ring-krenke-orange/20 transition-all placeholder:text-gray-600"
-                                    placeholder="exemplo@krenke.com.br"
-                                />
+                    {mfaChallengeId ? (
+                        <form onSubmit={handleMFAVerify} className="space-y-5">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 text-center block">Código de Verificação (2FA)</label>
+                                <div className="relative group text-center">
+                                    <input
+                                        type="text"
+                                        value={mfaCode}
+                                        onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                        required
+                                        autoFocus
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-center text-3xl font-black text-krenke-orange tracking-[0.5em] outline-none focus:border-krenke-orange/50 focus:ring-4 focus:ring-krenke-orange/20 transition-all placeholder:text-gray-600"
+                                        placeholder="000000"
+                                    />
+                                </div>
+                                <p className="text-[11px] text-gray-500 text-center mt-2">Insira o código gerado pelo seu aplicativo de autenticação.</p>
                             </div>
-                        </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Senha de Acesso</label>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-krenke-orange transition-colors" size={20} />
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-krenke-orange/50 focus:ring-4 focus:ring-krenke-orange/20 transition-all placeholder:text-gray-600"
-                                    placeholder="••••••••"
-                                />
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-orange-600/20 hover:shadow-orange-600/40 hover:-translate-y-1 transition-all disabled:opacity-50 group"
+                            >
+                                {loading ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        Verificar Código
+                                        <ShieldCheck size={20} />
+                                    </>
+                                )}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setMfaChallengeId(null)}
+                                className="w-full text-xs text-gray-500 hover:text-white transition-colors py-2"
+                            >
+                                Voltar para Login
+                            </button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleAuth} className="space-y-5">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">E-mail Corporativo</label>
+                                <div className="relative group">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-krenke-orange transition-colors" size={20} />
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-krenke-orange/50 focus:ring-4 focus:ring-krenke-orange/20 transition-all placeholder:text-gray-600"
+                                        placeholder="exemplo@krenke.com.br"
+                                    />
+                                </div>
                             </div>
-                        </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-orange-600/20 hover:shadow-orange-600/40 hover:-translate-y-1 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                        >
-                            {loading ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    {isLogin ? 'Entrar no Sistema' : 'Criar Conta de Admin'}
-                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                                </>
-                            )}
-                        </button>
-                    </form>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Senha de Acesso</label>
+                                <div className="relative group">
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-krenke-orange transition-colors" size={20} />
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-krenke-orange/50 focus:ring-4 focus:ring-krenke-orange/20 transition-all placeholder:text-gray-600"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-orange-600/20 hover:shadow-orange-600/40 hover:-translate-y-1 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                            >
+                                {loading ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        {isLogin ? 'Entrar no Sistema' : 'Criar Conta de Admin'}
+                                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    )}
 
                     {/* Footer Toggle */}
                     <div className="mt-8 text-center pt-8 border-t border-white/5">
@@ -170,7 +260,7 @@ const AuthPage: React.FC = () => {
 
                 <div className="mt-8 text-center">
                     <img
-                        src="https://krenke.netlify.app/assets/logo%20branco_krenke-Cke-155N.png"
+                        src={logoBranco}
                         alt="Logo Krenke"
                         className="h-6 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all mx-auto duration-500"
                     />

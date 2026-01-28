@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.png';
+import { Users } from 'lucide-react';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -19,7 +21,7 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-    const { user, signOut } = useAuth();
+    const { user, role, signOut } = useAuth();
 
     const menuItems = [
         { icon: BarChart3, label: 'Dashboard', path: '/pgadmin' },
@@ -27,6 +29,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { icon: MessageSquare, label: 'Blog', path: '/pgadmin/blog' },
         { icon: BarChart3, label: 'Orçamentos', path: '/pgadmin/leads' },
     ];
+
+    // Adiciona menu de usuários apenas para Super Admin
+    if (role === 'super') {
+        menuItems.push({ icon: Users, label: 'Usuários', path: '/pgadmin/usuarios' });
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 flex">
@@ -39,14 +46,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <div className="p-6 flex items-center justify-between">
                     {isSidebarOpen ? (
                         <motion.img
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            src="https://krenke.netlify.app/assets/logo%20branco_krenke-Cke-155N.png"
-                            alt="Logo Krenke"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            src={logoBranco}
+                            alt="Krenke Brinquedos"
                             className="h-8 object-contain"
                         />
                     ) : (
-                        <div className="w-8 h-8 bg-krenke-orange rounded-lg flex items-center justify-center font-black">K</div>
+                        <div className="w-8 h-8 bg-krenke-orange rounded-lg flex items-center justify-center font-black shadow-lg shadow-orange-500/20">K</div>
                     )}
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -85,9 +92,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
                 <div className="p-4 border-t border-white/10 space-y-4">
                     {isSidebarOpen && user && (
-                        <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Usuário</p>
-                            <p className="text-xs text-white font-medium truncate">{user.email}</p>
+                        <div className="px-4 py-3 bg-white/5 rounded-2xl border border-white/10 overflow-hidden space-y-2">
+                            <div>
+                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">Usuário</p>
+                                <p className="text-xs text-white font-medium truncate">{user.email}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${role === 'super' ? 'bg-krenke-orange text-white' : 'bg-blue-500/20 text-blue-400'}`}>
+                                    {role === 'super' ? 'Super Admin' : 'Acesso Restrito'}
+                                </span>
+                            </div>
                         </div>
                     )}
                     <button
