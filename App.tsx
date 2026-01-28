@@ -12,6 +12,9 @@ import BlogPostPage from './pages/BlogPost';
 import PrivacyPage from './pages/Privacy';
 import TermsPage from './pages/Terms';
 import { Preloader } from './components/Preloader';
+import AuthPage from './pages/Auth';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 
 // Scroll to top on route change and trigger GTM pageview
 const ScrollToTop = () => {
@@ -33,30 +36,39 @@ const ScrollToTop = () => {
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <Preloader />
-      <ScrollToTop />
-      <Routes>
-        {/* Public Routes with Main Layout */}
-        <Route element={<Layout><Outlet /></Layout>}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/empresa" element={<AboutPage />} />
-          <Route path="/produtos" element={<ProductsPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:slug" element={<BlogPostPage />} />
-          <Route path="/projetos" element={<ProjectsPage />} />
-          <Route path="/orcamento" element={<QuotePage />} />
-          <Route path="/politica-de-privacidade" element={<PrivacyPage />} />
-          <Route path="/termos-de-uso" element={<TermsPage />} />
-        </Route>
+    <AuthProvider>
+      <Router>
+        <Preloader />
+        <ScrollToTop />
+        <Routes>
+          {/* Public Routes with Main Layout */}
+          <Route element={<Layout><Outlet /></Layout>}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/empresa" element={<AboutPage />} />
+            <Route path="/produtos" element={<ProductsPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/projetos" element={<ProjectsPage />} />
+            <Route path="/orcamento" element={<QuotePage />} />
+            <Route path="/politica-de-privacidade" element={<PrivacyPage />} />
+            <Route path="/termos-de-uso" element={<TermsPage />} />
+          </Route>
 
-        {/* Admin Routes - Layout handled inside AdminPage */}
-        <Route path="/pgadmin/*" element={<AdminPage />} />
+          {/* Auth Route */}
+          <Route path="/login" element={<AuthPage />} />
 
-        {/* Fallback redirects */}
-        <Route path="*" element={<HomePage />} />
-      </Routes>
-    </Router>
+          {/* Admin Routes - Layout handled inside AdminPage */}
+          <Route path="/pgadmin/*" element={
+            <ProtectedRoute>
+              <AdminPage />
+            </ProtectedRoute>
+          } />
+
+          {/* Fallback redirects */}
+          <Route path="*" element={<HomePage />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 

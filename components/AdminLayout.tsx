@@ -11,6 +11,7 @@ import {
     X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -18,6 +19,7 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+    const { user, signOut } = useAuth();
 
     const menuItems = [
         { icon: BarChart3, label: 'Dashboard', path: '/pgadmin' },
@@ -81,8 +83,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     ))}
                 </nav>
 
-                <div className="p-4 border-t border-white/10">
-                    <button className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-red-500/10 hover:text-red-400 transition-all w-full">
+                <div className="p-4 border-t border-white/10 space-y-4">
+                    {isSidebarOpen && user && (
+                        <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Usuário</p>
+                            <p className="text-xs text-white font-medium truncate">{user.email}</p>
+                        </div>
+                    )}
+                    <button
+                        onClick={() => signOut()}
+                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-red-500/10 hover:text-red-400 transition-all w-full"
+                    >
                         <LogOut size={22} />
                         {isSidebarOpen && <span className="font-medium">Sair do Painel</span>}
                     </button>
