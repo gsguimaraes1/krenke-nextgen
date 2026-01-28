@@ -70,11 +70,11 @@ const AuthPage: React.FC = () => {
                 }
             } else {
                 // Email Restriction check
-                const isKrenkeEmail = email.toLowerCase().endsWith('@kreke.com.br');
+                const isKrenkeEmail = email.toLowerCase().endsWith('@krenke.com.br');
                 const isSuperAdmin = email.toLowerCase() === 'gabriel.gbr.fire@gmail.com';
 
                 if (!isKrenkeEmail && !isSuperAdmin) {
-                    throw new Error('Apenas e-mails corporativos (@kreke.com.br) podem ser cadastrados.');
+                    throw new Error('Apenas e-mails corporativos (@krenke.com.br) podem ser cadastrados.');
                 }
 
                 const { error } = await supabase.auth.signUp({ email, password });
