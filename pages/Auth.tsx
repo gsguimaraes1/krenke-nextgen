@@ -69,14 +69,6 @@ const AuthPage: React.FC = () => {
                     navigate('/pgadmin');
                 }
             } else {
-                // Email Restriction check
-                const isKrenkeEmail = email.toLowerCase().endsWith('@krenke.com.br');
-                const isSuperAdmin = email.toLowerCase() === 'gabriel.gbr.fire@gmail.com';
-
-                if (!isKrenkeEmail && !isSuperAdmin) {
-                    throw new Error('Apenas e-mails corporativos (@krenke.com.br) podem ser cadastrados.');
-                }
-
                 const { error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
                 setSuccess(true);
