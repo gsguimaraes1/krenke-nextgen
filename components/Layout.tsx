@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, Youtube, ChevronDown } from 'lucide-react';
-import logoBranco from '../assets/Logos/logo branco_krenke.png';
-import logoMarcaBranco from '../assets/Logos/krenke_marca_em_branco.png';
+import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.png';
+import logoMarcaBranco from '../assets/Logos/krenke-marca-playgrounds-branco.png';
 import { CookieConsent } from './CookieConsent';
 
 const LanguageSelector: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
@@ -90,7 +90,7 @@ export const Navbar: React.FC = () => {
           <Link to="/" className="flex-shrink-0 gtm-nav-logo">
             <img
               src={logoBranco}
-              alt="Krenke Brinquedos"
+              alt="Krenke Brinquedos - Playgrounds, Parques Infantis e Brinquedos para Escolas e Condomínios"
               className={`transition-all duration-300 ${isScrolled ? 'h-10' : 'h-14'}`}
             />
           </Link>
@@ -98,7 +98,7 @@ export const Navbar: React.FC = () => {
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center gap-8">
             <Link to="/" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-home">Home</Link>
-            <Link to="/about" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-about">Empresa</Link>
+            <Link to="/empresa" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-about">Empresa</Link>
 
             {/* Products Dropdown */}
             <div className="relative group">
@@ -111,7 +111,7 @@ export const Navbar: React.FC = () => {
                 {productCategories.map((cat, idx) => (
                   <Link
                     key={idx}
-                    to={`/products?category=${encodeURIComponent(cat)}`}
+                    to={`/produtos?categoria=${encodeURIComponent(cat)}`}
                     className={`block px-6 py-3 text-gray-700 hover:bg-orange-50 hover:text-krenke-orange transition-colors border-b border-gray-50 last:border-none gtm-nav-category-${cat.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {cat}
@@ -122,9 +122,10 @@ export const Navbar: React.FC = () => {
 
 
             <Link to="/downloads" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-downloads">Downloads</Link>
-            <Link to="/projects" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-projects">Projetos</Link>
+            <Link to="/blog" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-blog">Blog</Link>
+            <Link to="/projetos" className="text-white font-medium hover:text-krenke-orange transition-colors gtm-nav-link-projects">Projetos</Link>
 
-            <Link to="/quote" className="px-6 py-2.5 bg-krenke-orange text-white font-bold rounded-full hover:bg-orange-500 transition-all transform hover:scale-105 shadow-lg shadow-orange-900/20 gtm-nav-button-quote">
+            <Link to="/orcamento" className="px-6 py-2.5 bg-krenke-orange text-white font-bold rounded-full hover:bg-orange-500 transition-all transform hover:scale-105 shadow-lg shadow-orange-900/20 gtm-nav-button-quote">
               Orçamento
             </Link>
           </div>
@@ -142,7 +143,7 @@ export const Navbar: React.FC = () => {
       <div className={`lg:hidden fixed inset-0 bg-krenke-purple z-40 transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} pt-24 px-6`}>
         <div className="flex flex-col gap-6 text-lg overflow-y-auto max-h-screen pb-20">
           <Link to="/" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-home">Home</Link>
-          <Link to="/about" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-about">Empresa</Link>
+          <Link to="/empresa" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-about">Empresa</Link>
 
           <div>
             <button
@@ -156,7 +157,7 @@ export const Navbar: React.FC = () => {
                 {productCategories.map((cat, idx) => (
                   <Link
                     key={idx}
-                    to={`/products?category=${encodeURIComponent(cat)}`}
+                    to={`/produtos?categoria=${encodeURIComponent(cat)}`}
                     className={`block text-gray-300 hover:text-krenke-orange text-sm gtm-nav-mobile-category-${cat.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {cat}
@@ -167,8 +168,9 @@ export const Navbar: React.FC = () => {
           </div>
 
           <Link to="/downloads" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-downloads">Downloads</Link>
-          <Link to="/projects" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-projects">Projetos</Link>
-          <Link to="/quote" className="text-center py-4 bg-krenke-orange text-white font-bold rounded-xl shadow-lg gtm-nav-mobile-button-quote">
+          <Link to="/blog" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-blog">Blog</Link>
+          <Link to="/projetos" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-projects">Projetos</Link>
+          <Link to="/orcamento" className="text-center py-4 bg-krenke-orange text-white font-bold rounded-xl shadow-lg gtm-nav-mobile-button-quote">
             Solicitar Orçamento
           </Link>
 
@@ -188,7 +190,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           <div className="space-y-6">
-            <img src={logoMarcaBranco} alt="Krenke" className="h-12" />
+            <img src={logoMarcaBranco} alt="Logo Krenke Brinquedos - O Melhor Jeito de Brincar" className="h-12" />
             <p className="text-gray-300 leading-relaxed">
               Diversão, segurança e confiabilidade são sinônimos dos produtos da Krenke Brinquedos. O melhor jeito de brincar!
             </p>
@@ -209,10 +211,11 @@ export const Footer: React.FC = () => {
             <h3 className="text-lg font-bold mb-6 border-l-4 border-krenke-orange pl-4 gtm-footer-title-menu">Menu Rápido</h3>
             <ul className="space-y-3 text-gray-300">
               <li><Link to="/" className="hover:text-krenke-orange transition-colors gtm-footer-link-home">Home</Link></li>
-              <li><Link to="/about" className="hover:text-krenke-orange transition-colors gtm-footer-link-about">Empresa</Link></li>
-              <li><Link to="/products" className="hover:text-krenke-orange transition-colors gtm-footer-link-products">Produtos</Link></li>
+              <li><Link to="/empresa" className="hover:text-krenke-orange transition-colors gtm-footer-link-about">Empresa</Link></li>
+              <li><Link to="/produtos" className="hover:text-krenke-orange transition-colors gtm-footer-link-products">Produtos</Link></li>
+              <li><Link to="/blog" className="hover:text-krenke-orange transition-colors gtm-footer-link-blog">Blog</Link></li>
 
-              <li><Link to="/quote" className="hover:text-krenke-orange transition-colors gtm-footer-link-quote">Orçamento</Link></li>
+              <li><Link to="/orcamento" className="hover:text-krenke-orange transition-colors gtm-footer-link-quote">Orçamento</Link></li>
               <li><Link to="/politica-de-privacidade" className="hover:text-krenke-orange transition-colors gtm-footer-link-privacy">Política de Privacidade</Link></li>
               <li><Link to="/termos-de-uso" className="hover:text-krenke-orange transition-colors gtm-footer-link-terms">Termos de Uso</Link></li>
             </ul>

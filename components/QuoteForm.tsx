@@ -1,32 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { INITIAL_PRODUCTS } from '../products_data';
-import { Check, Search } from 'lucide-react';
+import { Check, Search, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Product } from '../types';
 
-// Load all assets using Vite's glob import
-const allAssets = import.meta.glob('../assets/**/*', { eager: true, query: '?url', import: 'default' });
+// Helper to find images for a product in Supabase Storage
+const getProductAssetsFromStorage = async (product: any) => {
+  const name = product.name || '';
+  const id = product.id || '';
+  if (!name && !id) return { main: '', gallery: [] as string[] };
 
-// Helper to find images for a product
-const findProductAssets = (productName: string) => {
-  if (!productName || productName.length < 3) return { main: '', gallery: [] as string[] };
+  const variants = [
+    id.toLowerCase(),
+    id.toLowerCase().replace('kmp', 'kpm'),
+    name.toLowerCase().trim().replace(/\s+/g, '-'),
+    name.toLowerCase().trim().replace(/\s+/g, ''),
+    name.split(' ').pop()?.toLowerCase()
+  ].filter(Boolean);
 
-  const normalizedName = productName.toLowerCase().replace(/\s+/g, '');
-  const matches: string[] = [];
+  const uniqueVariants = Array.from(new Set(variants));
 
-  Object.entries(allAssets).forEach(([path, url]) => {
-    if (path.toLowerCase().replace(/\s+/g, '').includes(normalizedName)) {
-      matches.push(url as string);
+  for (const folder of uniqueVariants) {
+    try {
+      const { data: files, error } = await supabase.storage.from('products').list(folder as string);
+
+      if (!error && files && files.length > 0) {
+        const imageFiles = files.filter(f => f.name.match(/\.(webp|jpg|jpeg|png|gif)$/i));
+
+        if (imageFiles.length > 0) {
+          const gallery = imageFiles.map(file =>
+            supabase.storage.from('products').getPublicUrl(`${folder}/${file.name}`).data.publicUrl
+          );
+
+          const mainImage = gallery.find(url =>
+            url.toLowerCase().includes('perspectiva') ||
+            url.toLowerCase().includes('capa') ||
+            url.toLowerCase().includes('principal') ||
+            url.toLowerCase().includes('capa')
+          ) || gallery[0];
+
+          return { main: mainImage, gallery };
+        }
+      }
+    } catch (err) {
+      console.error(`Erro ao listar pasta ${folder}:`, err);
     }
-  });
+  }
 
-  return {
-    main: matches.length > 0 ? matches[0] : '',
-    gallery: matches
-  };
+  return { main: '', gallery: [] };
 };
 
 const QuoteForm: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('name', { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const enriched = await Promise.all(data.map(async (p: any) => {
+            if (p.image && p.image.startsWith('http')) return p;
+            const assets = await getProductAssetsFromStorage(p);
+            return {
+              ...p,
+              image: assets.main || 'https://via.placeholder.com/100?text=Sem+Imagem',
+              images: assets.gallery
+            };
+          }));
+          setProducts(enriched);
+        } else {
+          const processedInitial = await Promise.all(INITIAL_PRODUCTS.map(async (p) => {
+            const assets = await getProductAssetsFromStorage(p);
+            return {
+              ...p,
+              image: assets.main || 'https://via.placeholder.get/100?text=Sem+Imagem',
+              images: assets.gallery
+            };
+          }));
+          setProducts(processedInitial);
+        }
+      } catch (err) {
+        console.error('Error fetching products for quote form:', err);
+        setProducts(INITIAL_PRODUCTS.map(p => ({ ...p, image: 'https://via.placeholder.com/100?text=Erro+Storage', images: [] })));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const toggleProduct = (productId: string) => {
     setSelectedProducts(prev =>
@@ -36,23 +106,34 @@ const QuoteForm: React.FC = () => {
     );
   };
 
-  const filteredProducts = INITIAL_PRODUCTS.filter(p =>
+  const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const data = {
-      name: formData.get('name'),
-      phone: formData.get('phone'),
-      email: formData.get('email'),
-      message: formData.get('message'),
-      products: selectedProducts.map(id => INITIAL_PRODUCTS.find(p => p.id === id)?.name)
+      name: formData.get('name') as string,
+      phone: formData.get('phone') as string,
+      email: formData.get('email') as string,
+      message: formData.get('message') as string,
+      products: selectedProducts.map(id => products.find(p => p.id === id)?.name || id)
     };
-    console.log('Form submitted:', data);
-    alert('Orçamento solicitado com sucesso!');
+
+    try {
+      const { error } = await supabase.from('leads').insert([data]);
+      if (error) throw error;
+
+      alert('Orçamento solicitado com sucesso! Entraremos em contato em breve.');
+      // Reset form
+      setSelectedProducts([]);
+      (e.target as HTMLFormElement).reset();
+    } catch (err: any) {
+      console.error('Error saving lead:', err);
+      alert('Erro ao enviar solicitação: ' + err.message);
+    }
   };
 
   return (
@@ -319,8 +400,8 @@ const QuoteForm: React.FC = () => {
       `}</style>
 
       <div className="form-container">
-        <h2 className="text-2xl font-black text-center mb-2">Solicitar Orçamento</h2>
-        <p className="text-center text-gray-400 mb-4">Escolha os produtos e preencha seus dados</p>
+        <h2 className="text-2xl font-black text-center mb-2">Solicitar Orçamento de Playgrounds</h2>
+        <p className="text-center text-gray-400 mb-4">Escolha os melhores brinquedos e parques infantis para o seu projeto</p>
 
         <form className="form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -351,10 +432,14 @@ const QuoteForm: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="product-selector custom-scrollbar">
+            <div className="product-selector custom-scrollbar relative min-h-[100px]">
+              {loading ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
+                  <Loader2 className="animate-spin text-krenke-orange" size={32} />
+                </div>
+              ) : null}
               {filteredProducts.map(product => {
-                const assets = findProductAssets(product.name);
-                const productImage = assets.main || 'https://via.placeholder.com/100?text=Sem+Imagem';
+                const productImage = product.image || 'https://via.placeholder.com/100?text=Sem+Imagem';
 
                 return (
                   <div

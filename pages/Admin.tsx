@@ -1,218 +1,719 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import { Product } from '../types';
-import { Save, Upload, Search, Edit2 } from 'lucide-react';
+import AdminLayout from '../components/AdminLayout';
+import RichTextEditor from '../components/RichTextEditor';
+import ProductSpecsManager from '../components/ProductSpecsManager';
+import {
+    Save,
+    Upload,
+    Search,
+    Edit2,
+    Plus,
+    Trash2,
+    Package,
+    TrendingUp,
+    Clock,
+    X,
+    RefreshCw,
+    MessageSquare,
+    FileText,
+    Users,
+    Mail,
+    Phone,
+    Calendar,
+    ChevronRight,
+    ExternalLink
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
+interface Lead {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    message: string;
+    products: string[];
+    created_at: string;
+}
+
+interface Post {
+    id: string;
+    title: string;
+    slug: string;
+    content: string;
+    excerpt: string;
+    cover_image: string;
+    author: string;
+    published: boolean;
+    created_at: string;
+}
+
+// --- Dashboard View Component ---
+const DashboardView = ({ stats }: { stats: any }) => (
+    <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+                { label: 'Total de Produtos', value: stats.totalProducts, icon: Package, color: 'bg-blue-500' },
+                { label: 'Novos Orçamentos', value: stats.totalLeads, icon: Mail, color: 'bg-orange-500' },
+                { label: 'Artigos no Blog', value: stats.totalPosts || 0, icon: FileText, color: 'bg-purple-500' },
+                { label: 'Status do Site', value: 'Online', icon: TrendingUp, color: 'bg-green-500' },
+            ].map((stat, i) => (
+                <div key={i} className="bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-4">
+                    <div className={`${stat.color} p-3 rounded-xl text-white`}>
+                        <stat.icon size={24} />
+                    </div>
+                    <div>
+                        <p className="text-sm text-gray-500 font-medium">{stat.label}</p>
+                        <p className="text-2xl font-black text-gray-900">{stat.value}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-2xl border shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-black text-xl text-krenke-blue flex items-center gap-2">
+                        <Mail className="text-krenke-orange" /> Últimos Orçamentos
+                    </h3>
+                </div>
+                <div className="space-y-4">
+                    {stats.recentLeads?.length > 0 ? stats.recentLeads.map((lead: any) => (
+                        <div key={lead.id} className="p-4 bg-gray-50 rounded-xl border flex items-center justify-between">
+                            <div>
+                                <p className="font-bold text-gray-900">{lead.name}</p>
+                                <p className="text-xs text-gray-500">{new Date(lead.created_at).toLocaleDateString()}</p>
+                            </div>
+                            <span className="text-xs font-bold px-2 py-1 bg-orange-100 text-krenke-orange rounded">
+                                {lead.products?.length || 0} produtos
+                            </span>
+                        </div>
+                    )) : <p className="text-gray-400 italic text-center py-4">Nenhum orçamento recente</p>}
+                </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-black text-xl text-krenke-blue flex items-center gap-2">
+                        <FileText className="text-krenke-orange" /> Artigos Recentes
+                    </h3>
+                </div>
+                <div className="space-y-4">
+                    {stats.recentPosts?.length > 0 ? stats.recentPosts.map((post: any) => (
+                        <div key={post.id} className="p-4 bg-gray-50 rounded-xl border flex items-center justify-between">
+                            <div>
+                                <p className="font-bold text-gray-900 truncate max-w-[200px]">{post.title}</p>
+                                <p className="text-xs text-gray-500">{post.published ? 'Publicado' : 'Rascunho'}</p>
+                            </div>
+                            <p className="text-xs text-gray-400">{new Date(post.created_at).toLocaleDateString()}</p>
+                        </div>
+                    )) : <p className="text-gray-400 italic text-center py-4">Nenhum artigo recente</p>}
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+// --- Main Page Component ---
 const AdminPage: React.FC = () => {
+    const location = useLocation();
+    const [activeView, setActiveView] = useState('dashboard');
     const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [leads, setLeads] = useState<Lead[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [editForm, setEditForm] = useState<Partial<Product>>({});
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [postForm, setPostForm] = useState<Partial<Post>>({});
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [scanning, setScanning] = useState(false);
 
     useEffect(() => {
-        fetchProducts();
+        fetchData();
     }, []);
 
-    const fetchProducts = async () => {
+    const fetchData = async () => {
+        setLoading(true);
+        await Promise.all([
+            fetchProducts(),
+            fetchLeads(),
+            fetchPosts()
+        ]);
+        setLoading(false);
+    };
+
+    const fetchLeads = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/products');
-            const data = await response.json();
-            setProducts(data);
+            const { data, error } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            setLeads(data || []);
         } catch (err) {
-            console.error('Error fetching products:', err);
+            console.error('Error fetching leads:', err);
+        }
+    };
+
+    const fetchPosts = async () => {
+        try {
+            const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            setPosts(data || []);
+        } catch (err) {
+            console.error('Error fetching posts:', err);
+        }
+    };
+
+    useEffect(() => {
+        const path = location.pathname;
+        if (path.endsWith('/produtos')) setActiveView('produtos');
+        else if (path.endsWith('/blog')) setActiveView('blog');
+        else if (path.endsWith('/leads')) setActiveView('leads');
+        else setActiveView('dashboard');
+    }, [location]);
+
+    useEffect(() => {
+        const term = searchTerm.toLowerCase();
+        setFilteredProducts(
+            products.filter(p =>
+                p.name?.toLowerCase().includes(term) ||
+                p.id?.toLowerCase().includes(term) ||
+                p.category?.toLowerCase().includes(term)
+            )
+        );
+    }, [searchTerm, products]);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase.from('products').select('*').order('name');
+            if (error) throw error;
+            setProducts(data || []);
+        } catch (err) {
+            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleEdit = (product: Product) => {
-        setSelectedProduct(product);
-        setEditForm({ ...product });
-        setMessage(null);
+    const scanStorageForImages = async (productId: string) => {
+        if (!productId) return null;
+        setScanning(true);
+        try {
+            const folder = productId.toLowerCase();
+            const { data: files, error } = await supabase.storage.from('products').list(folder);
+            if (error || !files || files.length === 0) return null;
+
+            const imageFiles = files.filter(f => f.name.match(/\.(webp|jpg|jpeg|png|gif)$/i));
+            if (imageFiles.length === 0) return null;
+
+            const urls = imageFiles.map(file =>
+                supabase.storage.from('products').getPublicUrl(`${folder}/${file.name}`).data.publicUrl
+            );
+
+            const mainImage = urls.find(url =>
+                url.toLowerCase().includes('perspectiva') ||
+                url.toLowerCase().includes('capa') ||
+                url.toLowerCase().includes('principal')
+            ) || urls[0];
+
+            return { main: mainImage, gallery: urls };
+        } catch (err) {
+            return null;
+        } finally {
+            setScanning(false);
+        }
     };
 
-    const handleUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedProduct) return;
+    const handleSelectProduct = async (p: Product) => {
+        setSelectedProduct(p);
+        setEditForm({ ...p });
 
+        // Só busca no storage automaticamente se o produto não tiver NENHUMA imagem definida no banco
+        // e se não for um produto que acabamos de "limpar" manualmente
+        if (!p.image && (!p.images || p.images.length === 0) && p.id) {
+            const assets = await scanStorageForImages(p.id);
+            if (assets) {
+                setEditForm(prev => ({
+                    ...prev,
+                    image: assets.main,
+                    images: assets.gallery
+                }));
+            }
+        }
+    };
+
+    const handleDeleteProduct = async () => {
+        if (!selectedProduct?.id) return;
+        if (!confirm('Tem certeza que deseja excluir este produto permanentemente?')) return;
+
+        setSaving(true);
         try {
-            const response = await fetch('http://localhost:3001/api/products/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...editForm, originalId: selectedProduct.id }),
-            });
+            const { error } = await supabase
+                .from('products')
+                .delete()
+                .eq('id', selectedProduct.id);
 
-            if (response.ok) {
-                setMessage({ type: 'success', text: 'Produto atualizado com sucesso!' });
-                fetchProducts();
-                // Update selection to match new ID if it changed
-                if (editForm.id) {
-                    setSelectedProduct(prev => prev ? { ...prev, id: editForm.id! } : null);
-                }
+            if (error) throw error;
+
+            alert('Produto excluído com sucesso!');
+            setSelectedProduct(null);
+            fetchProducts();
+        } catch (err: any) {
+            alert('Erro ao excluir: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSaveProduct = async () => {
+        if (!editForm.id || !editForm.name) return alert('ID e Nome são obrigatórios.');
+
+        setSaving(true);
+        try {
+            // Limpa o HTML das especificações para remover &nbsp; e melhorar a estrutura no banco
+            const specs = editForm.specs ?
+                editForm.specs.replace(/&nbsp;/g, ' ').replace(/></g, '>\n<').replace(/\n\s*\n/g, '\n').trim() :
+                '';
+
+            const productToSave = { ...editForm, specs };
+
+            // Se o ID original existia e é diferente do novo ID, usamos UPDATE filtrando pelo ID antigo
+            if (selectedProduct?.id && selectedProduct.id !== '' && selectedProduct.id !== editForm.id) {
+                const { error } = await supabase
+                    .from('products')
+                    .update(productToSave)
+                    .eq('id', selectedProduct.id);
+                if (error) throw error;
             } else {
-                const err = await response.json();
-                setMessage({ type: 'error', text: err.error || 'Erro ao atualizar produto.' });
+                // Caso contrário (novo produto ou mesmo ID), usamos UPSERT padrão
+                const { error } = await supabase.from('products').upsert(productToSave);
+                if (error) throw error;
             }
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Erro de conexão com o servidor.' });
+
+            alert('Produto salvo com sucesso!');
+            await fetchProducts();
+            setSelectedProduct(productToSave as Product);
+        } catch (err: any) {
+            alert('Erro ao salvar: ' + err.message);
+        } finally {
+            setSaving(false);
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files?.[0]) return;
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'image' | 'gallery') => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
-        const formData = new FormData();
-        formData.append('image', e.target.files[0]);
+        console.log(`Iniciando upload de ${field}:`, files.length, "arquivos");
+        const folder = editForm.id?.toLowerCase().replace(/\s+/g, '-') || 'temp';
+
+        setSaving(true);
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${i}.${fileExt}`;
+
+                const { data, error } = await supabase.storage
+                    .from('products')
+                    .upload(`${folder}/${fileName}`, file, { cacheControl: '3600', upsert: false });
+
+                if (error) throw error;
+
+                if (data) {
+                    const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(data.path);
+
+                    if (field === 'image') {
+                        setEditForm(prev => ({ ...prev, image: publicUrl }));
+                    } else {
+                        setEditForm(prev => ({
+                            ...prev,
+                            images: [...(prev.images || []), publicUrl]
+                        }));
+                    }
+                }
+            }
+        } catch (err: any) {
+            console.error("Erro no upload de produtos:", err);
+            alert(`Erro no upload: ` + err.message);
+        } finally {
+            setSaving(false);
+            if (e.target) e.target.value = '';
+        }
+    };
+
+    const slugify = (text: string) => {
+        return text
+            .toString()
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w-]+/g, '')
+            .replace(/--+/g, '-');
+    };
+
+    const handleSavePost = async () => {
+        if (!postForm.title || !postForm.content) return alert('Título e Conteúdo são obrigatórios.');
+
+        setSaving(true);
+        const slug = postForm.slug || slugify(postForm.title);
+
+        // Limpa o HTML do conteúdo para remover &nbsp; e melhorar a estrutura no banco
+        const content = postForm.content ?
+            postForm.content.replace(/&nbsp;/g, ' ').replace(/></g, '>\n<').replace(/\n\s*\n/g, '\n').trim() :
+            '';
+
+        const postData = { ...postForm, slug, content };
 
         try {
-            const response = await fetch('http://localhost:3001/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-            const data = await response.json();
-            if (data.success) {
-                setEditForm(prev => ({ ...prev, image: data.path }));
-                setMessage({ type: 'success', text: `Imagem ${data.filename} enviada!` });
-            }
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Erro ao enviar imagem.' });
+            const { error } = await supabase.from('posts').upsert(postData);
+            if (error) throw error;
+            alert('Post salvo com sucesso!');
+            fetchPosts();
+            setSelectedPost(postData as Post);
+        } catch (err: any) {
+            alert('Erro ao salvar post: ' + err.message);
+        } finally {
+            setSaving(false);
         }
     };
 
-    const filteredProducts = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleDeletePost = async () => {
+        if (!selectedPost?.id) return;
+        if (!confirm('Excluir este artigo?')) return;
+        setSaving(true);
+        try {
+            const { error } = await supabase.from('posts').delete().eq('id', selectedPost.id);
+            if (error) throw error;
+            alert('Artigo excluído!');
+            setSelectedPost(null);
+            fetchPosts();
+        } catch (err: any) {
+            alert('Erro ao excluir: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
 
-    if (loading) return <div className="p-10 text-center">Carregando painel admin...</div>;
+    const handleBlogImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        console.log("Iniciando upload de capa do blog:", file.name);
+        setSaving(true);
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `blog-${Date.now()}.${fileExt}`;
+
+        try {
+            const { data, error } = await supabase.storage
+                .from('blog')
+                .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+            if (error) throw error;
+
+            if (data) {
+                const { data: { publicUrl } } = supabase.storage.from('blog').getPublicUrl(data.path);
+                console.log("Capa do blog subida com sucesso:", publicUrl);
+                setPostForm(prev => ({ ...prev, cover_image: publicUrl }));
+            }
+        } catch (err: any) {
+            console.error("Erro no upload do blog:", err);
+            alert('Erro no upload: ' + err.message);
+        } finally {
+            setSaving(false);
+            if (e.target) e.target.value = '';
+        }
+    };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
-            <div className="max-w-7xl mx-auto">
-                <header className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-black text-krenke-blue">Painel Administrativo</h1>
-                        <p className="text-gray-500">Gerenciamento de Produtos</p>
-                    </div>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Buscar produto..."
-                            className="pl-10 pr-4 py-2 border rounded-xl w-80 focus:ring-2 focus:ring-krenke-orange outline-none"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </header>
-
-                {message && (
-                    <div className={`p-4 rounded-xl mb-6 ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {message.text}
-                    </div>
-                )}
-
-                <div className="grid lg:grid-cols-2 gap-8">
-                    {/* List Section */}
-                    <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
-                        <div className="p-6 border-b bg-gray-50/50">
-                            <h2 className="font-bold flex items-center gap-2"><Edit2 size={20} /> Lista de Produtos</h2>
-                        </div>
-                        <div className="h-[600px] overflow-y-auto">
-                            {filteredProducts.map(product => (
-                                <div
-                                    key={product.id}
-                                    onClick={() => handleEdit(product)}
-                                    className={`p-4 border-b hover:bg-orange-50 cursor-pointer transition-colors ${selectedProduct?.id === product.id ? 'bg-orange-50 border-l-4 border-l-krenke-orange' : ''}`}
-                                >
-                                    <div className="font-bold text-gray-800">{product.name}</div>
-                                    <div className="text-xs text-gray-400 mt-1">ID: {product.id} | {product.category}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Edit Section */}
-                    <div className="bg-white rounded-2xl shadow-sm border p-8">
-                        {selectedProduct ? (
-                            <form onSubmit={handleUpdate} className="space-y-6">
-                                <h2 className="text-xl font-bold text-krenke-blue mb-6">Editando Produto</h2>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-600">Código (ID)</label>
-                                        <input
-                                            type="text"
-                                            className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-krenke-orange font-mono text-sm bg-gray-50"
-                                            value={editForm.id || ''}
-                                            onChange={(e) => setEditForm({ ...editForm, id: e.target.value })}
-                                        />
+        <AdminLayout>
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={activeView}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                >
+                    {activeView === 'dashboard' && (
+                        <DashboardView stats={{
+                            totalProducts: products.length,
+                            totalLeads: leads.length,
+                            totalPosts: posts.length,
+                            recentLeads: leads.slice(0, 5),
+                            recentPosts: posts.slice(0, 5)
+                        }} />
+                    )}
+                    {activeView === 'produtos' && (
+                        <div className="grid lg:grid-cols-12 gap-8 h-[calc(100vh-160px)]">
+                            <div className="lg:col-span-4 bg-white rounded-2xl border shadow-sm flex flex-col overflow-hidden">
+                                <div className="p-4 border-b space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="font-bold flex items-center gap-2 text-krenke-blue"><Package size={20} className="text-krenke-orange" /> Produtos</h2>
+                                        <button onClick={() => handleSelectProduct({ id: '', name: 'Novo Produto', category: '', image: '', description: '', specs: '', images: [] })} className="p-2 bg-krenke-orange text-white rounded-lg"><Plus size={18} /></button>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-gray-600">Nome do Produto</label>
-                                        <input
-                                            type="text"
-                                            className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-krenke-orange"
-                                            value={editForm.name || ''}
-                                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                        />
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                        <input type="text" placeholder="Buscar..." className="w-full pl-10 pr-4 py-2 bg-gray-50 border rounded-xl outline-none" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                                     </div>
                                 </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-gray-600">Descrição Curta</label>
-                                    <textarea
-                                        rows={3}
-                                        className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-krenke-orange"
-                                        value={editForm.description || ''}
-                                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                                    />
+                                <div className="flex-1 overflow-y-auto">
+                                    {loading ? <div className="p-8 text-center text-gray-400">Carregando...</div> : filteredProducts.map(p => (
+                                        <button key={p.id} type="button" onClick={() => handleSelectProduct(p)} className={`w-full p-4 border-b text-left flex items-center gap-4 ${selectedProduct?.id === p.id ? 'bg-orange-50 border-l-4 border-l-krenke-orange' : ''}`}>
+                                            <div className="w-10 h-10 rounded bg-gray-100 flex-shrink-0 overflow-hidden">{p.image && <img src={p.image} className="w-full h-full object-cover" />}</div>
+                                            <div className="flex-1 min-w-0"><p className="font-bold truncate">{p.name}</p><p className="text-[10px] text-gray-400">{p.id}</p></div>
+                                        </button>
+                                    ))}
                                 </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-gray-600">Caminho da Imagem Principal</label>
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            className="flex-grow p-3 border rounded-xl outline-none focus:ring-2 focus:ring-krenke-orange"
-                                            value={editForm.image || ''}
-                                            onChange={(e) => setEditForm({ ...editForm, image: e.target.value })}
-                                        />
-                                        <label className="bg-gray-100 p-3 rounded-xl cursor-pointer hover:bg-gray-200 transition-colors">
-                                            <Upload size={20} />
-                                            <input type="file" className="hidden" onChange={handleImageUpload} />
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-gray-600">Especificações (HTML)</label>
-                                    <textarea
-                                        rows={8}
-                                        className="w-full p-3 border rounded-xl font-mono text-sm outline-none focus:ring-2 focus:ring-krenke-orange"
-                                        value={editForm.specs || ''}
-                                        onChange={(e) => setEditForm({ ...editForm, specs: e.target.value })}
-                                    />
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    className="w-full py-4 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-200"
-                                >
-                                    <Save size={20} /> SALVAR ALTERAÇÕES
-                                </button>
-                            </form>
-                        ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-4">
-                                <Edit2 size={64} className="opacity-20" />
-                                <p>Selecione um produto na lista para editar</p>
                             </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
+
+                            <div className="lg:col-span-8 bg-white rounded-2xl border shadow-sm overflow-y-auto p-8 relative">
+                                {selectedProduct ? (
+                                    <form key={selectedProduct.id} className="space-y-8" onSubmit={e => { e.preventDefault(); handleSaveProduct(); }}>
+                                        <div className="flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md pb-6 z-10 border-b -mx-8 px-8">
+                                            <div>
+                                                <h2 className="text-2xl font-black text-krenke-blue">{selectedProduct.id ? 'Editar Produto' : 'Novo Produto'}</h2>
+                                                {scanning && <span className="text-xs text-krenke-orange animate-pulse">Escaneando Storage...</span>}
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <button type="button" onClick={handleDeleteProduct} disabled={saving || !selectedProduct.id} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors" title="Excluir Produto">
+                                                    <Trash2 size={20} />
+                                                </button>
+                                                <button type="submit" disabled={saving} className="px-8 py-3 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2">
+                                                    {saving ? <RefreshCw size={20} className="animate-spin" /> : <Save size={20} />}
+                                                    SALVAR
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black text-gray-400 uppercase">ID / Código</label>
+                                                <input type="text" className="w-full p-4 bg-gray-50 border rounded-xl font-mono" value={editForm.id || ''} onChange={e => setEditForm(prev => ({ ...prev, id: e.target.value.toUpperCase() }))} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black text-gray-400 uppercase">Nome</label>
+                                                <input type="text" className="w-full p-4 bg-gray-50 border rounded-xl font-bold" value={editForm.name || ''} onChange={e => setEditForm({ ...editForm, name: e.target.value })} />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black text-gray-400 uppercase">Categoria</label>
+                                                <select className="w-full p-4 bg-gray-50 border rounded-xl" value={editForm.category || ''} onChange={e => setEditForm({ ...editForm, category: e.target.value })}>
+                                                    <option value="">Selecione...</option>
+                                                    <option value="Playgrounds Completos">Playgrounds Completos</option>
+                                                    <option value="Little Play">Little Play</option>
+                                                    <option value="Brinquedos Avulsos">Brinquedos Avulsos</option>
+                                                    <option value="Linha Pet">Linha Pet</option>
+                                                    <option value="Mobiliário Urbano e Jardim">Mobiliário Urbano e Jardim</option>
+                                                    <option value="LINHA TEMÁTICA">Linha Temática</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black text-gray-400 uppercase">Capa</label>
+                                                <div className="border-2 border-dashed rounded-2xl aspect-video bg-gray-50 flex items-center justify-center relative overflow-hidden group">
+                                                    {editForm.image ? (
+                                                        <>
+                                                            <img src={editForm.image} className="w-full h-full object-contain" />
+                                                            <label htmlFor="capa-produto" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                                                                <Upload className="text-white" />
+                                                                <input id="capa-produto" type="file" className="hidden" onChange={e => handleImageUpload(e, 'image')} />
+                                                            </label>
+                                                        </>
+                                                    ) : (
+                                                        <label htmlFor="capa-produto" className="cursor-pointer flex flex-col items-center">
+                                                            <Upload className="text-gray-300 mb-2" size={40} />
+                                                            <span className="text-xs text-gray-400">Subir Capa</span>
+                                                            <input id="capa-produto" type="file" className="hidden" onChange={e => handleImageUpload(e, 'image')} />
+                                                        </label>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-black text-gray-400 uppercase">Galeria</label>
+                                                <label className="text-krenke-orange text-xs font-bold cursor-pointer hover:underline">
+                                                    + Adicionar fotos
+                                                    <input type="file" className="hidden" multiple onChange={e => handleImageUpload(e, 'gallery')} />
+                                                </label>
+                                            </div>
+                                            <div className="grid grid-cols-4 md:grid-cols-6 gap-4 bg-gray-50 p-4 rounded-xl border">
+                                                {editForm.images?.map((img, i) => (
+                                                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden border bg-white group">
+                                                        <img src={img} className="w-full h-full object-cover" />
+                                                        <button type="button" onClick={() => setEditForm({ ...editForm, images: editForm.images?.filter(u => u !== img) })} className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X size={10} /></button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-black text-gray-400 uppercase">Descrição Curta</label>
+                                            <textarea rows={3} className="w-full p-4 bg-gray-50 border rounded-xl" value={editForm.description || ''} onChange={e => setEditForm({ ...editForm, description: e.target.value })} />
+                                        </div>
+
+                                        <ProductSpecsManager
+                                            value={editForm.specs || ''}
+                                            productDescription={editForm.description || ''}
+                                            onChange={val => setEditForm({ ...editForm, specs: val })}
+                                        />
+                                    </form>
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center text-gray-300">
+                                        <Package size={80} strokeWidth={1} />
+                                        <p className="mt-4 font-bold">Selecione um produto</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeView === 'blog' && (
+                        <div className="grid lg:grid-cols-12 gap-8 h-[calc(100vh-160px)]">
+                            <div className="lg:col-span-4 bg-white rounded-2xl border shadow-sm flex flex-col overflow-hidden">
+                                <div className="p-4 border-b space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="font-bold flex items-center gap-2 text-krenke-blue"><FileText size={20} className="text-krenke-orange" /> Artigos</h2>
+                                        <button onClick={() => {
+                                            setSelectedPost({ id: '', title: 'Novo Artigo', slug: '', content: '', excerpt: '', cover_image: '', author: 'Admin', published: false, created_at: new Date().toISOString() });
+                                            setPostForm({ title: '', content: '', author: 'Admin', published: false });
+                                        }} className="p-2 bg-krenke-orange text-white rounded-lg"><Plus size={18} /></button>
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-y-auto">
+                                    {posts.map(post => (
+                                        <button key={post.id} onClick={() => { setSelectedPost(post); setPostForm(post); }} className={`w-full p-4 border-b text-left flex items-center gap-4 ${selectedPost?.id === post.id ? 'bg-orange-50 border-l-4 border-l-krenke-orange' : ''}`}>
+                                            <div className="w-10 h-10 rounded bg-gray-100 flex-shrink-0 overflow-hidden">{post.cover_image && <img src={post.cover_image} className="w-full h-full object-cover" />}</div>
+                                            <div className="flex-1 min-w-0"><p className="font-bold truncate">{post.title}</p><p className="text-[10px] text-gray-400">{new Date(post.created_at).toLocaleDateString()}</p></div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-8 bg-white rounded-2xl border shadow-sm overflow-y-auto p-8 relative">
+                                {selectedPost ? (
+                                    <div className="space-y-8">
+                                        <div className="flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md pb-6 z-10 border-b -mx-8 px-8">
+                                            <h2 className="text-2xl font-black text-krenke-blue">{selectedPost.id ? 'Editar Artigo' : 'Novo Artigo'}</h2>
+                                            <div className="flex items-center gap-3">
+                                                <button onClick={handleDeletePost} className="p-3 bg-red-50 text-red-500 rounded-xl"><Trash2 size={20} /></button>
+                                                <button onClick={handleSavePost} disabled={saving} className="px-8 py-3 bg-krenke-orange text-white font-black rounded-xl flex items-center gap-2">
+                                                    {saving ? <RefreshCw className="animate-spin" /> : <Save size={20} />} SALVAR
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black text-gray-400 uppercase">Título</label>
+                                                <input type="text" className="w-full p-4 bg-gray-50 border rounded-xl font-bold text-xl" value={postForm.title || ''} onChange={e => setPostForm({ ...postForm, title: e.target.value })} />
+                                            </div>
+
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-black text-gray-400 uppercase">Slug (URL)</label>
+                                                    <input type="text" className="w-full p-4 bg-gray-50 border rounded-xl font-mono text-sm" value={postForm.slug || ''} placeholder="auto-gerado-se-vazio" onChange={e => setPostForm({ ...postForm, slug: e.target.value })} />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-black text-gray-400 uppercase">Status</label>
+                                                    <select className="w-full p-4 bg-gray-50 border rounded-xl" value={postForm.published ? 'true' : 'false'} onChange={e => setPostForm({ ...postForm, published: e.target.value === 'true' })}>
+                                                        <option value="false">Rascunho</option>
+                                                        <option value="true">Publicado</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black text-gray-400 uppercase">Imagem de Capa</label>
+                                                <div className="border-2 border-dashed rounded-2xl aspect-video bg-gray-50 flex items-center justify-center relative overflow-hidden group">
+                                                    {postForm.cover_image ? (
+                                                        <>
+                                                            <img src={postForm.cover_image} className="w-full h-full object-cover" />
+                                                            <label htmlFor="capa-blog" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                                                                <Upload className="text-white" />
+                                                                <input id="capa-blog" type="file" className="hidden" onChange={handleBlogImageUpload} />
+                                                            </label>
+                                                        </>
+                                                    ) : (
+                                                        <label htmlFor="capa-blog" className="cursor-pointer flex flex-col items-center">
+                                                            <Upload className="text-gray-300 mb-2" size={40} />
+                                                            <span className="text-xs text-gray-400">Subir Imagem</span>
+                                                            <input id="capa-blog" type="file" className="hidden" onChange={handleBlogImageUpload} />
+                                                        </label>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-black text-gray-400 uppercase">Resumo (Excerpt)</label>
+                                                <textarea rows={3} className="w-full p-4 bg-gray-50 border rounded-xl" value={postForm.excerpt || ''} onChange={e => setPostForm({ ...postForm, excerpt: e.target.value })} />
+                                            </div>
+
+                                            <RichTextEditor label="Conteúdo do Artigo" value={postForm.content || ''} onChange={val => setPostForm({ ...postForm, content: val })} />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center text-gray-300">
+                                        <FileText size={80} strokeWidth={1} />
+                                        <p className="mt-4 font-bold">Selecione um artigo ou crie um novo</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeView === 'leads' && (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h1 className="text-2xl font-black text-krenke-blue">Orçamentos Recebidos</h1>
+                                <button onClick={fetchLeads} className="p-2 text-gray-400 hover:text-krenke-orange transition-colors"><RefreshCw size={20} /></button>
+                            </div>
+
+                            <div className="grid gap-6">
+                                {leads.map(lead => (
+                                    <div key={lead.id} className="bg-white p-6 rounded-2xl border shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="grid md:grid-cols-3 gap-6">
+                                            <div className="space-y-3">
+                                                <h3 className="font-black text-krenke-blue text-lg flex items-center gap-2">
+                                                    <Users size={18} className="text-krenke-orange" /> {lead.name}
+                                                </h3>
+                                                <div className="flex flex-col gap-1 text-sm text-gray-600">
+                                                    <a href={`mailto:${lead.email}`} className="flex items-center gap-2 hover:text-krenke-orange"><Mail size={14} /> {lead.email}</a>
+                                                    <a href={`tel:${lead.phone}`} className="flex items-center gap-2 hover:text-krenke-orange"><Phone size={14} /> {lead.phone}</a>
+                                                    <span className="flex items-center gap-2"><Calendar size={14} /> {new Date(lead.created_at).toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                            <div className="md:col-span-2 space-y-4">
+                                                <div>
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block">Produtos de Interesse</label>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {lead.products?.map((p, i) => (
+                                                            <span key={i} className="px-3 py-1 bg-orange-50 text-krenke-orange border border-orange-100 rounded-full text-xs font-bold">{p}</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block">Mensagem</label>
+                                                    <p className="text-gray-700 bg-gray-50 p-4 rounded-xl text-sm border italic">"{lead.message || 'Sem mensagem'}"</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {leads.length === 0 && <div className="text-center py-20 text-gray-400 italic">Nenhum orçamento recebido ainda.</div>}
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+            </AnimatePresence>
+        </AdminLayout>
     );
 };
 

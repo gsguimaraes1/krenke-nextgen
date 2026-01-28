@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard, X } from 'lucide-react';
+import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard, X, Calendar, User, FileText } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Post } from '../types';
+import { motion } from 'framer-motion';
 import { ShowcaseCard } from '../components/ui/ShowcaseCard';
 import heroVideo from '../assets/Home/videokrenke.mp4';
 import { ImageCarousel } from '../components/ImageCarousel';
-import playgroundsImg from '../assets/Home/Playgrounds Completos-home.webp';
-import brinquedosImg from '../assets/Home/Brinquedos Avulsos-home.webp';
-import linhaPetImg from '../assets/Home/LinhaPet-Home.webp';
-import jardimImg from '../assets/Home/Jardim e mobili-home.webp';
-import sobreImg from '../assets/Sobre/SOBRE.webp';
+import playgroundsImg from '../assets/Home/krenke-playgrounds-completos-parque-infantil.webp';
+import brinquedosImg from '../assets/Home/krenke-brinquedos-infantis-avulsos.webp';
+import linhaPetImg from '../assets/Home/krenke-playground-pet-linha-agility.webp';
+import jardimImg from '../assets/Home/krenke-mobiliario-urbano-bancos-jardim.webp';
+import sobreImg from '../assets/Sobre/krenke-sobre-nos-fabrica-playgrounds.webp';
 
 const HeroSection = () => {
   return (
@@ -62,7 +65,7 @@ const HeroSection = () => {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-5 justify-center pt-6">
             <Link
-              to="/products"
+              to="/produtos"
               className="group relative px-8 py-4 bg-krenke-orange text-white font-bold text-lg rounded-full overflow-hidden shadow-xl shadow-orange-500/20 hover:shadow-orange-500/40 transition-all hover:scale-105 gtm-home-hero-button-products"
             >
               <span className="relative z-10 flex items-center gap-2">
@@ -72,7 +75,7 @@ const HeroSection = () => {
             </Link>
 
             <Link
-              to="/quote"
+              to="/orcamento"
               className="px-8 py-4 bg-white/5 backdrop-blur-md border border-white/30 text-white font-bold text-lg rounded-full hover:bg-white hover:text-krenke-purple transition-all flex items-center justify-center shadow-lg gtm-home-hero-button-quote"
             >
               Solicitar Orçamento
@@ -131,31 +134,35 @@ const CategoryPreview = () => {
     {
       title: "Playgrounds Completos",
       image: playgroundsImg,
-      link: "/products?category=Playgrounds%20Completos",
+      link: "/produtos?categoria=Playgrounds%20Completos",
       description: "Estruturas completas que garantem diversão máxima com total segurança para todas as idades.",
-      color: "#312783" // Krenke Purple
+      color: "#312783", // Krenke Purple
+      alt: "Playgrounds Completos Krenke - Parques Infantis Certificados"
     },
     {
       title: "Brinquedos Avulsos",
       image: brinquedosImg,
-      link: "/products?category=Brinquedos%20Avulsos",
+      link: "/produtos?categoria=Brinquedos%20Avulsos",
       description: "Peças individuais perfeitas para complementar seu espaço de lazer com variedade.",
-      color: "#FF8A00" // Orange
+      color: "#FF8A00", // Orange
+      alt: "Brinquedos Infantis Avulsos Krenke - Diversão e Segurança"
     },
     {
       title: "Linha Pet",
       image: linhaPetImg,
-      link: "/products?category=Linha%20Pet",
+      link: "/produtos?categoria=Linha%20Pet",
       description: "Equipamentos especiais para o divertimento e treinamento do seu melhor amigo.",
-      color: "#0B8E36" // Green
+      color: "#0B8E36", // Green
+      alt: "Linha Pet Krenke - Brinquedos para Parques Pet e Agility"
     },
     {
       title: "Jardim e Mobília",
       image: jardimImg,
-      link: "/products?category=Mobiliário%20Urbano%20e%20Jardim",
+      link: "/produtos?categoria=Mobiliário%20Urbano%20e%20Jardim",
       description: "Bancos e acessórios duráveis que trazem conforto e beleza para áreas externas.",
       color: "#0095DA", // Blue (Complementary)
-      imageScale: 1.15
+      imageScale: 1.15,
+      alt: "Mobiliário Urbano Krenke - Bancos de Jardim e Lixeiras"
     },
   ];
 
@@ -182,13 +189,13 @@ const CategoryPreview = () => {
         </div>
 
         <div className="mt-20 text-center">
-          <a
-            href="/#/quote"
+          <Link
+            to="/orcamento"
             className="inline-flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black text-xl rounded-2xl shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-1 transition-all duration-300 gtm-home-category-button-full-quote"
           >
             SOLICITAR ORÇAMENTO COMPLETO
             <ArrowRight strokeWidth={3} />
-          </a>
+          </Link>
         </div>
       </div>
     </section>
@@ -196,7 +203,7 @@ const CategoryPreview = () => {
 };
 
 const StatsSection = () => (
-  <section className="py-20 bg-white">
+  <section className="py-20 bg-white" id="sobre-nos">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-8">
@@ -238,7 +245,7 @@ const StatsSection = () => (
               <span className="text-xs text-gray-500 block font-bold">Desde</span>
               <span className="text-2xl font-black text-krenke-green">1987</span>
             </div>
-            <img src={sobreImg} alt="Criança no escorregador" className="w-full object-cover" />
+            <img src={sobreImg} alt="Sobre a Krenke - Fábrica de Playgrounds e Parques Infantis desde 1987" title="Criança brincando em playground seguro Krenke" className="w-full object-cover" />
           </div>
         </div>
       </div>
@@ -294,28 +301,10 @@ const Differentials = () => (
         ].map((item, i) => (
           <div
             key={i}
-            className="group bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border-t-4 border-transparent hover:-translate-y-1"
-            style={{ borderTopColor: 'transparent' }} // Default state overrides
+            className="group bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border-t-4 border-transparent hover:-translate-y-1 relative"
           >
-            {/* We use a workaround for the hover border color by using a style tag or just using the group-hover logic with arbitrary values if supported, 
-                but simpler is to use inline style for a pseudo element or just manipulate the border color on hover via React state? 
-                Actually, simpler is to just render the border color directly if we want it constant, OR use a wrapper.
-                
-                The user wants "mude a cor da barrinha um card de cada cor". 
-                Let's use a ref or just simple style that changes on CSS hover. 
-                Since we can't easily inject dynamic hover CSS styles in React without CSS-in-JS libraries like styled-components, 
-                we'll use a `hover` class that forces the border color via a `style` attribute that leverages a CSS variable or just set it statically if acceptable.
-                
-                Wait, standard inline styles don't support pseudo-classes. 
-                Alternative: Render the colored line as a separate div inside relative container.
-            */}
             <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl transition-colors duration-300"
               style={{ backgroundColor: item.color, opacity: 0.8 }} />
-
-            {/* Wait, the "border-t-4" on the main div is easier if we accept it's always colored or we use a helper. 
-                Let's try the colored line approach as it's cleaner than fighting inline hover states. 
-                Re-doing the structure: relative container, absolute top line that is the "barrinha".
-            */}
 
             <div className="w-12 h-12 mb-4 text-krenke-orange group-hover:scale-110 transition-transform duration-300">
               <item.icon size={48} strokeWidth={1.5} style={{ color: item.color }} />
@@ -425,6 +414,62 @@ const ComparativeTable = () => {
   );
 };
 
+const BlogPreview = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const { data } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      if (data) setPosts(data);
+    };
+    fetchPosts();
+  }, []);
+
+  if (posts.length === 0) return null;
+
+  return (
+    <section className="py-24 bg-slate-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+          <div>
+            <h2 className="text-sm font-bold text-krenke-orange uppercase tracking-widest mb-2">Nosso Blog</h2>
+            <h3 className="text-4xl md:text-5xl font-black text-krenke-blue">Fique por dentro das <br /> nossas <span className="text-krenke-orange">novidades</span></h3>
+          </div>
+          <Link to="/blog" className="px-8 py-3 bg-white border-2 border-krenke-blue text-krenke-blue font-black rounded-xl hover:bg-krenke-blue hover:text-white transition-all flex items-center gap-2 group">
+            Ver todo o blog <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {posts.map((post, i) => (
+            <Link key={post.id} to={`/blog/${post.slug}`} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-gray-100 flex flex-col h-full">
+              <div className="aspect-video overflow-hidden">
+                <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div className="p-8 flex flex-col flex-grow">
+                <div className="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                  <span className="flex items-center gap-1"><Calendar size={12} className="text-krenke-orange" /> {new Date(post.created_at).toLocaleDateString()}</span>
+                  <span className="flex items-center gap-1"><User size={12} className="text-krenke-orange" /> {post.author}</span>
+                </div>
+                <h4 className="text-xl font-black text-krenke-blue mb-4 leading-tight group-hover:text-krenke-orange transition-colors line-clamp-2">{post.title}</h4>
+                <p className="text-gray-500 text-sm line-clamp-3 mb-6 flex-grow">{post.excerpt}</p>
+                <div className="flex items-center gap-2 text-krenke-orange font-black uppercase text-xs tracking-widest group-hover:gap-4 transition-all mt-auto">
+                  Ler artigo <ArrowRight size={16} />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const HomePage: React.FC = () => {
   return (
     <div className="animate-fade-in">
@@ -432,6 +477,7 @@ const HomePage: React.FC = () => {
       <Features />
       <CategoryPreview />
       <StatsSection />
+      <BlogPreview />
       <Differentials />
       <ComparativeTable />
       <ImageCarousel />

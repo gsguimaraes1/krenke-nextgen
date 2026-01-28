@@ -56,7 +56,7 @@ const ProjectsPage: React.FC = () => {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-4 drop-shadow-2xl">
-              Projetos Realizados
+              Projetos de Parques e Playgrounds
             </h1>
             <div className="h-2 w-32 bg-gradient-to-r from-krenke-orange to-yellow-400 rounded-full"></div>
           </div>
@@ -76,7 +76,8 @@ const ProjectsPage: React.FC = () => {
             >
               <img
                 src={project.img}
-                alt={project.title}
+                alt={`Projeto de Parque Infantil Krenke: ${project.title} em ${project.location}`}
+                title={`Playground Krenke - ${project.title}`}
                 className="w-full aspect-video object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/30 transition-colors">

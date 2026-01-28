@@ -1,9 +1,9 @@
 import React from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
-import heroVideo from '../assets/Sobre/FabricaKrenke.mp4';
-import image36Anos from '../assets/Sobre/36anos-krenke.jpg.webp';
-import imageFachada from '../assets/Sobre/Fachada.webp';
-import imageNordeste from '../assets/Sobre/KrenkeNordeste.webp';
+import heroVideo from '../assets/Sobre/krenke-fabrica-playgrounds-video.mp4';
+import image36Anos from '../assets/Sobre/krenke-36-anos-playgrounds-infantis.webp';
+import imageFachada from '../assets/Sobre/krenke-fachada-fabrica-parques-infantis.webp';
+import imageNordeste from '../assets/Sobre/krenke-filial-nordeste-playgrounds.webp';
 
 const AboutPage: React.FC = () => {
   return (
@@ -71,7 +71,7 @@ const AboutPage: React.FC = () => {
 
             {/* Small Playground Image */}
             <div className="mt-8 rounded-2xl overflow-hidden shadow-lg border-4 border-white">
-              <img src={image36Anos} alt="36 Anos Krenke" className="w-full h-auto object-cover" />
+              <img src={image36Anos} alt="Krenke - 36 Anos de História na Fabricação de Playgrounds" title="Melhores Playgrounds do Brasil" className="w-full h-auto object-cover" />
             </div>
           </div>
 
@@ -128,7 +128,8 @@ const AboutPage: React.FC = () => {
               <div className="absolute -inset-4 bg-krenke-blue/10 rounded-3xl transform rotate-2"></div>
               <img
                 src={imageFachada}
-                alt="Fachada da Fábrica Krenke"
+                alt="Fachada da Fábrica Krenke Brinquedos - Maior Fábrica de Playgrounds do Brasil"
+                title="Fábrica de Parques Infantis Krenke"
                 className="relative rounded-2xl shadow-xl w-full object-cover h-80 lg:h-96"
               />
             </div>
@@ -145,7 +146,8 @@ const AboutPage: React.FC = () => {
               <div className="absolute -inset-4 bg-krenke-orange/10 rounded-3xl transform -rotate-2"></div>
               <img
                 src={imageNordeste}
-                alt="Filial Nordeste Krenke"
+                alt="Filial Nordeste da Krenke Brinquedos - Palmares/PE"
+                title="Sede Nordeste Krenke Playgrounds"
                 className="relative rounded-2xl shadow-xl w-full object-cover h-80 lg:h-96"
               />
             </div>

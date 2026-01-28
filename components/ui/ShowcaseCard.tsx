@@ -10,9 +10,10 @@ interface ShowcaseCardProps {
   link: string;
   color?: string;
   imageScale?: number;
+  alt?: string;
 }
 
-export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({ title, image, description, link, color = '#312783', imageScale = 1 }) => {
+export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({ title, image, description, link, color = '#312783', imageScale = 1, alt }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   // Helper to convert hex to rgba for shadows
@@ -93,7 +94,7 @@ export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({ title, image, descri
             <div className="absolute inset-0 opacity-30 z-0">
               <motion.img
                 src={image}
-                alt="Background"
+                alt={alt || (typeof title === 'string' ? title : 'Produto Krenke')}
                 className="w-full h-full object-cover blur-md scale-150"
                 animate={{ scale: isHovered ? 1.2 : 1.5 }}
                 transition={{ duration: 3, ease: "easeInOut" }}
@@ -108,7 +109,7 @@ export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({ title, image, descri
             >
               <img
                 src={image}
-                alt={title}
+                alt={alt || (typeof title === 'string' ? title : 'Produto Krenke')}
                 className="w-full h-full object-cover rounded-2xl shadow-inner transition-transform duration-500"
                 style={{ transform: `scale(${imageScale})` }}
               />
