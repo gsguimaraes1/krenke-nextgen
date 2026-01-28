@@ -148,6 +148,7 @@ const AdminPage: React.FC = () => {
     };
 
     const fetchLeads = async () => {
+        if (!supabase) return;
         try {
             const { data, error } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
             if (error) throw error;
@@ -158,6 +159,7 @@ const AdminPage: React.FC = () => {
     };
 
     const fetchPosts = async () => {
+        if (!supabase) return;
         try {
             const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
             if (error) throw error;
@@ -188,6 +190,10 @@ const AdminPage: React.FC = () => {
 
     const fetchProducts = async () => {
         setLoading(true);
+        if (!supabase) {
+            setLoading(false);
+            return;
+        }
         try {
             const { data, error } = await supabase.from('products').select('*').order('name');
             if (error) throw error;

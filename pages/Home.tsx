@@ -419,6 +419,7 @@ const BlogPreview = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
+      if (!supabase) return;
       const { data } = await supabase
         .from('posts')
         .select('*')

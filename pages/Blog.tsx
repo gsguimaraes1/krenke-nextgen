@@ -24,6 +24,10 @@ const BlogPage: React.FC = () => {
     }, []);
 
     const fetchPosts = async () => {
+        if (!supabase) {
+            setLoading(false);
+            return;
+        }
         try {
             const { data, error } = await supabase
                 .from('posts')

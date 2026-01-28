@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Filter, Search, Download, ChevronRight, X, Plus } from 'lucide-react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { Product } from '../types';
+import productsData from '../products.json';
 import { supabase } from '../lib/supabase';
 
 const CATEGORIES = [
@@ -213,6 +214,17 @@ const ProductsPage: React.FC = () => {
 
   const fetchProducts = async () => {
     setLoading(true);
+
+    // Fallback inicial para garantir que algo apareça
+    let finalData: Product[] = [];
+
+    if (!supabase) {
+      console.warn('Supabase não inicializado. Usando dados locais (fallback).');
+      setProducts(productsData as Product[]);
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('products')
@@ -221,8 +233,15 @@ const ProductsPage: React.FC = () => {
 
       if (error) throw error;
 
-      // Sincroniza imagens do Storage se o banco estiver vazio (comportamento original)
-      const enrichedProducts = await Promise.all((data || []).map(async (p) => {
+      finalData = data || [];
+
+      // Se o banco estiver vazio, usa o JSON de backup
+      if (finalData.length === 0) {
+        finalData = productsData as Product[];
+      }
+
+      // Sincroniza imagens do Storage se o banco estiver vazio ou campos de imagem nulos
+      const enrichedProducts = await Promise.all(finalData.map(async (p) => {
         if (!p.image || !p.images || p.images.length === 0) {
           const assets = await getProductAssets(p.id);
           if (assets) {
@@ -235,6 +254,8 @@ const ProductsPage: React.FC = () => {
       setProducts(enrichedProducts);
     } catch (err) {
       console.error('Erro ao buscar produtos:', err);
+      // Fallback em caso de erro de rede/conexão
+      setProducts(productsData as Product[]);
     } finally {
       setLoading(false);
     }
