@@ -176,12 +176,21 @@
     .tech-specs-table table {
       width: 100% !important;
       border-collapse: collapse !important;
-      font-size: 14px !important;
-      margin-top: 2rem !important;
-      border-radius: 1.5rem !important;
+      font-size: 13px !important;
+      margin-top: 1.5rem !important;
+      border-radius: 1rem !important;
       overflow: hidden !important;
       border: 1px solid #f1f5f9 !important;
-      table-layout: fixed !important;
+      table-layout: auto !important;
+    }
+
+    @media (min-width: 768px) {
+      .tech-specs-table table {
+        font-size: 14px !important;
+        margin-top: 2rem !important;
+        border-radius: 1.5rem !important;
+        table-layout: fixed !important;
+      }
     }
 
     .tech-specs-table table tr {
@@ -208,9 +217,17 @@
       font-weight: 900 !important;
       text-transform: uppercase !important;
       letter-spacing: -0.01em !important;
-      width: 45% !important;
+      width: 35% !important;
       border-right: 1px solid #f1f5f9 !important;
       background-color: transparent !important;
+    }
+
+    @media (min-width: 768px) {
+
+      .tech-specs-table table td:first-child,
+      .tech-specs-table table th:first-child {
+        width: 45% !important;
+      }
     }
 
     /* Target the second column (Values) */
@@ -218,7 +235,15 @@
     .tech-specs-table table th:last-child {
       color: #475569 !important;
       font-weight: 600 !important;
-      width: 55% !important;
+      width: 65% !important;
+    }
+
+    @media (min-width: 768px) {
+
+      .tech-specs-table table td:last-child,
+      .tech-specs-table table th:last-child {
+        width: 55% !important;
+      }
     }
 
     /* Highlight badge for specific values */
@@ -235,6 +260,72 @@
     .tech-specs-table table strong {
       color: #FF9F0A !important;
       font-weight: 900 !important;
+    }
+
+    /* Krenke Specific Spec Classes from Manager */
+    .krenke-product-container {
+      width: 100% !important;
+    }
+
+    .krenke-desc {
+      margin-bottom: 2rem !important;
+      font-size: 1rem !important;
+      color: #475569 !important;
+      line-height: 1.6 !important;
+      border-left: 4px solid #F39200 !important;
+      padding-left: 1.5rem !important;
+    }
+
+    .krenke-specs-table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      background: white !important;
+      border-radius: 1.5rem !important;
+      overflow: hidden !important;
+      border: 1px solid #f1f5f9 !important;
+    }
+
+    .krenke-specs-table th {
+      background: #f8fafc !important;
+      color: #312783 !important;
+      font-weight: 900 !important;
+      text-transform: uppercase !important;
+      font-size: 11px !important;
+      letter-spacing: 0.05em !important;
+      padding: 1rem 1.5rem !important;
+      text-align: left !important;
+      width: 40% !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .krenke-specs-table td {
+      padding: 1rem 1.5rem !important;
+      color: #1e293b !important;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .highlight-area {
+      background: #fff7ed !important;
+      color: #c2410c !important;
+      padding: 0.25rem 0.5rem !important;
+      border-radius: 0.5rem !important;
+      font-weight: 800 !important;
+    }
+
+    .highlight-orange {
+      color: #F39200 !important;
+      font-weight: 900 !important;
+    }
+
+    @media (max-width: 768px) {
+
+      .krenke-specs-table th,
+      .krenke-specs-table td {
+        padding: 0.75rem 1rem !important;
+        font-size: 11px !important;
+      }
     }
   </style>
 

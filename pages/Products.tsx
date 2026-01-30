@@ -55,94 +55,105 @@ const ProductModal: React.FC<{ product: Product | null; onClose: () => void }> =
           initial={{ opacity: 0, scale: 0.9, y: 50 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 50 }}
-          className="relative w-full max-w-6xl bg-white rounded-[3rem] overflow-hidden shadow-premium flex flex-col md:flex-row h-[90vh] md:h-auto max-h-[90vh]"
+          className="relative w-full max-w-6xl bg-white rounded-3xl md:rounded-[3rem] overflow-y-auto overflow-x-hidden shadow-premium h-[90vh] md:h-auto max-h-[90vh] custom-scrollbar"
         >
+          {/* Close Button - Premium Floating Style */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 z-20 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center text-white hover:bg-vibrant-orange transition-all"
+            className="fixed md:absolute top-8 right-8 z-[120] w-12 h-12 bg-gray-900/10 hover:bg-vibrant-orange backdrop-blur-md border border-black/5 md:border-white/20 rounded-2xl flex items-center justify-center text-gray-900 md:text-white transition-all shadow-xl"
           >
-            <X size={24} />
+            <X size={28} />
           </button>
 
-          {/* Gallery Section */}
-          <div className="md:w-1/2 p-8 bg-slate-50 relative flex flex-col h-full">
-            <div className="flex-grow flex items-center justify-center bg-white rounded-[2.5rem] p-10 shadow-premium border border-slate-100 overflow-hidden relative group/hero">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={activeImage}
-                  initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  exit={{ opacity: 0, scale: 1.1, rotate: 2 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  src={activeImage || product.image}
-                  alt={product.name}
-                  className="max-w-full max-h-[400px] object-contain drop-shadow-2xl"
-                />
-              </AnimatePresence>
-            </div>
-
-            {/* Thumbnails */}
-            {product.images && product.images.length > 0 && (
-              <div className="mt-8">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 mb-4 px-2">Galeria de Fotos</p>
-                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-2 snap-x">
-                  {Array.from(new Set([product.image, ...(product.images || [])])).map((img, idx) => (
-                    <motion.button
-                      key={idx}
-                      whileHover={{ y: -4 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setActiveImage(img)}
-                      className={`relative w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden border-4 transition-all snap-start ${activeImage === img || (!activeImage && idx === 0)
-                        ? 'border-vibrant-orange shadow-lg shadow-orange-500/20'
-                        : 'border-transparent hover:border-slate-200'
-                        }`}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                      {activeImage === img && (
-                        <div className="absolute inset-0 bg-vibrant-orange/10 flex items-center justify-center">
-                          <div className="w-2 h-2 rounded-full bg-vibrant-orange animate-pulse" />
-                        </div>
-                      )}
-                    </motion.button>
-                  ))}
-                </div>
+          {/* Wrapper for flex-row on desktop */}
+          <div className="flex flex-col md:flex-row min-h-full">
+            {/* Gallery Section */}
+            <div className="md:w-1/2 p-4 md:p-8 bg-slate-50 relative flex flex-col shrink-0">
+              <div className="aspect-square md:aspect-auto md:flex-grow flex items-center justify-center bg-white rounded-2xl md:rounded-[2.5rem] p-6 shadow-premium border border-slate-100 overflow-hidden relative group/hero">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={activeImage}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.1 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    src={activeImage || product.image}
+                    alt={product.name}
+                    className="max-w-[120%] max-h-[400px] object-contain drop-shadow-2xl translate-y-4"
+                  />
+                </AnimatePresence>
               </div>
-            )}
-          </div>
 
-          <div className="md:w-1/2 p-12 overflow-y-auto flex flex-col">
-            <div className="mb-6">
-              <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${CATEGORY_STYLES[product.category]?.bg} text-${CATEGORY_STYLES[product.category]?.color}`}>
-                {product.category}
-              </span>
-            </div>
-
-            <h2 className="text-4xl font-black text-gray-900 mb-8 uppercase tracking-tighter leading-none">
-              {product.name}
-            </h2>
-
-            <div className="prose prose-slate tech-specs-table max-w-none mb-12 flex-grow overflow-y-auto custom-scrollbar">
-              {product.specs ? (
-                <div
-                  className="text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: product.specs }}
-                />
-              ) : (
-                <p className="text-lg text-gray-400 font-medium leading-relaxed italic border-l-4 border-vibrant-orange pl-6">
-                  {product.description}
-                </p>
+              {/* Thumbnails */}
+              {product.images && product.images.length > 0 && (
+                <div className="mt-8">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 px-2">Galeria de Fotos</p>
+                  <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-2 snap-x">
+                    {Array.from(new Set([product.image, ...(product.images || [])])).map((img, idx) => (
+                      <motion.button
+                        key={idx}
+                        whileHover={{ y: -4 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setActiveImage(img)}
+                        className={`relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-2xl overflow-hidden border-4 transition-all snap-start ${activeImage === img || (!activeImage && idx === 0)
+                          ? 'border-vibrant-orange shadow-lg shadow-orange-500/20'
+                          : 'border-white hover:border-slate-200'
+                          }`}
+                      >
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                        {activeImage === img && (
+                          <div className="absolute inset-0 bg-vibrant-orange/10 flex items-center justify-center">
+                            <div className="w-2 h-2 rounded-full bg-vibrant-orange animate-pulse" />
+                          </div>
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <button
-                className="w-full bg-vibrant-orange py-5 rounded-2xl text-white font-black uppercase tracking-tighter flex items-center justify-center gap-4 hover:shadow-vibrant-orange transition-all hover:scale-[1.02]"
-                onClick={() => window.location.href = `/orcamento?produto=${encodeURIComponent(product.id)}`}
-              >
-                <ShoppingCart size={24} />
-                Solicitar Orçamento
-              </button>
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Ref: {product.id}</span>
+            {/* Content Section */}
+            <div className="md:w-1/2 p-8 md:p-14 flex flex-col bg-white">
+              <div className="mb-6">
+                <span className={`px-4 py-1.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest ${CATEGORY_STYLES[product.category]?.bg} text-${CATEGORY_STYLES[product.category]?.color}`}>
+                  {product.category}
+                </span>
+              </div>
+
+              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-8 uppercase tracking-tighter leading-tight">
+                {product.name}
+              </h2>
+
+              {/* Specifications Container */}
+              <div className="tech-specs-table mb-12">
+                {product.specs ? (
+                  <div
+                    className="text-gray-700 leading-relaxed text-sm md:text-base tech-specs-container"
+                    dangerouslySetInnerHTML={{ __html: product.specs }}
+                  />
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-base md:text-lg text-gray-500 font-medium leading-relaxed italic border-l-4 border-vibrant-orange pl-6">
+                      {product.description || 'Estamos preparando as especificações técnicas detalhadas para este item. Entre em contato para saber mais.'}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-auto pt-8 border-t border-slate-50 space-y-4">
+                <button
+                  className="w-full bg-vibrant-orange py-6 rounded-2xl text-white font-black text-lg uppercase tracking-widest transition-all hover:shadow-xl hover:shadow-orange-500/20 flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-95"
+                  onClick={() => window.location.href = `/orcamento?produto=${encodeURIComponent(product.id)}`}
+                >
+                  <ShoppingCart size={24} />
+                  Solicitar Orçamento
+                </button>
+                <div className="flex items-center justify-between opacity-40">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Krenke Playgrounds © 2026</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Ref: {product.id}</span>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
