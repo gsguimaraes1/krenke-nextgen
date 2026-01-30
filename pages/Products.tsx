@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Filter, Search, Download, ChevronRight, X, Plus } from 'lucide-react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Filter, Search, ChevronRight, X, Plus, ShoppingCart } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { Product } from '../types';
 import productsData from '../products.json';
 import { supabase } from '../lib/supabase';
@@ -15,14 +16,14 @@ const CATEGORIES = [
   'LINHA TEMÁTICA'
 ];
 
-const CATEGORY_STYLES: Record<string, { text: string; bg: string; dot: string }> = {
-  'Playgrounds Completos': { text: 'text-krenke-logo-blue', bg: 'bg-krenke-logo-blue/10', dot: 'bg-krenke-logo-blue' },
-  'Little Play': { text: 'text-krenke-logo-pink', bg: 'bg-krenke-logo-pink/10', dot: 'bg-krenke-logo-pink' },
-  'Brinquedos Avulsos': { text: 'text-krenke-logo-cyan', bg: 'bg-krenke-logo-cyan/10', dot: 'bg-krenke-logo-cyan' },
-  'Linha Pet': { text: 'text-krenke-logo-green', bg: 'bg-krenke-logo-green/10', dot: 'bg-krenke-logo-green' },
-  'Mobiliário Urbano e Jardim': { text: 'text-krenke-logo-purple', bg: 'bg-krenke-logo-purple/10', dot: 'bg-krenke-logo-purple' },
-  'LINHA TEMÁTICA': { text: 'text-krenke-logo-orange', bg: 'bg-krenke-logo-orange/10', dot: 'bg-krenke-logo-orange' },
-  'Todos': { text: 'text-gray-600', bg: 'bg-gray-100', dot: 'bg-gray-400' }
+const CATEGORY_STYLES: Record<string, { color: string; bg: string }> = {
+  'Playgrounds Completos': { color: 'vibrant-purple', bg: 'bg-vibrant-purple/10' },
+  'Little Play': { color: 'pink-500', bg: 'bg-pink-500/10' },
+  'Brinquedos Avulsos': { color: 'vibrant-cyan', bg: 'bg-vibrant-cyan/10' },
+  'Linha Pet': { color: 'vibrant-green', bg: 'bg-vibrant-green/10' },
+  'Mobiliário Urbano e Jardim': { color: 'vibrant-purple', bg: 'bg-vibrant-purple/10' },
+  'LINHA TEMÁTICA': { color: 'vibrant-orange', bg: 'bg-vibrant-orange/10' },
+  'Todos': { color: 'gray-500', bg: 'bg-gray-100' }
 };
 
 const ProductModal: React.FC<{ product: Product | null; onClose: () => void }> = ({ product, onClose }) => {
@@ -33,149 +34,120 @@ const ProductModal: React.FC<{ product: Product | null; onClose: () => void }> =
       setActiveImage(product.image);
       const originalTitle = document.title;
       document.title = `${product.name} | Krenke Brinquedos`;
-      return () => {
-        document.title = originalTitle;
-      };
+      return () => { document.title = originalTitle; };
     }
   }, [product]);
 
   if (!product) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 bg-black/70 transition-opacity" aria-hidden="true" onClick={onClose}></div>
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-krenke-purple/80 backdrop-blur-xl"
+          onClick={onClose}
+        ></motion.div>
 
-        <div className="relative inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full animate-fade-in-up">
-          <div className="absolute top-4 right-4 z-10">
-            <button onClick={onClose} className="bg-white/80 hover:bg-white text-gray-400 hover:text-gray-500 rounded-full p-2 focus:outline-none backdrop-blur-sm shadow-sm gtm-modal-close">
-              <X size={24} />
-            </button>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 50 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 50 }}
+          className="relative w-full max-w-6xl bg-white rounded-[3rem] overflow-hidden shadow-premium flex flex-col md:flex-row h-[90vh] md:h-auto max-h-[90vh]"
+        >
+          <button
+            onClick={onClose}
+            className="absolute top-6 right-6 z-20 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center text-white hover:bg-vibrant-orange transition-all"
+          >
+            <X size={24} />
+          </button>
 
-          <div className="grid md:grid-cols-2">
-            {/* Left: Image Gallery */}
-            <div className="bg-gray-100 p-6 md:p-8 flex flex-col h-full">
-              <div className="flex-grow flex items-center justify-center bg-white rounded-xl overflow-hidden shadow-inner mb-4 border border-gray-200 aspect-square">
-                <img
-                  src={activeImage || product.image || 'https://via.placeholder.com/600?text=Sem+Imagem'}
+          {/* Gallery Section */}
+          <div className="md:w-1/2 p-8 bg-slate-50 relative flex flex-col h-full">
+            <div className="flex-grow flex items-center justify-center bg-white rounded-[2.5rem] p-10 shadow-premium border border-slate-100 overflow-hidden relative group/hero">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={activeImage}
+                  initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 1.1, rotate: 2 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  src={activeImage || product.image}
                   alt={product.name}
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-full max-h-[400px] object-contain drop-shadow-2xl"
                 />
-              </div>
-              {product.images && product.images.length > 0 && (
-                <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-                  {/* Incluir a imagem principal na galeria também se não estiver lá */}
-                  {[product.image, ...(product.images || [])].filter((v, i, a) => v && a.indexOf(v) === i).map((img, idx) => (
-                    <button
+              </AnimatePresence>
+            </div>
+
+            {/* Thumbnails */}
+            {product.images && product.images.length > 0 && (
+              <div className="mt-8">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 mb-4 px-2">Galeria de Fotos</p>
+                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-2 snap-x">
+                  {Array.from(new Set([product.image, ...(product.images || [])])).map((img, idx) => (
+                    <motion.button
                       key={idx}
+                      whileHover={{ y: -4 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setActiveImage(img)}
-                      className={`w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${activeImage === img ? 'border-krenke-orange' : 'border-transparent hover:border-gray-300'}`}
+                      className={`relative w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden border-4 transition-all snap-start ${activeImage === img || (!activeImage && idx === 0)
+                        ? 'border-vibrant-orange shadow-lg shadow-orange-500/20'
+                        : 'border-transparent hover:border-slate-200'
+                        }`}
                     >
                       <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
+                      {activeImage === img && (
+                        <div className="absolute inset-0 bg-vibrant-orange/10 flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-vibrant-orange animate-pulse" />
+                        </div>
+                      )}
+                    </motion.button>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+
+          <div className="md:w-1/2 p-12 overflow-y-auto flex flex-col">
+            <div className="mb-6">
+              <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${CATEGORY_STYLES[product.category]?.bg} text-${CATEGORY_STYLES[product.category]?.color}`}>
+                {product.category}
+              </span>
+            </div>
+
+            <h2 className="text-4xl font-black text-gray-900 mb-8 uppercase tracking-tighter leading-none">
+              {product.name}
+            </h2>
+
+            <div className="prose prose-slate tech-specs-table max-w-none mb-12 flex-grow overflow-y-auto custom-scrollbar">
+              {product.specs ? (
+                <div
+                  className="text-gray-700 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: product.specs }}
+                />
+              ) : (
+                <p className="text-lg text-gray-400 font-medium leading-relaxed italic border-l-4 border-vibrant-orange pl-6">
+                  {product.description}
+                </p>
               )}
             </div>
 
-            {/* Right: Info */}
-            <div className="p-6 md:p-10 flex flex-col h-full overflow-y-auto max-h-[80vh] md:max-h-[90vh]">
-              <div className="mb-2">
-                <span className="inline-block py-1 px-3 rounded-full bg-orange-50 text-krenke-orange text-xs font-bold uppercase tracking-wider">
-                  {product.category}
-                </span>
-              </div>
-              <h1 className="text-3xl font-black text-gray-900 mb-6 uppercase tracking-tight">{product.name}</h1>
-
-              <style>{`
-                .product-specs-content {
-                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                  color: #333;
-                }
-
-                .product-specs-content .krenke-desc {
-                  line-height: 1.6;
-                  margin-bottom: 25px;
-                  font-size: 1rem;
-                  color: #555;
-                }
-
-                .product-specs-content table {
-                  width: 100%;
-                  border-collapse: collapse;
-                  background-color: #fff;
-                  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                  border-radius: 8px;
-                  overflow: hidden;
-                  border-left: 4px solid #301b6b;
-                  margin-top: 1rem;
-                  margin-bottom: 2rem;
-                }
-
-                .product-specs-content th, 
-                .product-specs-content td {
-                  padding: 12px 15px;
-                  text-align: left;
-                  border-bottom: 1px solid #eee;
-                }
-
-                .product-specs-content th {
-                  background-color: #fff;
-                  color: #301b6b;
-                  font-weight: 700;
-                  width: 40%;
-                  text-transform: uppercase;
-                  font-size: 0.85rem;
-                  letter-spacing: 0.5px;
-                }
-
-                .product-specs-content tr:nth-child(even) {
-                  background-color: #f8f9fa;
-                }
-
-                .product-specs-content tr:last-child td,
-                .product-specs-content tr:last-child th {
-                  border-bottom: none;
-                }
-
-                .product-specs-content .highlight-orange {
-                  color: #e65100;
-                  font-weight: bold;
-                }
-                
-                .product-specs-content .highlight-area {
-                  background-color: #fff8e1;
-                  font-weight: bold;
-                  color: #333;
-                  padding: 4px 8px;
-                  border-radius: 4px;
-                }
-              `}</style>
-
-              {product.specs ? (
-                <div className="product-specs-content prose prose-slate max-w-none mb-8" dangerouslySetInnerHTML={{ __html: product.specs }} />
-              ) : (
-                <p className="text-gray-600 text-lg leading-relaxed mb-8">{product.description}</p>
-              )}
-
-              <div className="mt-auto pt-6 border-t border-gray-100">
-                <button
-                  className="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-900/20 flex items-center justify-center gap-2 gtm-modal-button-quote"
-                  onClick={() => window.location.href = `/orcamento?produto=${encodeURIComponent(product.id)}`}
-                >
-                  Solicitar Orçamento Deste Item
-                </button>
-                <p className="text-center text-xs text-gray-400 mt-3">
-                  * Imagens meramente ilustrativas. Cores e detalhes podem variar conforme projeto.
-                </p>
-              </div>
+            <div className="space-y-4">
+              <button
+                className="w-full bg-vibrant-orange py-5 rounded-2xl text-white font-black uppercase tracking-tighter flex items-center justify-center gap-4 hover:shadow-vibrant-orange transition-all hover:scale-[1.02]"
+                onClick={() => window.location.href = `/orcamento?produto=${encodeURIComponent(product.id)}`}
+              >
+                <ShoppingCart size={24} />
+                Solicitar Orçamento
+              </button>
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Ref: {product.id}</span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 };
 
@@ -186,92 +158,29 @@ const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const getProductAssets = async (productId: string) => {
-    try {
-      const folder = productId.toLowerCase();
-      const { data: files } = await supabase.storage.from('products').list(folder);
-      if (!files || files.length === 0) return null;
-
-      const imageFiles = files.filter(f => f.name.match(/\.(webp|jpg|jpeg|png|gif)$/i));
-      if (imageFiles.length === 0) return null;
-
-      const urls = imageFiles.map(file =>
-        supabase.storage.from('products').getPublicUrl(`${folder}/${file.name}`).data.publicUrl
-      );
-
-      const main = urls.find(url =>
-        url.toLowerCase().includes('perspectiva') ||
-        url.toLowerCase().includes('capa') ||
-        url.toLowerCase().includes('principal') ||
-        url.toLowerCase().includes('foto-1')
-      ) || urls[0];
-
-      return { main, gallery: urls };
-    } catch (err) {
-      return null;
-    }
-  };
-
   const fetchProducts = async () => {
     setLoading(true);
-
-    // Fallback inicial para garantir que algo apareça
-    let finalData: Product[] = [];
-
     if (!supabase) {
-      console.warn('Supabase não inicializado. Usando dados locais (fallback).');
       setProducts(productsData as Product[]);
       setLoading(false);
       return;
     }
-
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('name', { ascending: true });
-
+      const { data, error } = await supabase.from('products').select('*').order('name', { ascending: true });
       if (error) throw error;
-
-      finalData = data || [];
-
-      // Se o banco estiver vazio, usa o JSON de backup
-      if (finalData.length === 0) {
-        finalData = productsData as Product[];
-      }
-
-      // Sincroniza imagens do Storage se o banco estiver vazio ou campos de imagem nulos
-      const enrichedProducts = await Promise.all(finalData.map(async (p) => {
-        if (!p.image || !p.images || p.images.length === 0) {
-          const assets = await getProductAssets(p.id);
-          if (assets) {
-            return { ...p, image: p.image || assets.main, images: assets.gallery };
-          }
-        }
-        return p;
-      }));
-
-      setProducts(enrichedProducts);
+      setProducts(data && data.length > 0 ? data : (productsData as Product[]));
     } catch (err) {
-      console.error('Erro ao buscar produtos:', err);
-      // Fallback em caso de erro de rede/conexão
       setProducts(productsData as Product[]);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
   useEffect(() => {
     const categoryParam = searchParams.get('categoria');
-    if (categoryParam && CATEGORIES.includes(categoryParam)) {
-      setActiveCategory(categoryParam);
-    } else {
-      setActiveCategory('Todos');
-    }
+    setActiveCategory(categoryParam && CATEGORIES.includes(categoryParam) ? categoryParam : 'Todos');
   }, [searchParams]);
 
   const handleCategoryChange = (cat: string) => {
@@ -288,175 +197,138 @@ const ProductsPage: React.FC = () => {
     return products.find(p => p.id?.toLowerCase() === idParam) || null;
   }, [searchParams, products]);
 
-  const handleCloseProduct = () => {
-    setSearchParams(prev => {
-      prev.delete('produto');
-      return prev;
-    });
-  };
-
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
       const matchesCategory = activeCategory === 'Todos' || p.category === activeCategory;
-      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.id.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || (p.id && p.id.toLowerCase().includes(search.toLowerCase()));
       return matchesCategory && matchesSearch;
     });
   }, [products, activeCategory, search]);
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-20">
+    <div className="bg-slate-50 min-h-screen pb-32 overflow-x-hidden">
       {selectedProduct && (
-        <ProductModal product={selectedProduct} onClose={handleCloseProduct} />
+        <ProductModal
+          product={selectedProduct}
+          onClose={() => setSearchParams(prev => { prev.delete('produto'); return prev; })}
+        />
       )}
 
-      {/* Header Banner */}
-      <div className="relative h-[300px] md:h-[400px] overflow-hidden flex items-center bg-[#1E1B4B]">
+      {/* Hero Banner */}
+      <div className="relative h-[450px] md:h-[550px] overflow-hidden flex items-center bg-krenke-purple px-4">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-krenke-purple via-vibrant-purple to-vibrant-orange opacity-40 mix-blend-overlay"></div>
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1E1B4B] via-[#2a2175] to-blue-900 opacity-95"></div>
         </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center md:text-left">
-          <div className="flex flex-col items-center md:items-start">
-            <div className="flex items-center gap-2 text-sm text-gray-300 mb-6 bg-white/5 px-3 py-1 rounded-full border border-white/10">
-              <span>Home</span>
-              <ChevronRight size={14} />
-              <span className="text-krenke-orange font-bold">Produtos</span>
+
+        <div className="relative z-10 max-w-7xl mx-auto w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col items-start"
+          >
+            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-black uppercase tracking-[0.3em] mb-8">
+              <span className="w-2 h-2 rounded-full bg-vibrant-orange animate-pulse shadow-vibrant-orange"></span>
+              Linha Completa 2026
             </div>
-            <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-4">
-              Nossos <span className="text-krenke-orange">Produtos</span>
+
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.85] tracking-tighter mb-8 uppercase drop-shadow-2xl">
+              MUNDO DE <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto] animate-gradient-x">DIVERSÃO</span>
             </h1>
-            <p className="text-gray-300 max-w-2xl text-lg font-light">
-              Explore nossa linha completa de playgrounds e brinquedos certificados, projetados para máxima segurança e diversão.
-            </p>
+
+            <div className="h-3 w-32 bg-vibrant-orange rounded-full shadow-vibrant-orange"></div>
+          </motion.div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20">
+        <div className="bg-white rounded-[3rem] shadow-premium p-6 md:p-12 flex flex-col md:flex-row gap-8 items-center justify-between border border-slate-100">
+          <div className="relative w-full md:w-1/2">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-vibrant-orange" size={24} />
+            <input
+              type="text"
+              placeholder="Pesquise por nome ou código..."
+              className="w-full pl-16 pr-8 py-6 bg-slate-50 border-2 border-transparent focus:border-vibrant-orange rounded-3xl font-black text-gray-900 outline-none transition-all placeholder:text-gray-300"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <div className="hidden md:flex gap-4">
+            <div className="flex flex-col items-end text-right">
+              <span className="text-[10px] font-black uppercase text-gray-300 tracking-widest leading-none mb-1">Mostrando</span>
+              <span className="text-2xl font-black text-krenke-purple uppercase leading-none">{filteredProducts.length} Itens</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
-        <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-4 md:p-8">
-          <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-            {/* Search */}
-            <div className="relative w-full md:w-96">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Buscar por nome ou código..."
-                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-krenke-orange transition-all outline-none"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col lg:flex-row gap-16">
+        <aside className="hidden lg:block w-80 shrink-0 sticky top-28 h-fit">
+          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-8 px-4 flex items-center gap-3">
+            <Filter size={14} className="text-vibrant-orange" /> Filtrar por Categoria
+          </h3>
+          <div className="space-y-4">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => handleCategoryChange(cat)}
+                className={`w-full text-left px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-tighter transition-all ${activeCategory === cat ? 'bg-krenke-purple text-white shadow-xl' : 'text-gray-500 hover:bg-slate-100'}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </aside>
 
-            {/* Category Filter Pills (Mobile) */}
-            <div className="flex md:hidden overflow-x-auto w-full pb-2 gap-2 no-scrollbar">
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => handleCategoryChange(cat)}
-                  className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-bold transition-all ${activeCategory === cat ? 'bg-krenke-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+        <main className="flex-1">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 text-center">Carregando...</div>
+          ) : filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {filteredProducts.map((product, idx) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: (idx % 3) * 0.1 }}
+                  className="group"
+                  onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), produto: product.id })}
                 >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col lg:flex-row gap-12">
-          {/* Sidebar Filters (Desktop) */}
-          <div className="hidden lg:block w-72 flex-shrink-0">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
-              <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Filter size={18} className="text-krenke-orange" /> Categorias
-              </h3>
-              <div className="space-y-2">
-                {CATEGORIES.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => handleCategoryChange(cat)}
-                    className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeCategory === cat ? 'bg-orange-50 text-krenke-orange' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Product Grid */}
-          <div className="flex-1">
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="bg-white rounded-3xl h-80 animate-pulse border"></div>
-                ))}
-              </div>
-            ) : filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="group bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-2 transition-all duration-500 flex flex-col cursor-pointer"
-                    onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), produto: product.id })}
-                  >
-                    {/* Imagem com Hover Effect */}
-                    <div className="aspect-[1/1] overflow-hidden bg-white relative">
+                  <div className="bg-white rounded-[2rem] overflow-hidden shadow-premium border border-slate-100 cursor-pointer flex flex-col transform transition-all duration-500 hover:-translate-y-4 h-full">
+                    <div className="relative aspect-[4/3] p-2 bg-slate-50 flex items-center justify-center overflow-hidden">
                       <img
-                        src={product.image || 'https://via.placeholder.com/400?text=Sem+Imagem'}
+                        src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700 p-8 relative z-0"
+                        className="w-[110%] h-[110%] object-contain transition-transform duration-700 group-hover:scale-115"
                       />
-
-                      {/* Badge flutuante */}
-                      <div className="absolute top-6 left-6 z-20">
-                        <div className={`backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm border border-white/50 flex items-center gap-2 ${CATEGORY_STYLES[product.category]?.bg || 'bg-white/90'}`}>
-                          <span className={`w-2 h-2 rounded-full animate-pulse ${CATEGORY_STYLES[product.category]?.dot || 'bg-krenke-orange'}`}></span>
-                          <span className={`text-[10px] font-black uppercase tracking-widest ${CATEGORY_STYLES[product.category]?.text || 'text-gray-800'}`}>{product.category}</span>
-                        </div>
-                      </div>
-
-                      {/* Botão flutuante no hover */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
-                        <div className="bg-krenke-blue text-white px-6 py-3 rounded-2xl font-black text-sm shadow-xl flex items-center gap-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 hover:bg-krenke-orange transition-colors">
-                          CONHECER PRODUTO <ChevronRight size={18} />
-                        </div>
-                      </div>
                     </div>
 
-                    {/* Conteúdo do Card */}
-                    <div className="p-8 flex flex-col flex-1 bg-white relative">
-                      <h3 className="text-2xl font-black text-krenke-blue mb-3 group-hover:text-krenke-orange transition-colors tracking-tight">
+                    <div className="p-8 flex flex-col items-center text-center flex-grow">
+                      <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter mb-4 group-hover:text-vibrant-orange transition-colors">
                         {product.name}
                       </h3>
-                      <p className="text-gray-400 text-sm line-clamp-2 mb-6 font-medium leading-relaxed">
-                        {product.description}
-                      </p>
-
-                      <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-50">
-                        <div className="flex flex-col">
-                          <span className="text-[9px] uppercase tracking-widest text-gray-300 font-bold mb-0.5">Referência</span>
-                          <span className="text-xs font-mono font-bold text-gray-400">{product.id}</span>
-                        </div>
-                        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-krenke-orange group-hover:bg-krenke-orange group-hover:text-white transition-all duration-300">
+                      <div className="mt-auto w-full pt-6 border-t border-slate-50 flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Ref: {product.id}</span>
+                        <div className="w-10 h-10 rounded-xl bg-slate-900 group-hover:bg-vibrant-orange flex items-center justify-center text-white transition-all shadow-lg">
                           <Plus size={20} />
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20 bg-white rounded-3xl border border-dashed">
-                <Search size={48} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900">Nenhum produto encontrado</h3>
-                <p className="text-gray-500">Tente ajustar sua busca ou categoria.</p>
-              </div>
-            )}
-          </div>
-        </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-40 bg-white rounded-[3rem] shadow-premium border-2 border-dashed border-slate-100">
+              <h3 className="text-2xl font-black text-gray-900 uppercase">Nada Encontrado</h3>
+              <button onClick={() => { setSearch(''); handleCategoryChange('Todos'); }} className="mt-8 px-10 py-4 bg-krenke-purple text-white font-black rounded-2xl">Limpar Filtros</button>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

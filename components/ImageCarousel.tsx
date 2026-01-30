@@ -55,39 +55,54 @@ export const ImageCarousel: React.FC = () => {
     }, [itemsPerScreen, maxIndex, currentIndex]);
 
     return (
-        <section className="py-20 bg-white overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl font-black text-gray-900 mb-4">
-                        Espaços transformados, <span className="text-krenke-orange">memórias inesquecíveis</span>
-                    </h2>
-                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                        Somos especialistas em criar playgrounds que encantam e inspiram gerações
+        <section className="py-32 bg-white overflow-hidden relative">
+            <div className="absolute top-1/2 left-0 w-64 h-64 bg-krenke-purple/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="text-center mb-20">
+                    <motion.h2
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        className="text-4xl md:text-6xl font-black text-gray-900 mb-6 uppercase tracking-tighter"
+                    >
+                        Espaços Transformativos <br />
+                        <span className="text-vibrant-orange drop-shadow-sm">Memórias Inesquecíveis</span>
+                    </motion.h2>
+                    <p className="text-xl text-gray-500 max-w-3xl mx-auto font-medium">
+                        Somos especialistas em criar ecossistemas de lazer que encantam e inspiram gerações.
                     </p>
                 </div>
 
                 <div className="relative group">
                     {/* Carousel Track Container */}
-                    <div className="overflow-hidden w-full px-4 py-8">
+                    <div className="overflow-hidden w-full px-4 py-12">
                         <motion.div
-                            className="flex gap-6"
-                            animate={{ x: `calc(-${currentIndex * (100 / itemsPerScreen)}% - ${currentIndex * 24 / itemsPerScreen}px)` }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="flex gap-8"
+                            animate={{ x: `calc(-${currentIndex * (100 / itemsPerScreen)}% - ${currentIndex * 32 / itemsPerScreen}px)` }}
+                            transition={{ type: "spring", stiffness: 200, damping: 25 }}
                         >
                             {images.map((img, idx) => (
                                 <motion.div
                                     key={idx}
-                                    className="relative flex-shrink-0 rounded-3xl overflow-hidden shadow-xl bg-gray-100"
+                                    className="relative flex-shrink-0 rounded-[3rem] overflow-hidden shadow-premium bg-slate-50 border border-gray-100"
                                     style={{
-                                        width: `calc(${100 / itemsPerScreen}% - ${24 * (itemsPerScreen - 1) / itemsPerScreen}px)`,
-                                        height: '400px'
+                                        width: `calc(${100 / itemsPerScreen}% - ${32 * (itemsPerScreen - 1) / itemsPerScreen}px)`,
+                                        height: '500px'
                                     }}
-                                    whileHover={{ scale: 1.05, y: -10 }}
-                                    transition={{ duration: 0.3 }}
+                                    whileHover={{ scale: 1.02, y: -20 }}
+                                    transition={{ duration: 0.4 }}
                                 >
                                     <img src={img} alt={`Projeto ${idx + 1}`} className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                                        <span className="text-white font-bold text-lg">Projeto #{idx + 1}</span>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-krenke-purple/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10">
+                                        <motion.span
+                                            initial={{ y: 20, opacity: 0 }}
+                                            whileInView={{ y: 0, opacity: 1 }}
+                                            className="text-white font-black text-3xl uppercase tracking-tighter"
+                                        >
+                                            Projeto <br />
+                                            <span className="text-vibrant-orange">EXCLUSIVO #{idx + 1}</span>
+                                        </motion.span>
                                     </div>
                                 </motion.div>
                             ))}
@@ -95,19 +110,25 @@ export const ImageCarousel: React.FC = () => {
                     </div>
 
                     {/* Navigation Buttons */}
-                    <button
-                        className="absolute -left-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-krenke-purple hover:bg-krenke-purple hover:text-white transition-all transform hover:scale-110 z-10"
-                        onClick={prevSlide}
-                    >
-                        <ChevronLeft size={28} strokeWidth={2.5} />
-                    </button>
+                    <div className="hidden md:flex justify-center gap-6 mt-12">
+                        <motion.button
+                            whileHover={{ scale: 1.1, x: -5 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="w-16 h-16 bg-white shadow-premium rounded-2xl flex items-center justify-center text-krenke-purple hover:bg-krenke-purple hover:text-white transition-all border border-gray-50"
+                            onClick={prevSlide}
+                        >
+                            <ChevronLeft size={32} strokeWidth={3} />
+                        </motion.button>
 
-                    <button
-                        className="absolute -right-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-krenke-purple hover:bg-krenke-purple hover:text-white transition-all transform hover:scale-110 z-10"
-                        onClick={nextSlide}
-                    >
-                        <ChevronRight size={28} strokeWidth={2.5} />
-                    </button>
+                        <motion.button
+                            whileHover={{ scale: 1.1, x: 5 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="w-16 h-16 bg-white shadow-premium rounded-2xl flex items-center justify-center text-krenke-purple hover:bg-krenke-purple hover:text-white transition-all border border-gray-50"
+                            onClick={nextSlide}
+                        >
+                            <ChevronRight size={32} strokeWidth={3} />
+                        </motion.button>
+                    </div>
                 </div>
             </div>
         </section>

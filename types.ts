@@ -52,3 +52,12 @@ export interface Lead {
   products: string[];
   created_at: string;
 }
+
+export interface AppScript {
+  id: string;
+  title: string;
+  content: string;
+  placement: 'head' | 'body';
+  is_active: boolean;
+  created_at?: string;
+}

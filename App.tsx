@@ -12,6 +12,7 @@ import BlogPostPage from './pages/BlogPost';
 import PrivacyPage from './pages/Privacy';
 import TermsPage from './pages/Terms';
 import { Preloader } from './components/Preloader';
+import DownloadsPage from './pages/Downloads';
 import AuthPage from './pages/Auth';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -49,6 +50,7 @@ const App: React.FC = () => {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/projetos" element={<ProjectsPage />} />
+            <Route path="/downloads" element={<DownloadsPage />} />
             <Route path="/orcamento" element={<QuotePage />} />
             <Route path="/politica-de-privacidade" element={<PrivacyPage />} />
             <Route path="/termos-de-uso" element={<TermsPage />} />

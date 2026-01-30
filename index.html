@@ -2,18 +2,8 @@
 <html lang="pt-BR">
 
 <head>
-  <!-- Google Tag Manager -->
-  <script>(function (w, d, s, l, i) {
-      w[l] = w[l] || []; w[l].push({
-        'gtm.start':
-          new Date().getTime(), event: 'gtm.js'
-      }); var f = d.getElementsByTagName(s)[0],
-        j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-          'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
-    })(window, document, 'script', 'dataLayer', 'GTM-T4WPNMCN');</script>
-  <!-- End Google Tag Manager -->
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>Krenke Brinquedos | Playgrounds, Parques e Brinquedos Infantis</title>
   <meta name="description"
     content="A Krenke Brinquedos é líder em Playgrounds Completos, Brinquedos Infantis e Parques Infantis. Qualidade, segurança e diversão para escolas, condomínios e praças." />
@@ -46,10 +36,42 @@
               'logo-orange': '#F39200',
               'logo-purple': '#7F2082',
               'logo-pink': '#E6007E',
+            },
+            vibrant: {
+              orange: '#FF9F0A',
+              purple: '#4032B2',
+              green: '#2ECC71',
+              cyan: '#00D1FF'
             }
           },
           borderRadius: {
             '4xl': '2rem',
+            '5xl': '3rem',
+          },
+          animation: {
+            'vibrant-pulse': 'vibrant-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'gradient-x': 'gradient-x 15s ease infinite',
+          },
+          keyframes: {
+            'vibrant-pulse': {
+              '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+              '50%': { opacity: 0.8, transform: 'scale(1.05)' },
+            },
+            'float': {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            'gradient-x': {
+              '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+              '50%': { 'background-size': '200% 200%', 'background-position': 'right center' },
+            }
+          },
+          boxShadow: {
+            'premium': '0 20px 50px -12px rgba(0, 0, 0, 0.25)',
+            'vibrant-orange': '0 20px 40px -10px rgba(243, 146, 0, 0.3)',
+            'vibrant-purple': '0 20px 40px -10px rgba(49, 39, 131, 0.3)',
+            'vibrant-green': '0 20px 40px -10px rgba(46, 204, 113, 0.3)',
           }
         }
       }
@@ -82,11 +104,53 @@
       position: relative;
       margin: 0;
       padding: 0;
+      scroll-behavior: smooth;
     }
 
     #root {
       width: 100%;
       overflow-x: hidden !important;
+    }
+
+    /* Grain Overlay */
+    .grain-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Glassmorphism Classes */
+    .glass-premium {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Reveal Animations */
+    .reveal-stagger>* {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    @keyframes reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Hide Google Translate Bar */
@@ -107,13 +171,77 @@
       user-select: none;
       -webkit-user-drag: none;
     }
+
+    /* Standards for Technical Tables (Admin) */
+    .tech-specs-table table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      font-size: 14px !important;
+      margin-top: 2rem !important;
+      border-radius: 1.5rem !important;
+      overflow: hidden !important;
+      border: 1px solid #f1f5f9 !important;
+      table-layout: fixed !important;
+    }
+
+    .tech-specs-table table tr {
+      border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .tech-specs-table table tr:nth-child(even) {
+      background-color: #f8fafc !important;
+    }
+
+    .tech-specs-table table td,
+    .tech-specs-table table th {
+      padding: 1.25rem 1.5rem !important;
+      line-height: 1.4 !important;
+      vertical-align: middle !important;
+      text-align: left !important;
+      /* Force left align globally for table cells */
+    }
+
+    /* Target the first column (Labels) */
+    .tech-specs-table table td:first-child,
+    .tech-specs-table table th:first-child {
+      color: #362B86 !important;
+      font-weight: 900 !important;
+      text-transform: uppercase !important;
+      letter-spacing: -0.01em !important;
+      width: 45% !important;
+      border-right: 1px solid #f1f5f9 !important;
+      background-color: transparent !important;
+    }
+
+    /* Target the second column (Values) */
+    .tech-specs-table table td:last-child,
+    .tech-specs-table table th:last-child {
+      color: #475569 !important;
+      font-weight: 600 !important;
+      width: 55% !important;
+    }
+
+    /* Highlight badge for specific values */
+    .tech-specs-table table span.highlight {
+      background: #fffbeb !important;
+      color: #92400e !important;
+      padding: 0.35rem 0.85rem !important;
+      border-radius: 0.75rem !important;
+      font-weight: 800 !important;
+      display: inline-block !important;
+    }
+
+    .tech-specs-table table b,
+    .tech-specs-table table strong {
+      color: #FF9F0A !important;
+      font-weight: 900 !important;
+    }
   </style>
 
 </head>
 
 <body>
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T4WPNMCN" height="0" width="0"
-      style="display:none;visibility:hidden"></iframe></noscript>
+  <div class="grain-overlay"></div>
   <div id="root"></div>
 
   <!-- Google Translate Element (Hidden) -->

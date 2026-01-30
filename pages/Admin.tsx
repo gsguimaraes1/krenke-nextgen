@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Product } from '../types';
+import { Product, AppScript } from '../types';
 import AdminLayout from '../components/AdminLayout';
 import RichTextEditor from '../components/RichTextEditor';
 import ProductSpecsManager from '../components/ProductSpecsManager';
@@ -24,7 +24,10 @@ import {
     Phone,
     Calendar,
     ChevronRight,
-    ExternalLink
+    ExternalLink,
+    Code,
+    ToggleLeft,
+    ToggleRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -174,6 +177,142 @@ const UsersView = ({ users, onUpdateRole }: { users: Profile[], onUpdateRole: (i
     </div>
 );
 
+// --- Scripts View Component ---
+const ScriptsView = ({
+    scripts,
+    onSelect,
+    selected,
+    form,
+    setForm,
+    onSave,
+    onDelete,
+    saving,
+    onNew
+}: {
+    scripts: AppScript[],
+    onSelect: (s: AppScript) => void,
+    selected: AppScript | null,
+    form: Partial<AppScript>,
+    setForm: (f: any) => void,
+    onSave: () => void,
+    onDelete: () => void,
+    saving: boolean,
+    onNew: () => void
+}) => (
+    <div className="grid lg:grid-cols-12 gap-8 h-[calc(100vh-160px)]">
+        <div className="lg:col-span-4 bg-white rounded-2xl border shadow-sm flex flex-col overflow-hidden">
+            <div className="p-4 border-b space-y-4">
+                <div className="flex items-center justify-between">
+                    <h2 className="font-bold flex items-center gap-2 text-krenke-blue">
+                        <Code size={20} className="text-krenke-orange" /> Scripts & Tags
+                    </h2>
+                    <button onClick={onNew} className="p-2 bg-krenke-orange text-white rounded-lg">
+                        <Plus size={18} />
+                    </button>
+                </div>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+                {scripts.map(s => (
+                    <button
+                        key={s.id}
+                        onClick={() => onSelect(s)}
+                        className={`w-full p-4 border-b text-left flex items-center gap-4 ${selected?.id === s.id ? 'bg-orange-50 border-l-4 border-l-krenke-orange' : ''}`}
+                    >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${s.is_active ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                            {s.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold truncate">{s.title}</p>
+                            <p className="text-[10px] text-gray-400 uppercase tracking-widest">{s.placement}</p>
+                        </div>
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        <div className="lg:col-span-8 bg-white rounded-2xl border shadow-sm overflow-y-auto p-8 relative">
+            {selected ? (
+                <div className="space-y-8">
+                    <div className="flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md pb-6 z-10 border-b -mx-8 px-8">
+                        <h2 className="text-2xl font-black text-krenke-blue">{selected.id ? 'Editar Script' : 'Novo Script'}</h2>
+                        <div className="flex items-center gap-3">
+                            {selected.id && (
+                                <button onClick={onDelete} disabled={saving} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors">
+                                    <Trash2 size={20} />
+                                </button>
+                            )}
+                            <button onClick={onSave} disabled={saving} className="px-8 py-3 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2">
+                                {saving ? <RefreshCw size={20} className="animate-spin" /> : <Save size={20} />}
+                                SALVAR
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-xs font-black text-gray-400 uppercase">Título do Script</label>
+                            <input
+                                type="text"
+                                placeholder="ex: Google Tag Manager, Facebook Pixel"
+                                className="w-full p-4 bg-gray-50 border rounded-xl font-bold"
+                                value={form.title || ''}
+                                onChange={e => setForm({ ...form, title: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-gray-400 uppercase">Posicionamento</label>
+                                <select
+                                    className="w-full p-4 bg-gray-50 border rounded-xl font-bold"
+                                    value={form.placement || 'head'}
+                                    onChange={e => setForm({ ...form, placement: e.target.value as any })}
+                                >
+                                    <option value="head">Inserir no &lt;HEAD&gt;</option>
+                                    <option value="body">Inserir no &lt;BODY&gt;</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black text-gray-400 uppercase">Status</label>
+                                <div className="flex items-center gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setForm({ ...form, is_active: !form.is_active })}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all font-bold text-xs uppercase ${form.is_active ? 'bg-green-50 border-green-200 text-green-600' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
+                                    >
+                                        {form.is_active ? (
+                                            <><ToggleRight size={18} /> Ativado</>
+                                        ) : (
+                                            <><ToggleLeft size={18} /> Desativado</>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-black text-gray-400 uppercase">Código (HTML/JS)</label>
+                            <textarea
+                                rows={12}
+                                className="w-full p-6 bg-gray-900 text-green-400 font-mono text-sm border rounded-2xl outline-none focus:ring-2 focus:ring-krenke-orange/20"
+                                placeholder="<!-- Cole seu código aqui -->"
+                                value={form.content || ''}
+                                onChange={e => setForm({ ...form, content: e.target.value })}
+                            />
+                            <p className="text-[11px] text-gray-400 italic">Certifique-se de incluir as tags &lt;script&gt; ou &lt;style&gt; se necessário.</p>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="h-full flex flex-col items-center justify-center text-gray-300">
+                    <Code size={80} strokeWidth={1} />
+                    <p className="mt-4 font-bold">Selecione um script ou crie um novo</p>
+                </div>
+            )}
+        </div>
+    </div>
+);
+
 // --- Main Page Component ---
 const AdminPage: React.FC = () => {
     const location = useLocation();
@@ -182,12 +321,15 @@ const AdminPage: React.FC = () => {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [profiles, setProfiles] = useState<Profile[]>([]);
+    const [scripts, setScripts] = useState<AppScript[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+    const [selectedScript, setSelectedScript] = useState<AppScript | null>(null);
     const [editForm, setEditForm] = useState<Partial<Product>>({});
     const [postForm, setPostForm] = useState<Partial<Post>>({});
+    const [scriptForm, setScriptForm] = useState<Partial<AppScript>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [scanning, setScanning] = useState(false);
@@ -202,7 +344,8 @@ const AdminPage: React.FC = () => {
             fetchProducts(),
             fetchLeads(),
             fetchPosts(),
-            fetchProfiles()
+            fetchProfiles(),
+            fetchScripts()
         ]);
         setLoading(false);
     };
@@ -254,12 +397,24 @@ const AdminPage: React.FC = () => {
         }
     };
 
+    const fetchScripts = async () => {
+        if (!supabase) return;
+        try {
+            const { data, error } = await supabase.from('app_scripts').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            setScripts(data || []);
+        } catch (err) {
+            console.error('Error fetching scripts:', err);
+        }
+    };
+
     useEffect(() => {
         const path = location.pathname;
         if (path.endsWith('/produtos')) setActiveView('produtos');
         else if (path.endsWith('/blog')) setActiveView('blog');
         else if (path.endsWith('/leads')) setActiveView('leads');
         else if (path.endsWith('/usuarios')) setActiveView('usuarios');
+        else if (path.endsWith('/scripts')) setActiveView('scripts');
         else setActiveView('dashboard');
     }, [location]);
 
@@ -522,6 +677,43 @@ const AdminPage: React.FC = () => {
         }
     };
 
+    const handleSaveScript = async () => {
+        if (!scriptForm.title || !scriptForm.content) return alert('Título e Conteúdo são obrigatórios.');
+        setSaving(true);
+        try {
+            const { error } = await supabase.from('app_scripts').upsert({
+                ...scriptForm,
+                is_active: scriptForm.is_active ?? true,
+                placement: scriptForm.placement || 'head'
+            });
+            if (error) throw error;
+            alert('Script salvo com sucesso!');
+            fetchScripts();
+            setSelectedScript(null);
+        } catch (err: any) {
+            alert('Erro ao salvar script: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteScript = async () => {
+        if (!selectedScript?.id) return;
+        if (!confirm('Excluir este script permanentemente?')) return;
+        setSaving(true);
+        try {
+            const { error } = await supabase.from('app_scripts').delete().eq('id', selectedScript.id);
+            if (error) throw error;
+            alert('Script excluído!');
+            setSelectedScript(null);
+            fetchScripts();
+        } catch (err: any) {
+            alert('Erro ao excluir: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <AdminLayout>
             <AnimatePresence mode="wait">
@@ -543,6 +735,22 @@ const AdminPage: React.FC = () => {
                     )}
                     {activeView === 'usuarios' && (
                         <UsersView users={profiles} onUpdateRole={updateUserRole} />
+                    )}
+                    {activeView === 'scripts' && (
+                        <ScriptsView
+                            scripts={scripts}
+                            selected={selectedScript}
+                            onSelect={(s) => { setSelectedScript(s); setScriptForm(s); }}
+                            form={scriptForm}
+                            setForm={setScriptForm}
+                            onSave={handleSaveScript}
+                            onDelete={handleDeleteScript}
+                            saving={saving}
+                            onNew={() => {
+                                setSelectedScript({ id: '', title: 'Novo Script', content: '', placement: 'head', is_active: true });
+                                setScriptForm({ title: '', content: '', placement: 'head', is_active: true });
+                            }}
+                        />
                     )}
                     {activeView === 'produtos' && (
                         <div className="grid lg:grid-cols-12 gap-8 h-[calc(100vh-160px)]">

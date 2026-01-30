@@ -24,109 +24,115 @@ export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({ title, image, descri
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
-
-
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center w-full">
       <motion.div
-        className="relative min-h-[500px] w-full max-w-[350px] backdrop-blur-md rounded-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] flex flex-col p-4 gap-4 overflow-hidden border border-white/10"
-        style={{ backgroundColor: `${color}E6` }} // Hex + E6 = ~90% opacity
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        className="relative min-h-[550px] w-full max-w-[380px] rounded-[3rem] shadow-premium flex flex-col p-6 gap-6 overflow-hidden border border-white/20 group"
+        style={{ backgroundColor: `${color}F2` }} // ~95% opacity
+        initial={{ opacity: 0, scale: 0.9 }}
+        whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         whileHover={{
-          scale: 1.02,
-          boxShadow: `0 35px 60px -15px ${getRgba(color, 0.5)}`,
-          borderColor: "rgba(255,255,255,0.3)"
+          y: -20,
+          boxShadow: `0 40px 80px -15px ${getRgba(color, 0.6)}`,
         }}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
       >
-        {/* Header Section */}
+        {/* Animated Glow Backdrop */}
         <motion.div
-          className="flex justify-between p-2 items-center z-20"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
+          animate={{
+            scale: isHovered ? [1, 1.2, 1] : 1,
+            opacity: isHovered ? [0.3, 0.5, 0.3] : 0.2
+          }}
+          transition={{ duration: 4, repeat: Infinity }}
+          className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] pointer-events-none"
+          style={{ backgroundColor: 'white' }}
+        />
+
+        {/* Header Section */}
+        <div className="flex justify-between items-center z-20">
           <motion.div
-            whileHover={{ rotate: 10, scale: 1.1 }}
-            transition={{ type: "spring", stiffness: 300 }}
-            className="bg-white/20 p-2 rounded-full"
+            whileHover={{ rotate: 15, scale: 1.2 }}
+            className="bg-white/20 p-3 rounded-2xl backdrop-blur-md border border-white/20"
           >
-            <Box size={24} className="text-white" />
+            <Box size={28} className="text-white" />
           </motion.div>
 
           <Link to={link}>
             <motion.div
-              className="w-10 h-10 bg-white rounded-full flex items-center justify-center cursor-pointer shadow-lg"
-              whileHover={{
-                scale: 1.1,
-                backgroundColor: "#ffffff",
-                boxShadow: `0 0 15px ${getRgba(color, 0.7)}`
-              }}
-              whileTap={{ scale: 0.95 }}
+              className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center cursor-pointer shadow-2xl group-hover:rotate-12 transition-all"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
-              <ArrowRight size={20} style={{ color: color }} />
+              <ArrowRight size={24} style={{ color: color }} strokeWidth={3} />
             </motion.div>
           </Link>
-        </motion.div>
+        </div>
 
         {/* Content Section */}
-        <div className="flex flex-col gap-4 h-full">
+        <div className="flex flex-col gap-6 h-full z-10 relative">
           <motion.h3
-            className="text-3xl text-center font-black text-white uppercase leading-none tracking-tight drop-shadow-md -mt-2 mb-2"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-4xl text-center font-black text-white uppercase leading-none tracking-tighter drop-shadow-2xl"
+            animate={{ y: isHovered ? -5 : 0 }}
           >
             {title}
           </motion.h3>
 
           <motion.div
-            className="relative flex-grow rounded-2xl overflow-hidden group"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
+            className="relative flex-grow rounded-[2rem] overflow-hidden border-2 border-white/10 shadow-inner"
+            animate={{
+              scale: isHovered ? 1.05 : 1,
+            }}
+            transition={{ duration: 0.4 }}
           >
             {/* Background Blur Effect */}
-            <div className="absolute inset-0 opacity-30 z-0">
+            <div className="absolute inset-0 opacity-40 z-0">
               <motion.img
                 src={image}
                 alt={alt || (typeof title === 'string' ? title : 'Produto Krenke')}
-                className="w-full h-full object-cover blur-md scale-150"
-                animate={{ scale: isHovered ? 1.2 : 1.5 }}
+                className="w-full h-full object-cover blur-xl scale-150"
+                animate={{
+                  scale: isHovered ? 1.2 : 1.5,
+                  rotate: isHovered ? 5 : 0
+                }}
                 transition={{ duration: 3, ease: "easeInOut" }}
               />
             </div>
 
             {/* Main Image */}
-            <motion.div
-              className="relative z-10 w-full h-full"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "easeInOut", duration: 0.5 }}
-            >
-              <img
+            <div className="relative z-10 w-full h-full p-2">
+              <motion.img
                 src={image}
                 alt={alt || (typeof title === 'string' ? title : 'Produto Krenke')}
-                className="w-full h-full object-cover rounded-2xl shadow-inner transition-transform duration-500"
+                className="w-full h-full object-cover rounded-[1.8rem] shadow-2xl"
                 style={{ transform: `scale(${imageScale})` }}
+                animate={{
+                  y: isHovered ? -10 : 0,
+                  rotate: isHovered ? -2 : 0
+                }}
               />
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80"></div>
-            </motion.div>
+              {/* Vibrant Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+            </div>
           </motion.div>
 
           <motion.p
-            className="text-xs text-center text-white font-medium px-4 pb-2 line-clamp-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.7 }}
+            className="text-sm text-center text-white/90 font-bold px-4 pb-4 leading-snug drop-shadow-md"
+            animate={{ opacity: isHovered ? 1 : 0.8 }}
           >
             {description}
           </motion.p>
         </div>
+
+        {/* Interactive Bottom Border */}
+        <motion.div
+          className="absolute bottom-0 left-0 h-1.5 bg-white"
+          initial={{ width: 0 }}
+          animate={{ width: isHovered ? '100%' : '0%' }}
+          transition={{ duration: 0.6 }}
+        />
       </motion.div>
     </div>
   );

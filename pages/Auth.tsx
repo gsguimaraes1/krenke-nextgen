@@ -95,49 +95,36 @@ const AuthPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-md"
             >
-                <div className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/10 p-8 md:p-12 shadow-2xl relative">
+                <div className="bg-[#1a164d]/60 backdrop-blur-3xl rounded-[3rem] border border-white/10 p-10 md:p-14 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                    {/* Decorative radial gradients inside the card */}
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-600/20 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+
                     {/* Header */}
-                    <div className="text-center mb-10">
-                        <div className="inline-flex p-4 bg-gradient-to-tr from-krenke-orange to-orange-400 rounded-3xl shadow-lg shadow-orange-500/20 mb-6 group transition-transform hover:scale-110 duration-300">
-                            <ShieldCheck size={32} className="text-white" />
+                    <div className="text-center mb-12 relative z-10">
+                        <motion.div
+                            initial={{ scale: 0.8 }}
+                            animate={{ scale: 1 }}
+                            className="inline-flex p-5 bg-gradient-to-tr from-vibrant-orange to-orange-400 rounded-3xl shadow-2xl shadow-orange-500/20 mb-8 group transition-transform hover:scale-110 duration-500"
+                        >
+                            <ShieldCheck size={40} className="text-white" />
+                        </motion.div>
+                        <div className="flex justify-center mb-6">
+                            <img src={logoBranco} alt="Krenke Brinquedos" className="h-12 object-contain drop-shadow-lg" />
                         </div>
-                        <div className="flex justify-center mb-4">
-                            <img src={logoBranco} alt="Krenke Brinquedos" className="h-10 object-contain" />
+                        <div className="flex flex-col gap-1 items-center">
+                            <p className="text-vibrant-orange text-[12px] font-black uppercase tracking-[0.4em] mb-1">
+                                SISTEMA DE GESTÃO
+                            </p>
+                            <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+                                {isLogin ? 'Autenticação Segura 256-bit' : 'Solicitar Token de Acesso'}
+                            </p>
                         </div>
-                        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-                            {isLogin ? 'Autenticação Segura' : 'Solicitar Acesso'}
-                        </p>
                     </div>
 
-                    {/* Messages */}
-                    <AnimatePresence mode="wait">
-                        {error && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl flex items-center gap-3 mb-6 text-sm"
-                            >
-                                <AlertCircle size={18} className="shrink-0" />
-                                {error}
-                            </motion.div>
-                        )}
-                        {success && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="bg-green-500/10 border border-green-500/20 text-green-400 p-4 rounded-2xl flex items-center gap-3 mb-6 text-sm font-bold"
-                            >
-                                <ShieldCheck size={18} className="shrink-0" />
-                                Cadastro realizado! Verifique seu email.
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Form */}
+                    {/* Form Input Upgrades */}
                     {mfaChallengeId ? (
-                        <form onSubmit={handleMFAVerify} className="space-y-5">
+                        <form onSubmit={handleMFAVerify} className="space-y-6 relative z-10">
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 text-center block">Código de Verificação (2FA)</label>
                                 <div className="relative group text-center">
@@ -182,28 +169,28 @@ const AuthPage: React.FC = () => {
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">E-mail Corporativo</label>
                                 <div className="relative group">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-krenke-orange transition-colors" size={20} />
+                                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-vibrant-orange transition-colors" size={20} />
                                     <input
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-krenke-orange/50 focus:ring-4 focus:ring-krenke-orange/20 transition-all placeholder:text-gray-600"
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-white outline-none focus:border-vibrant-orange/50 focus:ring-4 focus:ring-vibrant-orange/10 transition-all placeholder:text-gray-600 font-medium"
                                         placeholder="exemplo@krenke.com.br"
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5">
+                            <div className="space-y-2">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Senha de Acesso</label>
                                 <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-krenke-orange transition-colors" size={20} />
+                                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-vibrant-orange transition-colors" size={20} />
                                     <input
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-krenke-orange/50 focus:ring-4 focus:ring-krenke-orange/20 transition-all placeholder:text-gray-600"
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-white outline-none focus:border-vibrant-orange/50 focus:ring-4 focus:ring-vibrant-orange/10 transition-all placeholder:text-gray-600 font-medium"
                                         placeholder="••••••••"
                                     />
                                 </div>
@@ -212,14 +199,14 @@ const AuthPage: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-orange-600/20 hover:shadow-orange-600/40 hover:-translate-y-1 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                                className="w-full bg-gradient-to-r from-vibrant-orange to-orange-500 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 shadow-2xl shadow-orange-600/30 hover:shadow-orange-600/50 hover:-translate-y-1 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed group text-lg"
                             >
                                 {loading ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : (
                                     <>
-                                        {isLogin ? 'Entrar no Sistema' : 'Criar Conta de Admin'}
-                                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                        {isLogin ? 'Entrar no Sistema' : 'Solicitar Cadastro'}
+                                        <ArrowRight size={22} className="group-hover:translate-x-2 transition-transform" />
                                     </>
                                 )}
                             </button>

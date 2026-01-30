@@ -30,8 +30,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { icon: BarChart3, label: 'Orçamentos', path: '/pgadmin/leads' },
     ];
 
-    // Adiciona menu de usuários apenas para Super Admin
+    // Adiciona menus exclusivos para Super Admin
     if (role === 'super') {
+        menuItems.push({ icon: Settings, label: 'Scripts', path: '/pgadmin/scripts' });
         menuItems.push({ icon: Users, label: 'Usuários', path: '/pgadmin/usuarios' });
     }
 
