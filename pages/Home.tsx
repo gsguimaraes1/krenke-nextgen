@@ -12,6 +12,7 @@ import brinquedosImg from '../assets/Home/krenke-brinquedos-infantis-avulsos.web
 import linhaPetImg from '../assets/Home/krenke-playground-pet-linha-agility.webp';
 import jardimImg from '../assets/Home/krenke-mobiliario-urbano-bancos-jardim.webp';
 import sobreImg from '../assets/Sobre/krenke-sobre-nos-fabrica-playgrounds.webp';
+import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.png';
 
 const HeroSection = () => {
   return (
@@ -399,17 +400,32 @@ const Differentials = () => (
 );
 
 const ComparativeTable = () => {
+  const [logoUrl, setLogoUrl] = useState(logoBranco);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (!supabase) return;
+      const { data } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'site_logo_white')
+        .single();
+      if (data?.value) setLogoUrl(data.value);
+    };
+    fetchSettings();
+  }, []);
+
   const comparisons = [
-    { feature: "Polímero Rotomoldado (Densidade Industrial)", common: false, krenke: true },
-    { feature: "100% à prova de ferrugem e apodrecimento", common: false, krenke: true },
-    { feature: "Isolante Térmico (Segurança sob Sol forte)", common: false, krenke: true },
-    { feature: "Superfície Anti-Farpas (Segurança Total)", common: false, krenke: true },
-    { feature: "Resistência a Maresia e Intempéries", common: "Baixa", krenke: true },
-    { feature: "Manutenção Zero (Economia Garantida)", common: false, krenke: true },
-    { feature: "Pigmentação UV (Cor Vibrante por anos)", common: "Limitada", krenke: true },
-    { feature: "Design Ergonômico (Zero Cantos Vivos)", common: false, krenke: true },
-    { feature: "Material Ecológico 100% Reciclável", common: false, krenke: true },
-    { feature: "Homologação Premium ABNT", common: "Rara", krenke: true },
+    { feature: "Polímero Rotomoldado", common: false, krenke: true },
+    { feature: "Resistente a ferrugem e apodrecimento", common: false, krenke: true },
+    { feature: "Conforto térmico (Não aquece como metal)", common: false, krenke: true },
+    { feature: "Totalmente livre de farpas (Madeira zero)", common: false, krenke: true },
+    { feature: "Alta durabilidade (Sol, Chuva e Intempéries)", common: "Baixa", krenke: true },
+    { feature: "Baixa Manutenção (Dispensa pintura e verniz)", common: false, krenke: true },
+    { feature: "Pigmentação UV Industrial (Não desbota fácil)", common: "Algumas", krenke: true },
+    { feature: "Cantos arredondados (Segurança anti-impacto)", common: false, krenke: true },
+    { feature: "Material atóxico e 100% Reciclável", common: false, krenke: true },
+    { feature: "Certificação de Segurança ABNT", common: "Raras", krenke: true },
   ];
 
   return (
@@ -447,9 +463,9 @@ const ComparativeTable = () => {
                 <th className="bg-vibrant-orange p-8 md:p-12 text-center font-black uppercase tracking-[0.2em] text-sm w-1/4 relative overflow-hidden">
                   <div className="flex justify-center items-center h-full scale-[1.75]">
                     <img
-                      src="/assets/Logos/krenke-brinquedos-logo-branco.png"
-                      alt="Krenke"
-                      className="h-6 w-auto object-contain drop-shadow-2xl"
+                      src={logoUrl}
+                      alt="Krenke Brinquedos"
+                      className="h-8 md:h-12 w-auto object-contain drop-shadow-md"
                     />
                   </div>
                 </th>
