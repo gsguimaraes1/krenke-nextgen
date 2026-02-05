@@ -111,7 +111,7 @@ export const Navbar: React.FC = () => {
               <Link
                 key={i}
                 to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-                className="text-white font-black text-sm uppercase tracking-widest hover:text-vibrant-orange transition-all relative group"
+                className="text-white font-black text-sm uppercase tracking-widest hover:text-vibrant-orange transition-all relative group mx-2"
               >
                 {item}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-vibrant-orange transition-all group-hover:w-full"></span>
@@ -140,7 +140,7 @@ export const Navbar: React.FC = () => {
               <Link
                 key={i}
                 to={`/${item.toLowerCase()}`}
-                className="text-white font-black text-sm uppercase tracking-widest hover:text-vibrant-orange transition-all relative group"
+                className="text-white font-black text-sm uppercase tracking-widest hover:text-vibrant-orange transition-all relative group mx-2"
               >
                 {item}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-vibrant-orange transition-all group-hover:w-full"></span>
@@ -277,13 +277,19 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Legal Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5 pt-12">
           <p className="text-gray-500 font-bold text-sm">
-            © {new Date().getFullYear()} Krenke Brinquedos Pedagógicos LTDA. <span className="text-white/20 ml-2">Premium Experience.</span>
+            © {new Date().getFullYear()} Krenke Brinquedos Pedagógicos. <span className="text-white/20 ml-2">Engenharia da Diversão.</span>
           </p>
-          <div className="flex gap-8 text-xs font-black uppercase tracking-widest text-gray-500">
-            <Link to="/politica-de-privacidade" className="hover:text-vibrant-orange transition-colors">Privacidade</Link>
-            <Link to="/termos-de-uso" className="hover:text-vibrant-orange transition-colors">Termos</Link>
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-xs font-black uppercase tracking-widest text-gray-500">
+            <button
+              onClick={() => { localStorage.removeItem('krenke-cookie-consent'); window.location.reload(); }}
+              className="hover:text-vibrant-orange transition-colors px-2 py-1"
+            >
+              Cookies
+            </button>
+            <Link to="/politica-de-privacidade" className="hover:text-vibrant-orange transition-colors px-2 py-1">Privacidade</Link>
+            <Link to="/termos-de-uso" className="hover:text-vibrant-orange transition-colors px-2 py-1">Termos</Link>
           </div>
         </div>
       </div>

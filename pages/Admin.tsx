@@ -27,7 +27,8 @@ import {
     ExternalLink,
     Code,
     ToggleLeft,
-    ToggleRight
+    ToggleRight,
+    ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -335,6 +336,15 @@ const AdminPage: React.FC = () => {
     const [scanning, setScanning] = useState(false);
 
     useEffect(() => {
+        // Double check session validity on mount to address security requirements (TC010)
+        const checkSession = async () => {
+            if (!supabase) return;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = '/login';
+            }
+        };
+        checkSession();
         fetchData();
     }, []);
 
@@ -713,6 +723,28 @@ const AdminPage: React.FC = () => {
             setSaving(false);
         }
     };
+
+    if (!supabase) {
+        return (
+            <AdminLayout>
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
+                    <div className="bg-red-500/10 p-10 rounded-[3rem] border border-red-100 max-w-xl">
+                        <ShieldCheck size={80} className="text-red-500 mx-auto mb-8" />
+                        <h2 className="text-3xl font-black text-red-600 mb-4">SUPABASE NÃO CONFIGURADO</h2>
+                        <p className="text-gray-500 font-medium italic mb-8">
+                            As chaves de acesso ao Supabase (URL e Anon Key) não foram encontradas no arquivo .env.
+                        </p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-8 py-4 bg-krenke-purple text-white font-black rounded-2xl hover:bg-orange-600 transition-all flex items-center gap-2 mx-auto"
+                        >
+                            <RefreshCw size={20} /> Tentar Novamente
+                        </button>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout>

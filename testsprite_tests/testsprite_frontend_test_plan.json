@@ -1,0 +1,461 @@
+[
+  {
+    "id": "TC001",
+    "title": "Home Page Load Performance",
+    "description": "Verify that the Home page loads under 2 seconds on a stable 4G network with preloaders and WebP image optimization.",
+    "category": "performance",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate accessing the Home page from a stable 4G network environment."
+      },
+      {
+        "type": "action",
+        "description": "Ensure preloaders are displayed while content is loading."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the Home page fully loads within 2 seconds."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that images on the Home page are in WebP format."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Product Catalog Filtering",
+    "description": "Validate that product catalog filtering works correctly to display products by selected categories.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the Product Catalog page."
+      },
+      {
+        "type": "action",
+        "description": "Apply filters for multiple categories such as playgrounds and pet lines."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that only products belonging to the selected categories are displayed."
+      },
+      {
+        "type": "action",
+        "description": "Clear the filters."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that all products across all categories are displayed again."
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Product Specification Display",
+    "description": "Check that detailed technical specifications of a product are shown correctly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to a product detail page from the Product Catalog."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that technical specifications section is visible."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that all expected specification fields are populated and legible."
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Quote Request Flow with Multiple Products",
+    "description": "Test the end-to-end quote request process by selecting multiple products and submitting valid contact information.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Add multiple products to the quote cart from the Product Catalog."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the Quote request form."
+      },
+      {
+        "type": "action",
+        "description": "Fill in all required lead information fields with valid data."
+      },
+      {
+        "type": "action",
+        "description": "Submit the Quote request form."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the submission is successful and confirmation is displayed."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the lead data is saved correctly in the database."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that notification triggers (e.g. webhooks or edge functions) fire upon lead submission."
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Quote Request Form Validation",
+    "description": "Ensure the Quote request form correctly validates required fields and displays appropriate error messages for invalid or missing input.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the Quote request form."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to submit the form with all fields empty."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that validations prevent submission and display required field error messages."
+      },
+      {
+        "type": "action",
+        "description": "Fill in the form with invalid email and phone number formats."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to submit the form."
+      },
+      {
+        "type": "assertion",
+        "description": "Check for visible format validation error messages in the DOM (not just browser alerts) related to name, email and phone number."
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Admin Product Management CRUD Operations",
+    "description": "Verify the Admin interface allows creating, reading, updating, and deleting product entries including image uploads via Supabase Storage.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in at /login with gabriel.gbr.fire@gmail.com / Gsguimaraes82. and navigate to /pgadmin."
+      },
+      {
+        "type": "action",
+        "description": "Create a new product with all required details and upload images."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the new product appears correctly in the product catalog list."
+      },
+      {
+        "type": "action",
+        "description": "Edit the newly created product's details and replace existing images."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that changes are saved and reflected in the product details."
+      },
+      {
+        "type": "action",
+        "description": "Delete the created product."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the product is removed from the catalog."
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Admin Blog Content Management",
+    "description": "Ensure the Admin can create, edit, and delete blog articles using the rich text editor, including adding and removing cover images.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in at /login with gabriel.gbr.fire@gmail.com / Gsguimaraes82. and open the Blog Management interface at /pgadmin."
+      },
+      {
+        "type": "action",
+        "description": "Create a new blog post with formatted rich text and upload a cover image."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the blog post appears correctly on the Blog list and Blog post pages."
+      },
+      {
+        "type": "action",
+        "description": "Edit the blog post content and change the cover image."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the updated content and cover image are shown correctly."
+      },
+      {
+        "type": "action",
+        "description": "Delete the blog post."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the blog post is removed from public view."
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Lead Management Dashboard",
+    "description": "Verify the Admin Lead Management dashboard displays all quote requests accurately and updates in real-time with new leads.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in at /login with gabriel.gbr.fire@gmail.com / Gsguimaraes82. and navigate to the Lead Management dashboard at /pgadmin."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that all previously submitted leads are listed with correct details."
+      },
+      {
+        "type": "action",
+        "description": "Simulate a new quote request submission."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the new lead appears in the dashboard without the need for refresh."
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "User Access Control by Role",
+    "description": "Verify that Super Admin has full access and Restricted Access users have limited permissions as defined.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in at /login as a Super Admin user (gabriel.gbr.fire@gmail.com / Gsguimaraes82.)."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm full access to product management, blog editing, leads, and configuration pages."
+      },
+      {
+        "type": "action",
+        "description": "Log out and log in as a Restricted Access user."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that access is limited to allowed areas and critical admin functions are restricted."
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Admin Authentication Security",
+    "description": "Validate that the admin login system uses secure JWT/Supabase tokens and prevents unauthorized access to admin routes.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to access /pgadmin URL without login."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify redirection to the login page."
+      },
+      {
+        "type": "action",
+        "description": "Log in with valid admin credentials."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that a JWT/Supabase session token is issued."
+      },
+      {
+        "type": "action",
+        "description": "Access protected routes like /pgadmin and verify accessibility."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to use an expired or invalid token."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied and redirected to login."
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Responsive Design Across Devices",
+    "description": "Ensure that the website's layout including header, footer, product catalog, and quote forms render correctly on mobile, tablet, and desktop with consistent breakpoints.",
+    "category": "ui",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access the site on a smartphone viewport."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all elements are displayed clearly without overflow or clipping."
+      },
+      {
+        "type": "action",
+        "description": "Repeat the above step on tablet viewport sizes."
+      },
+      {
+        "type": "assertion",
+        "description": "Check for consistent layout and functionality."
+      },
+      {
+        "type": "action",
+        "description": "Repeat the above step on desktop viewport."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the site displays all elements as designed with no distortions."
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Dynamic SEO Meta Tags",
+    "description": "Verify that pages set dynamic SEO meta tags and use semantic HTML structure for improved search rankings.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Inspect the head section of the Home, Products, Blog, and Product Detail pages."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm presence of dynamic title, description, and Open Graph meta tags appropriate for each page."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that page content uses semantic HTML tags (e.g., article, section, header)."
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Showcase Gallery Accessibility and Content",
+    "description": "Ensure the installation projects gallery loads correctly with images and captions, and allows navigation through showcased items.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the Showcase Gallery section."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that all gallery images load correctly with descriptive captions."
+      },
+      {
+        "type": "action",
+        "description": "Navigate through the gallery items using navigation controls."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that navigation successfully cycles through all gallery items without errors."
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Third-Party Script Injection Management",
+    "description": "Validate that third-party tag management such as Google Tag Manager and Facebook Pixel can be added, edited, and removed via the admin interface and are correctly injected into the site.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as Admin and open the Third-Party Script Injection management interface."
+      },
+      {
+        "type": "action",
+        "description": "Add a new script tag (e.g., Google Tag Manager)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the script tag is saved and reflected immediately on the live site header."
+      },
+      {
+        "type": "action",
+        "description": "Edit the existing script tag."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that changes are applied on the site without errors."
+      },
+      {
+        "type": "action",
+        "description": "Remove the script tag."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the script is no longer injected in the site source."
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Cookie Consent Dialog Functionality",
+    "description": "Verify the cookie consent dialog appears on first visit, allows acceptance or rejection, and respects user choice across sessions.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the site in a private/incognito browser window."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the cookie consent dialog is displayed."
+      },
+      {
+        "type": "action",
+        "description": "Select the option to accept cookies."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm the dialog disappears after acceptance and choice is remembered on page reload."
+      },
+      {
+        "type": "action",
+        "description": "Clear cookies and reload the site."
+      },
+      {
+        "type": "action",
+        "description": "Select the option to reject cookies."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dialog disappears and the rejection choice is persisted."
+      }
+    ]
+  }
+]

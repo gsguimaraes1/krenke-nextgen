@@ -9,7 +9,7 @@ export const Preloader: React.FC = () => {
         // Tempo de carregamento (2.5 segundos)
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 1300);
+        }, 2500);
         return () => clearTimeout(timer);
     }, []);
 

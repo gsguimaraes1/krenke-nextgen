@@ -12,6 +12,8 @@ const QuoteForm: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState('');
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -57,28 +59,47 @@ const QuoteForm: React.FC = () => {
     };
 
     // Basic Validation
-    if (data.name.length < 3) {
-      alert('Por favor, insira seu nome completo.');
+    if (!data.name || data.name.length < 3) {
+      setSubmitError('Por favor, insira seu nome completo (mínimo 3 caracteres).');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!data.email || !data.email.includes('@')) {
+      setSubmitError('Por favor, insira um e-mail corporativo válido.');
       setIsSubmitting(false);
       return;
     }
 
     const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
-    if (!phoneRegex.test(data.phone)) {
-      alert('Por favor, insira um WhatsApp válido no formato (00) 00000-0000');
+    if (!data.phone || (!phoneRegex.test(data.phone) && data.phone.length < 10)) {
+      setSubmitError('Por favor, insira um WhatsApp válido no formato (00) 00000-0000');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (selectedProducts.length === 0) {
+      setSubmitError('Por favor, selecione ao menos um produto para o orçamento.');
       setIsSubmitting(false);
       return;
     }
 
     try {
+      setSubmitError(null);
+      setSubmitSuccess(false);
+
       const { error } = await supabase.from('leads').insert([data]);
       if (error) throw error;
-      alert('Orçamento solicitado com sucesso! Nossa equipe entrará em contato em breve.');
+
+      setSubmitSuccess(true);
       setSelectedProducts([]);
       setHoneypot('');
       (e.target as HTMLFormElement).reset();
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (err: any) {
-      alert('Erro ao enviar: ' + err.message);
+      setSubmitError('Erro ao enviar: ' + err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -106,7 +127,7 @@ const QuoteForm: React.FC = () => {
             </p>
           </div>
 
-          <form className="space-y-10" onSubmit={handleSubmit}>
+          <form className="space-y-10" onSubmit={handleSubmit} noValidate>
             {/* Honeypot Field (Security) */}
             <div className="hidden" aria-hidden="true">
               <input
@@ -214,6 +235,30 @@ const QuoteForm: React.FC = () => {
               {isSubmitting ? <Loader2 className="animate-spin" /> : <Send size={24} />}
               {isSubmitting ? 'ENVIANDO...' : 'SOLICITAR PROPOSTA AGORA'}
             </button>
+
+            {/* Status Messages */}
+            <AnimatePresence>
+              {submitError && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="p-6 bg-red-50 border-2 border-red-100 rounded-2xl text-red-600 font-bold text-center text-sm"
+                >
+                  {submitError}
+                </motion.div>
+              )}
+              {submitSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="p-6 bg-green-50 border-2 border-green-100 rounded-2xl text-green-600 font-bold text-center text-sm"
+                >
+                  Orçamento solicitado com sucesso! Nossa equipe entrará em contato em breve.
+                </motion.div>
+              )}
+            </AnimatePresence>
           </form>
         </div>
       </motion.div>

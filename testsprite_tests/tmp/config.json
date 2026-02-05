@@ -1,0 +1,19 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "loginUser": "gabriel.gbr.fire@gmail.com",
+  "loginPassword": "Gsguimaraes82.",
+  "executionArgs": {
+    "projectName": "krenke-nextgen-main",
+    "projectPath": "c:\\Users\\Gabriel\\Downloads\\PROJETOS\\krenke-nextgen-main",
+    "testIds": [],
+    "additionalInstruction": "Execute all frontend tests. The .env file with Supabase credentials has been created. The app should be running on port 3000. Verify that the login works, that the admin dashboard reflects data, and that quote requests show in-page success messages.",
+    "envs": {
+      "API_KEY": "sk-user-Tf-bEOXljrGkMEc_H2TQFcoY9wM7q1klhGKeAITcO20TPvk1wBCSItI067OmTalYTZYrQxOpcuikS0RzxFrUPfqdtAxNKULlgl5DFSP_Ud71pWQtK1oaar0OPXtiKGkHQew"
+    }
+  },
+  "serverPort": 51633,
+  "proxy": "http://bc79819b-841d-4958-b781-844417b0dbff:DVofG45RLjiYapCn8UkgvoNkLIFnD65J@tun.testsprite.com:8080"
+}

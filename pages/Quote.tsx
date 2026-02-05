@@ -54,11 +54,7 @@ const QuotePage: React.FC = () => {
         <QuoteForm />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 border-t border-slate-100 pt-20">
-          <p>© 2026 Krenke Brinquedos. Engenharia da Diversão & Segurança Absoluta.</p>
-        </div>
-      </div>
+
     </div>
   );
 };

@@ -151,6 +151,19 @@
       scroll-behavior: smooth;
     }
 
+    /* Google Translate Fixes */
+    .skiptranslate {
+      display: none !important;
+    }
+
+    body {
+      top: 0 !important;
+    }
+
+    .VIpgJd-Zvi9ab-OR9s-rb {
+      display: none !important;
+    }
+
     #root {
       width: 100%;
       overflow-x: hidden !important;
@@ -380,11 +393,12 @@
   <div id="root"></div>
 
   <!-- Google Translate Element (Hidden) -->
-  <div id="google_translate_element"></div>
+  <div id="google_translate_element" style="display:none"></div>
   <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
         pageLanguage: 'pt',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
         autoDisplay: false
       }, 'google_translate_element');
     }

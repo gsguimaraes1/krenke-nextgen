@@ -1,0 +1,81 @@
+{
+    "tech_stack": [
+        "React 19",
+        "Vite 6",
+        "TypeScript",
+        "Supabase",
+        "Express",
+        "Tailwind CSS",
+        "Framer Motion",
+        "Lucide React",
+        "React Router"
+    ],
+    "features": [
+        {
+            "name": "Home Page",
+            "description": "Main landing page showcasing products and agency information. (Route: /)",
+            "files": [
+                "pages/Home.tsx",
+                "components/IntroScreen.tsx",
+                "components/Preloader.tsx"
+            ]
+        },
+        {
+            "name": "Product Management",
+            "description": "Admin interface for managing the product catalog, specifications, and images. (Route: /pgadmin)",
+            "files": [
+                "pages/Admin.tsx",
+                "components/ProductSpecsManager.tsx",
+                "components/RichTextEditor.tsx"
+            ]
+        },
+        {
+            "name": "Product Catalog",
+            "description": "Public-facing catalog where users can view available playground products. (Route: /produtos)",
+            "files": [
+                "pages/Products.tsx",
+                "components/ImageCarousel.tsx"
+            ]
+        },
+        {
+            "name": "Authentication",
+            "description": "User login system with MFA support and visible error feedback. (Route: /login)",
+            "files": [
+                "pages/Auth.tsx",
+                "components/ProtectedRoute.tsx"
+            ]
+        },
+        {
+            "name": "Quotes and Lead Generation",
+            "description": "Quote request system with multi-product selection and in-page confirmation/validation feedback. (Route: /orcamento)",
+            "files": [
+                "pages/Quote.tsx",
+                "components/QuoteForm.tsx"
+            ]
+        },
+        {
+            "name": "Blog",
+            "description": "A system to display news and articles related to the company. (Route: /blog)",
+            "files": [
+                "pages/Blog.tsx",
+                "pages/BlogPost.tsx"
+            ]
+        },
+        {
+            "name": "Reseller Area",
+            "description": "Exclusive area for resellers to access specific resources.",
+            "files": [
+                "pages/ResellerArea.tsx"
+            ]
+        },
+        {
+            "name": "Global Layout",
+            "description": "Common UI elements including header, footer, and cookie consent.",
+            "files": [
+                "components/Layout.tsx",
+                "components/CookieConsent.tsx",
+                "components/AdminLayout.tsx"
+            ]
+        }
+    ]
+}

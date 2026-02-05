@@ -122,7 +122,36 @@ const AuthPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Form Input Upgrades */}
+                    {/* Feedback Messages */}
+                    <AnimatePresence mode="wait">
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mb-6 overflow-hidden"
+                            >
+                                <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-5 py-4 rounded-2xl text-xs font-bold flex items-center gap-3">
+                                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse flex-shrink-0" />
+                                    {error}
+                                </div>
+                            </motion.div>
+                        )}
+                        {success && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mb-6 overflow-hidden"
+                            >
+                                <div className="bg-green-500/10 border border-green-500/20 text-green-500 px-5 py-4 rounded-2xl text-xs font-bold flex items-center gap-3">
+                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse flex-shrink-0" />
+                                    Solicitação enviada com sucesso! Aguarde aprovação.
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {mfaChallengeId ? (
                         <form onSubmit={handleMFAVerify} className="space-y-6 relative z-10">
                             <div className="space-y-1.5">

@@ -29,15 +29,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
         }
 
-        const handleAuthStateChange = (session: Session | null) => {
+        const handleAuthStateChange = async (session: Session | null) => {
             setSession(session);
             const currentUser = session?.user ?? null;
             setUser(currentUser);
 
             if (currentUser) {
-                if (currentUser.email === SUPER_ADMIN_EMAIL) {
-                    setRole('super');
-                } else {
+                try {
+                    // Try to fetch profile multiple times if needed (to handle trigger creation delay)
+                    let profileData = null;
+                    let retries = 3;
+
+                    while (retries > 0 && !profileData) {
+                        const { data, error } = await supabase
+                            .from('profiles')
+                            .select('role')
+                            .eq('id', currentUser.id)
+                            .single();
+
+                        if (data) {
+                            profileData = data;
+                        } else {
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            retries--;
+                        }
+                    }
+
+                    if (profileData) {
+                        setRole(profileData.role as UserRole);
+                    } else {
+                        // Safe fallback for standard users if profile hasn't been created yet
+                        setRole(currentUser.email === SUPER_ADMIN_EMAIL ? 'super' : 'restricted');
+                    }
+                } catch (err) {
+                    console.error('Error fetching user role:', err);
                     setRole('restricted');
                 }
             } else {
@@ -46,12 +71,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setLoading(false);
         };
 
-        // Check active sessions and sets the user
+        // Initial session check
         supabase.auth.getSession().then(({ data: { session } }) => {
             handleAuthStateChange(session);
         });
 
-        // Listen for changes on auth state (logged in, signed out, etc.)
+        // Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             handleAuthStateChange(session);
         });

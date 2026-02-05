@@ -6,6 +6,49 @@ import { Product } from '../types';
 import productsData from '../products.json';
 import { supabase } from '../lib/supabase';
 
+// High-performance image discovery via Vite Glob Import
+const allAssets = import.meta.glob('../assets/**/*', { eager: true, as: 'url' });
+
+const findProductAssets = (productName: string) => {
+  if (!productName || productName.length < 3) return { main: '', gallery: [] as string[] };
+
+  const normalize = (s: string) => s.toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, '');
+
+  const normalizedName = normalize(productName);
+  const matches: string[] = [];
+
+  Object.entries(allAssets).forEach(([path, url]) => {
+    const normalizedPath = normalize(path);
+
+    // Check if path contains the normalized name
+    if (normalizedPath.includes(normalizedName)) {
+      matches.push(url as string);
+    }
+
+    // Special mapping for LINHA TEMÁTICA to thematic folder
+    if (normalizedName === 'linhatematica' && normalizedPath.includes('tematica2025')) {
+      matches.push(url as string);
+    }
+  });
+
+  // Sort to prioritize main product image (exact file name match)
+  const sortedMatches = [...matches].sort((a, b) => {
+    const aName = normalize(a.split('/').pop() || '');
+    const bName = normalize(b.split('/').pop() || '');
+    if (aName === normalizedName + '.jpg' || aName === normalizedName + '.png' || aName === normalizedName + '.webp') return -1;
+    if (bName === normalizedName + '.jpg' || bName === normalizedName + '.png' || bName === normalizedName + '.webp') return 1;
+    return 0;
+  });
+
+  return {
+    main: sortedMatches.length > 0 ? sortedMatches[0] : '',
+    gallery: sortedMatches
+  };
+};
+
 const CATEGORIES = [
   'Todos',
   'Playgrounds Completos',
@@ -79,7 +122,7 @@ const ProductModal: React.FC<{ product: Product | null; onClose: () => void }> =
                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                     src={activeImage || product.image}
                     alt={product.name}
-                    className="max-w-[120%] max-h-[400px] object-contain drop-shadow-2xl translate-y-4"
+                    className="max-w-full max-h-[400px] object-contain drop-shadow-2xl"
                   />
                 </AnimatePresence>
               </div>
@@ -179,9 +222,31 @@ const ProductsPage: React.FC = () => {
     try {
       const { data, error } = await supabase.from('products').select('*').order('name', { ascending: true });
       if (error) throw error;
-      setProducts(data && data.length > 0 ? data : (productsData as Product[]));
+
+      const rawProducts = data && data.length > 0 ? data : (productsData as Product[]);
+
+      // Post-process products to discover local images if database is missing them
+      const processed = rawProducts.map(p => {
+        const assets = findProductAssets(p.name);
+        return {
+          ...p,
+          image: p.image || assets.main || 'https://via.placeholder.com/800x600?text=Krenke+Brinquedos',
+          images: (p.images && p.images.length > 0) ? p.images : assets.gallery
+        };
+      });
+
+      setProducts(processed);
     } catch (err) {
-      setProducts(productsData as Product[]);
+      // Fallback to local data if Supabase fails
+      const processed = (productsData as Product[]).map(p => {
+        const assets = findProductAssets(p.name);
+        return {
+          ...p,
+          image: p.image || assets.main || 'https://via.placeholder.com/800x600?text=Krenke+Brinquedos',
+          images: (p.images && p.images.length > 0) ? p.images : assets.gallery
+        };
+      });
+      setProducts(processed);
     } finally {
       setLoading(false);
     }
@@ -314,7 +379,7 @@ const ProductsPage: React.FC = () => {
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-[110%] h-[110%] object-contain transition-transform duration-700 group-hover:scale-115"
+                        className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
                       />
                     </div>
 
