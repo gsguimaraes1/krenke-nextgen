@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Search, ChevronRight, X, Plus, ShoppingCart } from 'lucide-react';
+import { Filter, Search, X, Plus, ShoppingCart } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { Product } from '../types';
 import productsData from '../products.json';
@@ -260,7 +260,7 @@ const ProductsPage: React.FC = () => {
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-vibrant-orange" size={24} />
             <input
               type="text"
-              placeholder="Pesquise por nome ou código..."
+              placeholder="Pesquisar Parques, Playgrounds ou Código..."
               className="w-full pl-16 pr-8 py-6 bg-slate-50 border-2 border-transparent focus:border-vibrant-orange rounded-3xl font-black text-gray-900 outline-none transition-all placeholder:text-gray-300"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

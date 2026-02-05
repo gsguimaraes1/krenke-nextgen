@@ -86,9 +86,9 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-6">
             <LanguageSelector />
             <div className="w-px h-4 bg-white/20 mx-2"></div>
-            <a href="#" className="hover:text-vibrant-orange transition-all gtm-social-instagram-top"><Instagram size={18} /></a>
-            <a href="#" className="hover:text-vibrant-orange transition-all gtm-social-facebook-top"><Facebook size={16} /></a>
-            <a href="#" className="hover:text-vibrant-orange transition-all gtm-social-youtube-top"><Youtube size={18} /></a>
+            <a href="https://www.instagram.com/krenke_brinquedos/" target="_blank" rel="noopener noreferrer" className="hover:text-vibrant-orange transition-all gtm-social-instagram-top"><Instagram size={18} /></a>
+            <a href="https://www.facebook.com/krenkept/" target="_blank" rel="noopener noreferrer" className="hover:text-vibrant-orange transition-all gtm-social-facebook-top"><Facebook size={16} /></a>
+            <a href="https://www.youtube.com/@KrenkeBrinquedos" target="_blank" rel="noopener noreferrer" className="hover:text-vibrant-orange transition-all gtm-social-youtube-top"><Youtube size={18} /></a>
           </div>
         </div>
       </div>
@@ -229,22 +229,15 @@ export const Footer: React.FC = () => {
               Desde 1987 transformando espaços em mundos de <span className="text-white font-black">pura diversão</span> com segurança absoluta e design de elite.
             </p>
             <div className="flex gap-4">
-              {[Facebook, Instagram, Youtube].map((Icon, i) => (
-                <motion.a
-                  key={i}
-                  href="#"
-                  whileHover={{ y: -5, color: '#FF9F0A' }}
-                  className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all"
-                >
-                  <Icon size={24} />
-                </motion.a>
-              ))}
+              <motion.a href="https://www.facebook.com/krenkept/" target="_blank" rel="noopener noreferrer" whileHover={{ y: -5, color: '#FF9F0A' }} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all"><Facebook size={24} /></motion.a>
+              <motion.a href="https://www.instagram.com/krenke_brinquedos/" target="_blank" rel="noopener noreferrer" whileHover={{ y: -5, color: '#FF9F0A' }} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all"><Instagram size={24} /></motion.a>
+              <motion.a href="https://www.youtube.com/@KrenkeBrinquedos" target="_blank" rel="noopener noreferrer" whileHover={{ y: -5, color: '#FF9F0A' }} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all"><Youtube size={24} /></motion.a>
             </div>
           </div>
 
           {/* Quick Links Group */}
           <div className="lg:col-span-3">
-            <h4 className="text-vibrant-orange font-black uppercase tracking-[0.2em] text-sm mb-10">Explore</h4>
+            <h4 className="text-vibrant-orange font-black uppercase tracking-[0.2em] text-sm mb-10">Nossos Produtos</h4>
             <ul className="grid grid-cols-1 gap-4">
               {['Home', 'Empresa', 'Produtos', 'Downloads', 'Blog', 'Projetos'].map((item) => (
                 <li key={item}>

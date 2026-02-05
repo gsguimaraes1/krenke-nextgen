@@ -14,6 +14,50 @@
     content="Líder nacional na fabricação de playgrounds e brinquedos infantis certificados. Segurança e diversão com tecnologia de ponta." />
   <meta property="og:image" content="/favicon.png" />
   <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <!-- Schema.org JSON-LD para SEO -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Krenke Brinquedos",
+      "url": "https://krenke.com.br",
+      "logo": "https://krenke.com.br/favicon.png",
+      "description": "Líder nacional na fabricação de playgrounds e brinquedos infantis certificados. Segurança e diversão com tecnologia de ponta.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "BR"
+      },
+      "sameAs": [
+        "https://www.instagram.com/krenke_brinquedos/",
+        "https://www.facebook.com/krenkept/",
+        "https://www.youtube.com/@KrenkeBrinquedos"
+      ]
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Krenke Brinquedos",
+      "image": "https://krenke.com.br/favicon.png",
+      "description": "Fábrica líder de playgrounds e brinquedos pedagógicos no Brasil.",
+      "priceRange": "$$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "São Bento do Sul",
+        "addressRegion": "SC",
+        "addressCountry": "BR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -26.248,
+        "longitude": -49.378
+      },
+      "url": "https://krenke.com.br"
+    }
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <script>
@@ -351,7 +395,7 @@
   <script>
     // Global translation function used by React
     window.doGTranslate = function (langCode) {
-      console.log('Translating to:', langCode);
+
       var select = document.querySelector('.goog-te-combo');
       if (select) {
         select.value = langCode;

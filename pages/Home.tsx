@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard, X, Calendar, User, FileText } from 'lucide-react';
+import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard, X, Calendar, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Post } from '../types';
 import { motion } from 'framer-motion';
@@ -206,7 +206,7 @@ const CategoryPreview = () => {
             viewport={{ once: true }}
             className="text-5xl md:text-7xl font-black text-krenke-purple mb-6 uppercase tracking-tighter"
           >
-            Explore Nosso <span className="text-vibrant-orange">Universo</span>
+            Explore Nossa Linha de <span className="text-vibrant-orange">Playgrounds</span>
           </motion.h2>
           <p className="text-xl text-gray-500 max-w-3xl mx-auto font-medium leading-relaxed">
             Produtos certificados pela ABNT com durabilidade extrema. O melhor investimento para o lazer das crianças.
@@ -260,8 +260,8 @@ const StatsSection = () => (
           <div>
             <span className="text-sm font-black text-vibrant-orange uppercase tracking-widest bg-vibrant-orange/10 px-4 py-1.5 rounded-full mb-6 inline-block">Nossa Essência</span>
             <h3 className="text-4xl md:text-6xl font-black text-gray-900 leading-[1.1] tracking-tighter">
-              QUALIDADE DE VIDA E <br />
-              <span className="text-krenke-purple">SEGURANÇA ABSOLUTA</span>
+              QUALIDADE EM CADA <br />
+              <span className="text-krenke-purple">PLAYGROUND E BRINQUEDO</span>
             </h3>
           </div>
 
