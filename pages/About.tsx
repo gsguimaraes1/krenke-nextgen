@@ -3,13 +3,8 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Award, ShieldCheck, Zap, Globe } from 'lucide-react';
 import heroVideo from '../assets/Sobre/krenke-fabrica-playgrounds-video.mp4';
 import image36Anos from '../assets/Sobre/krenke-36-anos-playgrounds-infantis.webp';
-<<<<<<< HEAD
 import imageFachada from '../assets/Sobre/krenke-fachada-fabrica-parques-infantis.jpg';
 import imageNordeste from '../assets/Sobre/krenke-filial-nordeste-playgrounds.jpg';
-=======
-import imageFachada from '../assets/Sobre/krenke-fachada-fabrica-parques-infantis.webp';
-import imageNordeste from '../assets/Sobre/krenke-filial-nordeste-playgrounds.webp';
->>>>>>> origin/main
 
 const AboutPage: React.FC = () => {
   return (
@@ -190,11 +185,7 @@ const AboutPage: React.FC = () => {
                 <img
                   src={imageFachada}
                   alt="Fábrica de Parques Infantis Krenke"
-<<<<<<< HEAD
                   className="w-full h-auto hover:scale-105 transition-transform duration-700"
-=======
-                  className="w-full object-cover lg:h-[500px] hover:scale-105 transition-transform duration-700"
->>>>>>> origin/main
                 />
                 <div className="absolute top-6 left-6 p-4 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20">
                   <Award className="text-vibrant-orange" size={32} strokeWidth={2.5} />
@@ -221,11 +212,7 @@ const AboutPage: React.FC = () => {
                 <img
                   src={imageNordeste}
                   alt="Sede Nordeste Krenke Playgrounds"
-<<<<<<< HEAD
                   className="w-full h-auto group-hover:scale-110 transition-transform duration-700"
-=======
-                  className="w-full object-cover lg:h-[500px] group-hover:scale-110 transition-transform duration-700"
->>>>>>> origin/main
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-vibrant-orange/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-12">
                   <span className="text-white font-black text-2xl uppercase tracking-widest">Atendimento Ágil em Todo o Brasil</span>
@@ -254,7 +241,7 @@ const AboutPage: React.FC = () => {
                   </div>
                 </div>
                 <p>
-                  Esta expansão não é apenas sobre logística; é sobre estar perto de nossos clientes, entendendo as nuances climáticas e regionais para entregar a melhor solução em lazer do país.
+                  Esta expansão não é apenas sobre logística; é sobre estar perto de nossos clientes, entendendo as nuances climáticas e regionais para entregar a melhor solution em lazer do país.
                 </p>
               </div>
             </div>
