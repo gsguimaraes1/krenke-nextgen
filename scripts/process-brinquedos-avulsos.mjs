@@ -77,9 +77,7 @@ for (const rawFolder of folders) {
     productImages.push(webPath);
 
     if (existsSync(outPath)) {
-      process.stdout.write(`[SKIP] ${productSlug}/${outName}\n`);
-      skip++;
-      continue;
+      process.stdout.write(`[OVERWRITE] ${productSlug}/${outName}\n`);
     }
 
     try {
