@@ -11,7 +11,7 @@ const DownloadsPage: React.FC = () => {
             type: "PDF",
             icon: LayoutGrid,
             accent: "vibrant-orange",
-            link: "/catalogo-krenke-2026.pdf"
+            link: "/catalogo-krenke-2026_compressed.pdf"
         },
         {
             title: "Manual de Instalação",

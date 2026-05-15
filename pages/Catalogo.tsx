@@ -283,7 +283,7 @@ const CatalogoPage: React.FC = () => {
     const [numPages, setNumPages] = useState<number | null>(null);
     const [isMobile, setIsMobile] = useState<boolean>(false);
     const [hasAccess, setHasAccess] = useState(false);
-    const pdfUrl = "/catalogo-krenke-2026.pdf";
+    const pdfUrl = "/catalogo-krenke-2026_compressed.pdf";
 
     useEffect(() => {
         const authorized = localStorage.getItem('krenke_catalog_authorized') === 'true';
@@ -308,7 +308,7 @@ const CatalogoPage: React.FC = () => {
     const handleDownload = () => {
         const link = document.createElement('a');
         link.href = pdfUrl;
-        link.download = 'catalogo-krenke-2026.pdf';
+        link.download = 'catalogo-krenke-2026_compressed.pdf';
         link.target = '_blank';
         document.body.appendChild(link);
         link.click();
