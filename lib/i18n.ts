@@ -95,62 +95,11 @@ const resources = {
         "loading": "Cargando...",
         "search": "Buscar...",
         "see_more": "Ver Más"
-      }
-    }
-  },
-  fr: {
-    translation: {
-      "nav": {
-        "home": "Accueil",
-        "about": "Entreprise",
-        "products": "Produits",
-        "blog": "Blog",
-        "catalog": "Catalogue",
-        "quote": "Devis",
-        "reseller": "Espace Revendeur",
-        "lang_selection": "Sélection de la langue"
       },
-      "footer": {
-        "rights": "Tous droits réservés.",
-        "contact": "Contact Direct",
-        "address": "Adresse",
-        "privacy": "Confidentialité",
-        "terms": "Conditions",
-        "bio": "Depuis 1987, nous transformons les espaces en mondes de pur plaisir avec une sécurité absolue et un design d'élite."
-      },
-      "common": {
-        "explore": "Explorer les Détails",
-        "loading": "Chargement...",
-        "search": "Rechercher...",
-        "see_more": "Voir Plus"
-      }
-    }
-  },
-  de: {
-    translation: {
-      "nav": {
-        "home": "Startseite",
-        "about": "Unternehmen",
-        "products": "Produkte",
-        "blog": "Blog",
-        "catalog": "Katalog",
-        "quote": "Angebot",
-        "reseller": "Händlerbereich",
-        "lang_selection": "Sprachauswahl"
-      },
-      "footer": {
-        "rights": "Alle Rechte vorbehalten.",
-        "contact": "Direktkontakt",
-        "address": "Adresse",
-        "privacy": "Datenschutz",
-        "terms": "Bedingungen",
-        "bio": "Seit 1987 verwandeln wir Räume in Welten des puren Vergnügens mit absoluter Sicherheit und erstklassigem Design."
-      },
-      "common": {
-        "explore": "Details Erkunden",
-        "loading": "Laden...",
-        "search": "Suchen...",
-        "see_more": "Mehr Sehen"
+      "products": {
+        "filter": "Filtrar por Categoría",
+        "items": "Artículos",
+        "no_results": "No se encontraron productos para esta selección."
       }
     }
   }

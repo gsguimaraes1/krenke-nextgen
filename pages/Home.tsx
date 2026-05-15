@@ -10,6 +10,12 @@ import heroVideo from '../assets/Home/videokrenke.mp4';
 import { ImageCarousel } from '../components/ImageCarousel';
 import sobreImg from '../assets/Home/Menino-Home-krenke.webp';
 import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
+import imgPlaygroundsPadroes from '../assets/playgrounds_padroes/kmp_0502/kmp 0502 - render perspectiva.png';
+import imgBrinquedosAvulsos from '../assets/brinquedos-avulsos/cavalo-de-molas/cavalinho de mola - laranja - render.png';
+import imgAquaticos from '../assets/aquatico/KAQ 0302/KAQ 0302 - render perspectiva 2.png';
+import imgLittlePlay from '../assets/Little Play/KLP0201/krenke-playground-Little-Play-0201-render-perspectiva-2.webp';
+import imgMobiliarios from '../assets/Mobiliario/banco4.png';
+import imgTematicos from '../assets/tematicos/TRATOR/trator - render 1.png';
 import { useTranslation } from 'react-i18next';
 import { TranslatableText } from '../components/TranslatableText';
 
@@ -166,61 +172,61 @@ const CategoryPreview = () => {
     {
       title: "Playgrounds Padrões",
       subtitle: "Linha Profissional Certified",
-      image: "https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0401/krenke-playground-kmp-0401-render-perspectiva.webp",
+      image: imgPlaygroundsPadroes,
       link: "/produtos/categoria/playgrounds-padroes",
       description: "Estruturas completas que garantem diversão máxima com total segurança para todas as idades.",
       color: "#f18915",
-      alt: "Playground Krenke KMP 0401 - Modelo Padrão",
+      alt: "Playground Krenke KMP 0502 - Modelo Padrão",
       id: "btn-home-category-playgrounds-padroes"
     },
     {
       title: "Little Play",
       subtitle: "Para Pequenos Exploradores",
-      image: "https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/klp-0101/krenke-playground-klp-0101-perspectiva-3.webp",
+      image: imgLittlePlay,
       link: "/produtos/categoria/little-play",
       description: "Diversão sob medida para os pequenos, com segurança e ergonomia.",
       color: "#16462c",
-      alt: "Playground Little Play Krenke - KLP 0101",
+      alt: "Playground Little Play Krenke - KLP 0201",
       id: "btn-home-category-little-play"
     },
     {
       title: "Brinquedos Avulsos",
       subtitle: "Acessórios e Lúdicos",
-      image: "https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/jogo-de-xadrez-gigante/1775285663484-0.webp",
+      image: imgBrinquedosAvulsos,
       link: "/produtos/categoria/brinquedos-avulsos",
       description: "Peças individuais perfeitas para complementar seu espaço de lazer com variedade.",
       color: "#5f2c65",
-      alt: "Jogo de Xadrez Gigante Krenke - Brinquedo Avulso",
+      alt: "Cavalinho de Mola Krenke - Brinquedo Avulso",
       id: "btn-home-category-brinquedos-avulsos"
     },
     {
       title: "Aquáticos",
       subtitle: "Diversão na Água",
-      image: "https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kaq-0403/1776025454641-1.webp",
+      image: imgAquaticos,
       link: "/produtos/categoria/aquaticos",
       description: "Estruturas interativas para diversão na água com total segurança.",
       color: "#429ac6",
-      alt: "Playground Aquático Krenke - KAQ 0403",
+      alt: "Playground Aquático Krenke - KAQ 0302",
       id: "btn-home-category-aquaticos"
     },
     {
       title: "Mobiliários",
       subtitle: "Design e Conforto Urbano",
-      image: "https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/conjunto-hexagonal/1775549529366-0.webp",
+      image: imgMobiliarios,
       link: "/produtos/categoria/mobiliarios",
       description: "Bancos e acessórios duráveis que trazem conforto e beleza para áreas externas.",
       color: "#c14d89",
-      alt: "Conjunto Hexagonal Krenke - Mobiliário Urbano",
+      alt: "Mesa Krenke - Mobiliário Urbano",
       id: "btn-home-category-mobiliarios"
     },
     {
       title: "Temáticos",
       subtitle: "Aventuras de Imaginação",
-      image: "https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmt-barco/1775759658158-5.webp",
+      image: imgTematicos,
       link: "/produtos/categoria/tematicos",
       description: "Aventuras lúdicas com playgrounds inspiradores que estimulam a imaginação.",
       color: "#284e9d",
-      alt: "Playgrounds Temáticos Krenke - Barco",
+      alt: "Playground Temático Krenke - Trator",
       id: "btn-home-category-tematicos"
     },
   ];

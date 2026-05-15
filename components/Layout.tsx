@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
 import logoMarcaBranco from '../assets/Logos/krenke-marca-playgrounds-branco.webp';
 import { CookieConsent } from './CookieConsent';
+import { SecurityGuard } from './SecurityGuard';
 import { ScriptInjector } from './ScriptInjector';
 import { WhatsAppWidget } from './WhatsAppWidget';
 import { supabase } from '../lib/supabase';
@@ -21,8 +22,6 @@ const LanguageSelector: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
     { code: 'pt', label: 'BR', flag: 'https://flagcdn.com/w40/br.webp' },
     { code: 'en', label: 'EN', flag: 'https://flagcdn.com/w40/us.webp' },
     { code: 'es', label: 'ES', flag: 'https://flagcdn.com/w40/es.webp' },
-    { code: 'fr', label: 'FR', flag: 'https://flagcdn.com/w40/fr.webp' },
-    { code: 'de', label: 'DE', flag: 'https://flagcdn.com/w40/de.webp' },
   ];
 
   return (
@@ -163,7 +162,7 @@ export const Navbar: React.FC = () => {
                                     className="block px-8 py-3 text-white hover:bg-white/10 hover:text-vibrant-orange transition-colors gtm-nav-category"
                                     id={`nav-category-${slugify(cat)}`}
                                   >
-                                    <span className="font-bold">{cat}</span>
+                                    <TranslatableText className="font-bold">{cat}</TranslatableText>
                                   </Link>
                                 ))}
                               </div>
@@ -310,7 +309,7 @@ export const Navbar: React.FC = () => {
                                   to={`/produtos/categoria/${slugify(cat)}`}
                                   className={`block text-gray-300 hover:text-krenke-orange text-sm gtm-nav-mobile-category-${cat.toLowerCase().replace(/\s+/g, '-')}`}
                                 >
-                                  {cat}
+                                  <TranslatableText>{cat}</TranslatableText>
                                 </Link>
                               ))}
                             </div>
@@ -344,7 +343,7 @@ export const Navbar: React.FC = () => {
                             to={`/produtos/categoria/${slugify(cat)}`}
                             className={`block text-gray-300 hover:text-krenke-orange text-sm gtm-nav-mobile-category-${cat.toLowerCase().replace(/\s+/g, '-')}`}
                           >
-                            {cat}
+                            <TranslatableText>{cat}</TranslatableText>
                           </Link>
                         ))}
                       </div>
@@ -517,6 +516,7 @@ export const Footer: React.FC = () => {
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen font-sans text-gray-900 overflow-x-hidden">
+      <SecurityGuard />
       <ScriptInjector />
       <Navbar />
       <main className="flex-grow pt-20 overflow-x-hidden">

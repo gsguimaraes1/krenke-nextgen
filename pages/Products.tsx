@@ -63,20 +63,29 @@ const CATEGORY_STYLES: Record<string, { color: string; bg: string }> = {
   'Todos': { color: 'gray-500', bg: 'bg-gray-100' }
 };
 
-const ProductModal: React.FC<{ 
-  product: Product | null; 
+const ProductModal: React.FC<{
+  product: Product | null;
   onClose: () => void;
   cart: string[];
   toggleCart: (id: string) => void;
 }> = ({ product, onClose, cart, toggleCart }) => {
   const { i18n } = useTranslation();
   const [activeImage, setActiveImage] = useState<string>('');
+  const [translatedSpecs, setTranslatedSpecs] = useState<string>('');
 
   useEffect(() => {
     if (product) {
       setActiveImage(product.image);
     }
   }, [product]);
+
+  useEffect(() => {
+    if (!product?.specs) { setTranslatedSpecs(''); return; }
+    if (i18n.language === 'pt') { setTranslatedSpecs(product.specs); return; }
+    import('../lib/i18n').then(({ translateText }) => {
+      translateText(product.specs!, i18n.language).then(setTranslatedSpecs);
+    });
+  }, [product?.specs, i18n.language]);
 
   if (!product) return null;
 
@@ -191,7 +200,7 @@ const ProductModal: React.FC<{
             <div className="md:w-1/2 p-8 md:p-14 flex flex-col bg-white">
               <div className="mb-6">
                 <span className={`px-4 py-1.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest ${CATEGORY_STYLES[product.category]?.bg || 'bg-krenke-purple/10'} text-${CATEGORY_STYLES[product.category]?.color || 'krenke-purple'}`}>
-                  {product.category}
+                  <TranslatableText>{product.category}</TranslatableText>
                 </span>
               </div>
 
@@ -204,7 +213,7 @@ const ProductModal: React.FC<{
                 {product.specs ? (
                   <div
                     className="text-gray-700 leading-relaxed text-sm md:text-base tech-specs-container"
-                    dangerouslySetInnerHTML={{ __html: product.specs }}
+                    dangerouslySetInnerHTML={{ __html: translatedSpecs || product.specs }}
                   />
                 ) : (
                   <div className="space-y-4">
@@ -402,15 +411,13 @@ export const ProductsPage: React.FC = () => {
           >
             <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-black uppercase tracking-[0.3em] mb-8">
               <span className="w-2 h-2 rounded-full bg-vibrant-orange animate-pulse shadow-vibrant-orange"></span>
-              {activeCategory === 'Todos' ? 'Linha Completa 2026' : `Linha ${activeCategory} 2026`}
+              <TranslatableText>{activeCategory === 'Todos' ? 'Linha Completa 2026' : `Linha ${activeCategory} 2026`}</TranslatableText>
             </div>
 
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.85] tracking-tighter mb-8 uppercase drop-shadow-2xl">
-              {activeCategory === 'Todos' ? (
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto] animate-gradient-x">DIVERSÃO</span>
-              ) : (
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto] animate-gradient-x">{activeCategory}</span>
-              )}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto] animate-gradient-x">
+                <TranslatableText>{activeCategory === 'Todos' ? 'DIVERSÃO' : activeCategory}</TranslatableText>
+              </span>
             </h1>
 
             <div className="h-3 w-32 bg-vibrant-orange rounded-full shadow-vibrant-orange"></div>
