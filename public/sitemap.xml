@@ -2,679 +2,655 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://site.krenke.com.br/</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/empresa</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/blog</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/projetos</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/orcamento</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/downloads</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/catalogo</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/politica-de-privacidade</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/termos-de-uso</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/aquaticos</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/linha-pet</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/little-play</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/mobiliario-urbano-e-jardim</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/pisos-de-borracha</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/tematicos</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=BALANCO-DE-ALUMINIO</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/balanco-de-aluminio/1775491534482-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/balanco-de-aluminio-krenke/balano-aluminio-render-perspectiva.webp</image:loc>
       <image:title>Balanço de alumínio</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=BALANCO-DE-FERRO</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/balanco-de-ferro/1775491449658-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/balanco-de-ferro-krenke/balano-render-perspectiva.webp</image:loc>
       <image:title>Balanço de Ferro</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/mobiliario-urbano-e-jardim?produto=BANCO-JARDIM-B102</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/banco-jardim-b102/1775282224343-0.webp</image:loc>
-      <image:title>Banco de jardim B-102</image:title>
-    </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=CARROSEL-COLORIDO</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/carrosel-colorido/1775504175059-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/carrosel-colorido/carrossel-render.webp</image:loc>
       <image:title>Carrossel Colorido</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/mobiliario-urbano-e-jardim?produto=CONJUNTO-HEXAGONAL</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/conjunto-hexagonal/1775549529366-0.webp</image:loc>
-      <image:title>Conjunto Hexagonal</image:title>
-    </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=GANGORRA-DE-FERRO</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/gangorra-de-ferro/1775492488882-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/gangorra-de-ferro/gangorra-render-perspectiva.webp</image:loc>
       <image:title>Gangorra de Ferro</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/aquaticos?produto=KAQ-0201</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kaq-0201/1776024637682-1.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kaq-0201/kaq-0201-render-perspectiva-1.webp</image:loc>
       <image:title>KAQ 0201</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/aquaticos?produto=KAQ-0301</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kaq-0301/1776024710237-1.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kaq-0301/kaq-0301-render-perspectiva-2.webp</image:loc>
       <image:title>KAQ 0301</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/aquaticos?produto=KAQ-0303</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kaq-0303/1776024729282-1.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kaq-0303/kaq-0303-render-perspectiva-1.webp</image:loc>
       <image:title>KAQ 0303</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/aquaticos?produto=KAQ-0401</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kaq-0401/1776025423162-1.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kaq-0401/kaq-0401-render-perspectiva-1.webp</image:loc>
       <image:title>KAQ 0401</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/aquaticos?produto=KAQ-0402</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kaq-0402/1776025440920-1.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kaq-0402/kaq-0402-render-perspectiva-2.webp</image:loc>
       <image:title>KAQ 0402</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/aquaticos?produto=KAQ-0403</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kaq-0403/1776025454641-1.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kaq-0403/kaq-0403-render-perspectiva-2.webp</image:loc>
       <image:title>KAQ 0403</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/tematicos?produto=KMT-AVIAO</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmt-aviao/1776028684418-6.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmt-avio/aviao-2026-render-perspectiva.webp</image:loc>
       <image:title>KMT Avião</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/tematicos?produto=KMT-BARCO</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmt-barco/1775759658158-5.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmt-barco/barco-render-perspectiva.webp</image:loc>
       <image:title>KMT Barco</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/tematicos?produto=KMT-TRATOR</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmt-trator/1775543242590-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmt-trator/trator-render-1.webp</image:loc>
       <image:title>KMT Trator</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/tematicos?produto=KMT-TREM</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmt-trem/1775543386882-1.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmt-trem/krenke-trem-capa.webp</image:loc>
       <image:title>KMT Trem</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/linha-pet?produto=PLAY-PET-AGILITY</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/mobiliario-urbano-e-jardim?produto=b-102-colorido</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/b-102-colorido/1775158958371-0.webp</image:loc>
-      <image:title>Banco de Jardim B-102 (COLORIDO)</image:title>
-    </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=balanco-ninho</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/balanco-ninho/1775491697372-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/balanco-ninho/balano-ninho-render-perspectiva.webp</image:loc>
       <image:title>Balanço Ninho</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/mobiliario-urbano-e-jardim?produto=banco-jardim-p93</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/banco-jardim-p93/1775283413400-0.webp</image:loc>
-      <image:title>Banco Jardim P93</image:title>
-    </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=cavalo-de-molas</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/cavalo-de-molas/1775503590856-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/cavalo-de-molas/krenke-playground-brinquedo-cavalo-de-molas.webp</image:loc>
       <image:title>CAVALO DE MOLAS</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=golfinho-de-molas</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/golfinho-de-molas/krenke-playground-Brinquedo%20de%20Molas%20Golfinho.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/golfinho-de-molas/krenke-playground-brinquedo-de-molas-golfinho.webp</image:loc>
       <image:title>GOLFINHO DE MOLAS</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=jogo-de-xadrez-gigante</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/jogo-de-xadrez-gigante/1775285663484-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/jogo-de-xadrez-gigante/krenke-playground-jogo-de-xadrez-gigante-1.webp</image:loc>
       <image:title>Jogo de Xadrez Gigante</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/little-play?produto=klp-0101</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/klp-0101/krenke-playground-klp-0101-perspectiva-3.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/klp-0101/krenke-playground-klp-0101-perspectiva-3.webp</image:loc>
       <image:title>KLP 0101</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/little-play?produto=klp-0102</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/klp-0102/krenke-playground-klp-0102-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/klp-0102/krenke-playground-klp-0102-perspectiva-2.webp</image:loc>
       <image:title>KLP 0102</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/little-play?produto=klp-0201</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/klp-0201/krenke-playground-Little-Play-0201-render-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/klp-0201/krenke-playground-little-play-0201-render-perspectiva-2.webp</image:loc>
       <image:title>KLP 0201</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/little-play?produto=klp-0202</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/klp-0202/krenke-playground-klp-0202-perspectiva.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/klp-0202/krenke-playground-klp-0202-perspectiva.webp</image:loc>
       <image:title>KLP 0202</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/little-play?produto=klp-0204</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/klp-0204/krenke-playground-klp-0204-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/klp-0204/krenke-playground-klp-0204-perspectiva-2.webp</image:loc>
       <image:title>KLP 0204</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0101</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0101/krenke-playground-kpm-0101-perspectiva-300x300.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0101/kpm-0101-perspectiva.webp</image:loc>
       <image:title>KMP 0101</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0102</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0102/krenke-playground-kmp-0102-render-01.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0102/kmp-0102-render-perspectiva.webp</image:loc>
       <image:title>KMP 0102</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0201</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0201/krenke-playground-kmp-0201-perspectiva-600x600.png.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0201/kmp-0201-perspectiva.webp</image:loc>
       <image:title>KMP 0201</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0202</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0202/krenke-playground-kmp-0202-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0202/km0-0202-perspectiva.webp</image:loc>
       <image:title>KMP 0202</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0204</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0204/krenke-playground-kmp-0204-frontal.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0204/kmp-0204-frontal.webp</image:loc>
       <image:title>KMP 0204</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0205</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0205/krenke-playground-kmp-0205-render-perspectiva.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0205/kmp-0205-render-perspectiva.webp</image:loc>
       <image:title>KMP 0205</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0208</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0208/krenke-playground-KMP0208.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0208/kmp-0208-render-perspectiva.webp</image:loc>
       <image:title>KMP 0208</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0209</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0209/krenke-playground-kmp-0209-render-perspectiva.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0209/kmp-0209-render-perspectiva.webp</image:loc>
       <image:title>KMP 0209</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0301</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0301/krenke-playground-kmp-0301-render-perspectiva.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0301/kmp-0301-render-perspectiva.webp</image:loc>
       <image:title>KMP 0301</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0302</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0302/krenke-playground-kmp-0302-render-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0302/kmp-0302-render-perspectiva-2.webp</image:loc>
       <image:title>KMP 0302</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0303</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0303/krenke-playground-kmp-0303-render-frontal.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0303/kmp-0303-render-perspectiva.webp</image:loc>
       <image:title>KMP 0303</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0305</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0305/krenke-playground-kmp-0305-render-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0305/kmp-0305-render-perspectiva-2.webp</image:loc>
       <image:title>KMP 0305</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0401</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0401/krenke-playground-kmp-0401-render-perspectiva.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0401/kmp-0401-render-perspectiva.webp</image:loc>
       <image:title>KMP 0401</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0402</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0402/krenke-playground-kmp-0402-render-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0402/kmp-0402-render-perspectiva-2.webp</image:loc>
       <image:title>KMP 0402</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0404</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0404/krenke-playground-kmp-0404-render-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0404/kmp-0404-render-perspectiva.webp</image:loc>
       <image:title>KMP 0404</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0502</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0502/krenke-playground-kmp-0502-render-posterior.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0502/kmp-0502-render-perspectiva.webp</image:loc>
       <image:title>KMP 0502</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0601</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0601/krenke-playground-kmp-0601-render-perspectiva.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0601/kmp-0601-render-perspectiva.webp</image:loc>
       <image:title>KMP 0601</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0603</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0603/krenke-playground-kmp-0603-render-perspectiva.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0603/kmp-0603-render-perspectiva.webp</image:loc>
       <image:title>KMP 0603</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0702</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0702/krenke-playground-kmp-0702-render-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0702/kmp-0702-render-perspectiva-2.webp</image:loc>
       <image:title>KMP 0702</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-0901</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-0901/krenke-playground-kmp-0901-render-perspectiva.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-0901/kmp-0901-render-perspectiva.webp</image:loc>
       <image:title>KMP 0901</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/playgrounds-completos?produto=kmp-1101</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/kmp-1101/krenke-playground-kmp-1101-render-perspectiva-2.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/kmp-1101/kmp-1101-render-perspectiva.webp</image:loc>
       <image:title>KMP 1101</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=moto-de-molas</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/moto-de-molas/1772731411746-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/moto-de-molas/krenke-playground-brinquedo-moto-de-molas.webp</image:loc>
       <image:title>MOTO DE MOLAS</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/mobiliario-urbano-e-jardim?produto=p-92</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/p-92/1775282754786-0.webp</image:loc>
-      <image:title>Banco Krenke P-92</image:title>
-    </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/mobiliario-urbano-e-jardim?produto=p-92-a-colorido</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/p-92-a-colorido/1775283120542-0.webp</image:loc>
-      <image:title>P-92-A (COLORIDO)</image:title>
-    </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=piramide-de-cordas</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/piramide-de-cordas/krenke-playground-PIRAMIDE%20DE%20CORDAS.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/piramide-de-cordas/krenke-playground-piramide-de-cordas.webp</image:loc>
       <image:title>PIRÂMIDE DE CORDAS</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/pisos-de-borracha?produto=piso-emborrachado-40mm</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/linha-pet?produto=salto-pet-agility</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=scandere-domos</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/scandere-domos/1772731366363-0.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/scandere-domos/scandere-domos-perspectiva.webp</image:loc>
       <image:title>SCANDERE DOMOS</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/brinquedos-avulsos?produto=toboga-especial</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <image:image>
-      <image:loc>https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/toboga-especial/krenke-playground-TOBOGA%20ESPECIAL%20-%201.webp</image:loc>
+      <image:loc>https://site.krenke.com.br/assets/products/toboga-especial/krenke-playground-toboga-especial-1.webp</image:loc>
       <image:title>TOBOGÃ ESPECIAL</image:title>
     </image:image>
   </url>
   <url>
     <loc>https://site.krenke.com.br/produtos/categoria/linha-pet?produto=tunel-pet-3-curvas</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://site.krenke.com.br/blog/por-que-devo-morar-em-um-condomnio-que-tenha-playground</loc>
-    <lastmod>2026-04-16</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
