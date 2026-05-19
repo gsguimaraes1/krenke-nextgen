@@ -237,7 +237,6 @@ const ResellerArea: React.FC = () => {
           file_type: fileExt,
           folder_id: currentFolderId,
           size: file.size,
-          storage_path: key,
         }]);
 
       if (dbError) throw dbError;
