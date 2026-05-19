@@ -93,17 +93,23 @@ const ResellerArea: React.FC = () => {
       const { data: foldersResult } = await folderQuery.order('name');
       setFolders(foldersResult || []);
 
-      if (!currentFolderId) {
-        setFiles(STATIC_FILES);
-      } else {
-        let fileQuery = supabase.from('reseller_files').select('*');
+      let fileQuery = supabase.from('reseller_files').select('*');
+      if (currentFolderId) {
         fileQuery = fileQuery.eq('folder_id', currentFolderId);
-        const { data: filesResult } = await fileQuery.order('name');
+      } else {
+        fileQuery = fileQuery.is('folder_id', null);
+      }
+      const { data: filesResult } = await fileQuery.order('name');
+
+      if (!currentFolderId) {
+        setFiles([...STATIC_FILES, ...(filesResult || [])]);
+      } else {
         setFiles(filesResult || []);
       }
     } catch (error) {
       console.error('Error fetching content:', error);
       if (!currentFolderId) setFiles(STATIC_FILES);
+      else setFiles([]);
     } finally {
       setLoading(false);
     }
