@@ -25,6 +25,7 @@ import {
   HardDrive
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { uploadToR2, deleteFromR2 } from '../lib/r2-upload';
 import { useAuth } from '../context/AuthContext';
 import { ResellerFolder, ResellerFile, Profile } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -223,23 +224,11 @@ const ResellerArea: React.FC = () => {
 
     setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-      const filePath = currentFolderId ? `${currentFolderId}/${fileName}` : fileName;
+      const fileExt = file.name.split('.').pop() || '';
+      const folder = currentFolderId || undefined;
 
-      // 1. Upload to Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('reseller-files')
-        .upload(filePath, file);
+      const { publicUrl, key } = await uploadToR2(file, folder);
 
-      if (uploadError) throw uploadError;
-
-      // 2. Get Public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('reseller-files')
-        .getPublicUrl(filePath);
-
-      // 3. Save reference in DB
       const { error: dbError } = await supabase
         .from('reseller_files')
         .insert([{
@@ -247,7 +236,8 @@ const ResellerArea: React.FC = () => {
           file_url: publicUrl,
           file_type: fileExt,
           folder_id: currentFolderId,
-          size: file.size
+          size: file.size,
+          storage_path: key,
         }]);
 
       if (dbError) throw dbError;
@@ -266,11 +256,10 @@ const ResellerArea: React.FC = () => {
     if (!window.confirm(`Tem certeza que deseja excluir ${file.name}?`)) return;
 
     try {
-      // 1. Remove from Storage (requires parsing filename from URL or storing path)
-      // For simplicity, we'll assume the URL contains the path or we just delete metadata
-      // Ideally, we should store the 'storage_path' in the DB.
-      // But let's try to delete just from DB for now or handle storage later.
-      
+      if ((file as any).storage_path) {
+        await deleteFromR2((file as any).storage_path).catch(console.error);
+      }
+
       const { error } = await supabase
         .from('reseller_files')
         .delete()
