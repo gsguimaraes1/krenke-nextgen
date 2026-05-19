@@ -50,41 +50,59 @@ const ResellerArea: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const STATIC_FILES: ResellerFile[] = [
+    {
+      id: 'static-1',
+      name: 'Catálogo Krenke 2026',
+      file_url: 'https://pub-d6b3de974e824cbb8aa6e5256ef4f28b.r2.dev/CataloVFINAL-%20digital.pdf',
+      file_type: 'pdf',
+      folder_id: null,
+      size: 0,
+      created_at: '',
+    },
+    {
+      id: 'static-2',
+      name: 'Produtos Krenke Atualizado AVULSOS 2026',
+      file_url: 'https://pub-d6b3de974e824cbb8aa6e5256ef4f28b.r2.dev/Produtos%20Krenke%20%20Atualizado%20AVULSOS%202026.pdf',
+      file_type: 'pdf',
+      folder_id: null,
+      size: 0,
+      created_at: '',
+    },
+    {
+      id: 'static-3',
+      name: 'Tabela Playgrounds Matriz Revenda Atualizada 2026',
+      file_url: 'https://pub-d6b3de974e824cbb8aa6e5256ef4f28b.r2.dev/TABELA%20%20PLAYGROUNDS%20MATRIZ%20REVENDA%20%20ATUALIZADA%202026.pdf',
+      file_type: 'pdf',
+      folder_id: null,
+      size: 0,
+      created_at: '',
+    },
+  ];
+
   const fetchContent = async () => {
     setLoading(true);
     try {
-      // Fetch folders
-      const { data: foldersData, error: foldersError } = await supabase
-        .from('reseller_folders')
-        .select('*')
-        .eq('parent_id', currentFolderId || 'null') // Handling null parent_id
-        .order('name');
-
-      // Note: eq('parent_id', null) doesn't work in Postgrest for NULL. 
-      // Need to use is('parent_id', null) instead.
-      
       let folderQuery = supabase.from('reseller_folders').select('*');
       if (currentFolderId) {
         folderQuery = folderQuery.eq('parent_id', currentFolderId);
       } else {
         folderQuery = folderQuery.is('parent_id', null);
       }
-      
       const { data: foldersResult } = await folderQuery.order('name');
       setFolders(foldersResult || []);
 
-      // Fetch files
-      let fileQuery = supabase.from('reseller_files').select('*');
-      if (currentFolderId) {
-        fileQuery = fileQuery.eq('folder_id', currentFolderId);
+      if (!currentFolderId) {
+        setFiles(STATIC_FILES);
       } else {
-        fileQuery = fileQuery.is('folder_id', null);
+        let fileQuery = supabase.from('reseller_files').select('*');
+        fileQuery = fileQuery.eq('folder_id', currentFolderId);
+        const { data: filesResult } = await fileQuery.order('name');
+        setFiles(filesResult || []);
       }
-      
-      const { data: filesResult } = await fileQuery.order('name');
-      setFiles(filesResult || []);
     } catch (error) {
       console.error('Error fetching content:', error);
+      if (!currentFolderId) setFiles(STATIC_FILES);
     } finally {
       setLoading(false);
     }
@@ -476,8 +494,8 @@ const ResellerArea: React.FC = () => {
                           >
                             <Download size={18} />
                           </a>
-                          {isSuperAdmin && (
-                            <button 
+                          {isSuperAdmin && !file.id.startsWith('static-') && (
+                            <button
                               onClick={() => handleDeleteFile(file)}
                               className="p-2 text-slate-300 hover:text-red-500 transition-colors"
                             >
@@ -491,7 +509,7 @@ const ResellerArea: React.FC = () => {
                           <span className="text-[10px] uppercase font-black tracking-widest text-[#312783] bg-[#312783]/5 px-2 py-1 rounded-lg">
                               {file.file_type || 'unkn'}
                           </span>
-                          <span className="text-xs text-slate-400 font-bold">{formatSize(file.size)}</span>
+                          {file.size > 0 && <span className="text-xs text-slate-400 font-bold">{formatSize(file.size)}</span>}
                       </div>
                     </motion.div>
                   ))}
