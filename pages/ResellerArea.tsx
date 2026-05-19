@@ -243,9 +243,9 @@ const ResellerArea: React.FC = () => {
       if (dbError) throw dbError;
 
       fetchContent();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading file:', error);
-      alert('Erro ao subir arquivo');
+      alert('Erro ao subir arquivo: ' + (error?.message || JSON.stringify(error)));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
