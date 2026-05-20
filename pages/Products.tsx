@@ -241,7 +241,7 @@ const ProductModal: React.FC<{
                   onClick={() => toggleCart(product.id)}
                 >
                   <ShoppingCart size={24} />
-                  {inCart ? (i18n.language === 'pt' ? 'Adicionado ao Orçamento ✓' : 'Added to Quote ✓') : (i18n.language === 'pt' ? 'Adicionar ao Orçamento' : 'Add to Quote')}
+                  {inCart ? 'Adicionado ao Orçamento ✓' : 'Adicionar ao Orçamento'}
                 </button>
                 <div className="flex items-center justify-between opacity-40">
                   <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Krenke Playgrounds © 2026</span>
