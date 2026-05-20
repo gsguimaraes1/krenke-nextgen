@@ -283,7 +283,7 @@ const CatalogoPage: React.FC = () => {
     const [numPages, setNumPages] = useState<number | null>(null);
     const [isMobile, setIsMobile] = useState<boolean>(false);
     const [hasAccess, setHasAccess] = useState(false);
-    const pdfUrl = "https://pub-d6b3de974e824cbb8aa6e5256ef4f28b.r2.dev/catalogo/catalogo-krenke-2026.pdf";
+    const pdfUrl = "/catalogo-krenke-2026.pdf";
 
     useEffect(() => {
         const authorized = localStorage.getItem('krenke_catalog_authorized') === 'true';
