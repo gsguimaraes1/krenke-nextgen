@@ -25,6 +25,7 @@ const DynamicPage = React.lazy(() => import('./pages/DynamicPage'));
 const ResellerArea = React.lazy(() => import('./pages/ResellerArea'));
 
 import { captureUTMs } from './lib/utm-tracker';
+import { Analytics } from "@vercel/analytics/react";
 
 // Scroll to top on route change and trigger GTM pageview
 const ScrollToTop = () => {
@@ -97,6 +98,7 @@ const App: React.FC = () => {
           </Routes>
         </React.Suspense>
       </Router>
+      <Analytics />
     </AuthProvider>
   );
 };
