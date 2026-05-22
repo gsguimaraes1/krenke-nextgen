@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Outlet, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { Layout } from './components/Layout';
 import { Preloader } from './components/Preloader';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -53,6 +54,7 @@ const App: React.FC = () => {
       <Router>
         <Preloader />
         <ScrollToTop />
+        <Analytics />
         <React.Suspense fallback={<div className="h-screen w-screen bg-[#312783] flex items-center justify-center"><div className="w-10 h-10 border-4 border-white/20 border-t-vibrant-orange rounded-full animate-spin"></div></div>}>
           <Routes>
             {/* Public Routes with Main Layout */}
