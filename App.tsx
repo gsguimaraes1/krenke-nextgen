@@ -26,6 +26,7 @@ const ResellerArea = React.lazy(() => import('./pages/ResellerArea'));
 
 import { captureUTMs } from './lib/utm-tracker';
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Scroll to top on route change and trigger GTM pageview
 const ScrollToTop = () => {
@@ -99,6 +100,7 @@ const App: React.FC = () => {
         </React.Suspense>
       </Router>
       <Analytics />
+      <SpeedInsights />
     </AuthProvider>
   );
 };
