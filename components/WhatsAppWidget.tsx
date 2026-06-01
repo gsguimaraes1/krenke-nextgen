@@ -80,9 +80,21 @@ export const WhatsAppWidget: React.FC = () => {
       ...utms
     };
 
-    // 1. Save to Supabase
+    // 1. Save to Supabase (fire-and-forget)
     supabase.from('leads').insert([leadData]).then(({ error }) => {
       if (error) console.error('Supabase lead error:', error);
+    });
+
+    // GTM / Pixel dataLayer event
+    const eventId = `lead_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).dataLayer.push({
+      event: 'lead_whatsapp',
+      event_id: eventId,
+      lead_first_name: leadData.name.split(' ')[0].toLowerCase(),
+      lead_phone: leadData.phone,   // texto livre — normalizado pelo GTM jsp_phone_wa
+      lead_segment: leadData.segment,
+      lead_source: leadData.source,
     });
 
     // 2. Send to Webhook
@@ -96,8 +108,25 @@ export const WhatsAppWidget: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...leadData,
-          executionMode: mode
+          form_type: 'whatsapp',
+          name: leadData.name,
+          email: '',
+          phone: leadData.phone,
+          city: '',
+          state: '',
+          city_full: '',
+          client_type: '',
+          segment: leadData.segment,
+          message: leadData.message,
+          products: '',
+          source: 'WhatsApp Widget',
+          submitted_at: leadData.submitted_at,
+          utm_source: (leadData as any).utm_source || '',
+          utm_medium: (leadData as any).utm_medium || '',
+          utm_campaign: (leadData as any).utm_campaign || '',
+          utm_term: (leadData as any).utm_term || '',
+          utm_content: (leadData as any).utm_content || '',
+          utm_id: (leadData as any).utm_id || '',
         })
       }).catch(e => console.error('Webhook error:', e));
     }

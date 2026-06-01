@@ -212,6 +212,23 @@ const QuoteForm: React.FC = () => {
       const { error } = await supabase.from('leads').insert([data]);
       if (error) throw error;
 
+      // GTM / Pixel dataLayer event
+      const eventId = `lead_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: 'lead_orcamento',
+        event_id: eventId,
+        lead_email: data.email,
+        lead_phone: data.phone,                          // E.164 (+5547...)
+        lead_first_name: data.name.split(' ')[0].toLowerCase(),
+        lead_city: data.city.split(' - ')[0],            // "São Paulo - SP" → "São Paulo"
+        lead_state: data.city.split(' - ')[1] ?? '',     // "SP"
+        lead_segment: data.segment,
+        lead_client_type: data.client_type,
+        lead_products: data.products.join(', '),
+        lead_source: data.source,
+      });
+
       setSubmitSuccess(true);
 
       // SEND TO WEBHOOK
@@ -225,9 +242,25 @@ const QuoteForm: React.FC = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...data,
+            form_type: 'orcamento',
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            city: data.city.split(' - ')[0] || '',
+            state: data.city.split(' - ')[1] || '',
+            city_full: data.city,
+            client_type: data.client_type,
+            segment: data.segment,
+            message: data.message,
+            products: Array.isArray(data.products) ? data.products.join(', ') : '',
             source: 'Site Krenke - Orçamento',
-            submitted_at: new Date().toISOString()
+            submitted_at: new Date().toISOString(),
+            utm_source: data.utm_source || '',
+            utm_medium: data.utm_medium || '',
+            utm_campaign: data.utm_campaign || '',
+            utm_term: data.utm_term || '',
+            utm_content: data.utm_content || '',
+            utm_id: (data as any).utm_id || '',
           })
         }).catch(e => console.error('Webhook error:', e));
       }
