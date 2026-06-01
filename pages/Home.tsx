@@ -6,7 +6,9 @@ import { Post } from '../types';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { ShowcaseCard } from '../components/ui/ShowcaseCard';
-import heroVideo from '../assets/Home/videokrenke.mp4';
+// heroVideo removido — vídeo agora hospedado no YouTube para evitar bandwidth do Vercel
+const HERO_YOUTUBE_ID = 'SEU_ID_AQUI'; // substitua pelo ID do vídeo no YouTube
+import bannerKrenke from '../assets/banner Krenke.png';
 import { ImageCarousel } from '../components/ImageCarousel';
 import sobreImg from '../assets/Home/Menino-Home-krenke.webp';
 import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
@@ -19,99 +21,62 @@ import imgTematicos from '../assets/tematicos/TRATOR/trator - render 1.png';
 import { useTranslation } from 'react-i18next';
 import { TranslatableText } from '../components/TranslatableText';
 
+/* BANNER TEMPORÁRIO — descomente para reativar
+const HeroSection = () => (
+  <div className="relative w-full overflow-hidden pt-[60px]">
+    <img
+      src={bannerKrenke}
+      alt="Banner Krenke"
+      className="w-full h-auto block"
+    />
+    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent"></div>
+  </div>
+);
+*/
+
 const HeroSection = () => {
   const { t } = useTranslation();
   return (
     <div className="relative w-full h-[85vh] bg-krenke-purple overflow-hidden flex items-center justify-center">
-      {/* Video Background Wrapper */}
       <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover opacity-70 scale-105"
-        >
-          <source src={heroVideo} type="video/mp4" />
-        </video>
+        <iframe
+          src={`https://www.youtube.com/embed/C_KbvW2MjB8?autoplay=1&mute=1&loop=1&playlist=C_KbvW2MjB8&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`}
+          allow="autoplay; encrypted-media"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-70"
+          style={{ width: '177.78vh', minWidth: '100%', height: '56.25vw', minHeight: '100%', border: 'none' }}
+          title="Hero video"
+        />
       </div>
-
-      {/* Overlays for readability and color tinting */}
       <div className="absolute inset-0 bg-gradient-to-br from-krenke-purple/80 via-krenke-purple/60 to-blue-900/60 mix-blend-multiply z-10"></div>
       <div className="absolute inset-0 bg-black/10 z-10"></div>
-
-      {/* Gradient fade at bottom to merge with next section */}
       <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent z-10"></div>
-
-      {/* Content */}
       <div className="relative z-20 w-full flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-10 max-w-5xl"
-        >
-
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs md:text-sm font-bold tracking-[0.2em] uppercase shadow-2xl hover:bg-white/20 transition-all cursor-default"
-          >
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="space-y-10 max-w-5xl">
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs md:text-sm font-bold tracking-[0.2em] uppercase shadow-2xl hover:bg-white/20 transition-all cursor-default">
             <span className="w-2.5 h-2.5 rounded-full bg-vibrant-orange animate-vibrant-pulse shadow-[0_0_10px_#FF9F0A]"></span>
             <TranslatableText>Desde 1987 • A maior fábrica de playgrounds do Brasil</TranslatableText>
           </motion.div>
-
-          {/* Main Heading */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-[0.9] md:leading-[0.85] drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] uppercase">
             <TranslatableText>PLAYGROUNDS E</TranslatableText><br />
-            <motion.span
-              animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-              }}
-              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-              className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto]"
-            >
+            <motion.span animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }} transition={{ duration: 5, repeat: Infinity, ease: "linear" }} className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto]">
               <TranslatableText>PARQUES INFANTIS</TranslatableText>
             </motion.span>
           </h1>
-
-          {/* Description */}
           <p className="text-lg md:text-2xl lg:text-3xl text-white/90 max-w-3xl mx-auto font-medium leading-tight opacity-90 drop-shadow-md px-4">
             <TranslatableText>Transformamos espaços em mundos de pura diversão com segurança absoluta.</TranslatableText>
           </p>
-
-          {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
-            <Link
-              to="/produtos"
-              id="btn-home-hero-products"
-              className="group relative px-10 py-5 bg-vibrant-orange text-white font-black text-xl rounded-2xl overflow-hidden shadow-[0_20px_40px_-10px_rgba(243,146,0,0.5)] hover:shadow-[0_30px_60px_-10px_rgba(243,146,0,0.6)] transition-all hover:scale-110 gtm-home-hero-button-products flex items-center gap-3"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <TranslatableText>Explorar Produtos</TranslatableText> <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
-              </span>
+            <Link to="/produtos" id="btn-home-hero-products" className="group relative px-10 py-5 bg-vibrant-orange text-white font-black text-xl rounded-2xl overflow-hidden shadow-[0_20px_40px_-10px_rgba(243,146,0,0.5)] hover:shadow-[0_30px_60px_-10px_rgba(243,146,0,0.6)] transition-all hover:scale-110 gtm-home-hero-button-products flex items-center gap-3">
+              <span className="relative z-10 flex items-center gap-2"><TranslatableText>Explorar Produtos</TranslatableText> <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" /></span>
               <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-vibrant-orange opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
-
-            <Link
-              to="/orcamento"
-              id="btn-home-hero-quote"
-              className="px-10 py-5 bg-white/10 backdrop-blur-xl border-2 border-white/30 text-white font-black text-xl rounded-2xl hover:bg-white hover:text-krenke-purple transition-all flex items-center justify-center shadow-2xl gtm-home-hero-button-quote group"
-            >
+            <Link to="/orcamento" id="btn-home-hero-quote" className="px-10 py-5 bg-white/10 backdrop-blur-xl border-2 border-white/30 text-white font-black text-xl rounded-2xl hover:bg-white hover:text-krenke-purple transition-all flex items-center justify-center shadow-2xl gtm-home-hero-button-quote group">
               <span className="group-hover:scale-110 transition-transform"><TranslatableText>Fazer Orçamento</TranslatableText></span>
             </Link>
           </div>
         </motion.div>
       </div>
-
-      {/* Scroll Indicator */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 hidden md:block"
-      >
+      <motion.div animate={{ y: [0, 10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 hidden md:block">
         <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center p-1 backdrop-blur-sm">
           <div className="w-1.5 h-3 bg-white rounded-full animate-bounce"></div>
         </div>
