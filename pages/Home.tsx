@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { ShowcaseCard } from '../components/ui/ShowcaseCard';
 // heroVideo removido — vídeo agora hospedado no YouTube para evitar bandwidth do Vercel
-const HERO_YOUTUBE_ID = 'SEU_ID_AQUI'; // substitua pelo ID do vídeo no YouTube
+const HERO_YOUTUBE_ID = 'C_KbvW2MjB8';
 import bannerKrenke from '../assets/banner Krenke.png';
 import { ImageCarousel } from '../components/ImageCarousel';
 import sobreImg from '../assets/Home/Menino-Home-krenke.webp';
