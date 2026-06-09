@@ -23,6 +23,8 @@ const AuthPage = React.lazy(() => import('./pages/Auth'));
 const CatalogoPage = React.lazy(() => import('./pages/Catalogo'));
 const DynamicPage = React.lazy(() => import('./pages/DynamicPage'));
 const ResellerArea = React.lazy(() => import('./pages/ResellerArea'));
+const LpPage = React.lazy(() => import('./pages/Lp'));
+const WebviewPage = React.lazy(() => import('./pages/Webview'));
 
 import { captureUTMs } from './lib/utm-tracker';
 import { Analytics } from "@vercel/analytics/react";
@@ -74,6 +76,12 @@ const App: React.FC = () => {
               <Route path="/404" element={<Navigate to="/" replace />} />
               <Route path="/:slug" element={<DynamicPage />} />
             </Route>
+
+            {/* Landing Page - no main layout */}
+            <Route path="/lp" element={<LpPage />} />
+
+            {/* Deep Link WebView redirect - no layout */}
+            <Route path="/webview" element={<WebviewPage />} />
 
             {/* Auth Route */}
             <Route path="/login" element={<AuthPage />} />
