@@ -106,6 +106,19 @@ export const WhatsAppWidget: React.FC = () => {
       if (error) console.error('Supabase lead error:', error);
     });
 
+    // GTM / Pixel dataLayer event
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).dataLayer.push({
+      event: 'lead_whatsapp',
+      event_id: eventId,
+      lead_first_name: leadData.name.split(' ')[0].toLowerCase(),
+      lead_phone: leadData.phone,
+      lead_segment: leadData.segment,
+      lead_source: leadData.source,
+      lead_city: geoCity,
+      lead_state: geoState,
+    });
+
     // 2. Send to Webhook
     const mode = siteSettings.find(s => s.key === 'webhook_mode')?.value || 'test';
     const webhookUrl = mode === 'prod'

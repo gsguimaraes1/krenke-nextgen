@@ -216,11 +216,11 @@ const QuoteForm: React.FC = () => {
       setSubmitError(null);
       setSubmitSuccess(false);
 
-      // Write cookies synchronously — GTM gtm.formSubmit reads these at document level
-      // (React 18 root fires before document, so cookies are ready when GTM tag executes)
+      // Write cookies with precise IBGE data — overwrites Stape geo (less accurate)
+      // Also persists lead data for cross-page remarketing audiences
       const eventId = `lead_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       const cityParts = data.city.split(' - ');
-      writeCookie('ck_cidade', cityParts[0] || '');      // IBGE precise — overwrites Stape geo
+      writeCookie('ck_cidade', cityParts[0] || '');
       writeCookie('ck_estado', cityParts[1] || '');
       writeCookie('ck_email', data.email);
       writeCookie('ck_phone', data.phone);
@@ -229,6 +229,22 @@ const QuoteForm: React.FC = () => {
 
       const { error } = await supabase.from('leads').insert([data]);
       if (error) throw error;
+
+      // GTM / Pixel dataLayer event
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: 'lead_orcamento',
+        event_id: eventId,
+        lead_email: data.email,
+        lead_phone: data.phone,
+        lead_first_name: data.name.split(' ')[0].toLowerCase(),
+        lead_city: cityParts[0] || '',
+        lead_state: cityParts[1] ?? '',
+        lead_segment: data.segment,
+        lead_client_type: data.client_type,
+        lead_products: data.products.join(', '),
+        lead_source: data.source,
+      });
 
       setSubmitSuccess(true);
 
