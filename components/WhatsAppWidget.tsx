@@ -59,15 +59,22 @@ export const WhatsAppWidget: React.FC = () => {
 
   const WHATSAPP_NUMBER = '554733730693';
 
+  const readCookie = (name: string) => {
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : '';
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim() || !phone.trim() || !segment || !message.trim()) return;
     if (segment === 'outros' && !otherSegment.trim()) return;
 
     const finalSegmentLabel = segment === 'outros' ? otherSegment : segment;
 
     const utms = getStoredUTMs();
+    const geoCity = readCookie('ck_cidade');
+    const geoState = readCookie('ck_estado');
 
     // Prepare lead data
     const leadData = {
@@ -92,9 +99,11 @@ export const WhatsAppWidget: React.FC = () => {
       event: 'lead_whatsapp',
       event_id: eventId,
       lead_first_name: leadData.name.split(' ')[0].toLowerCase(),
-      lead_phone: leadData.phone,   // texto livre — normalizado pelo GTM jsp_phone_wa
+      lead_phone: leadData.phone,
       lead_segment: leadData.segment,
       lead_source: leadData.source,
+      lead_city: geoCity,
+      lead_state: geoState,
     });
 
     // 2. Send to Webhook
@@ -112,9 +121,9 @@ export const WhatsAppWidget: React.FC = () => {
           name: leadData.name,
           email: '',
           phone: leadData.phone,
-          city: '',
-          state: '',
-          city_full: '',
+          city: geoCity,
+          state: geoState,
+          city_full: geoCity ? `${geoCity} - ${geoState}` : '',
           client_type: '',
           segment: leadData.segment,
           message: leadData.message,

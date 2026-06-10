@@ -8,6 +8,7 @@ export const captureUTMs = () => {
     utm_campaign: urlParams.get('utm_campaign'),
     utm_term: urlParams.get('utm_term'),
     utm_content: urlParams.get('utm_content'),
+    utm_id: urlParams.get('utm_id'),
   };
 
   // Only store if at least one UTM is present
