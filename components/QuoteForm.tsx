@@ -12,6 +12,13 @@ import { getStoredUTMs } from '../lib/utm-tracker';
 const normalizeText = (text: string) =>
   text ? text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
 
+const writeCookie = (name: string, value: string) => {
+  if (!value) return;
+  const exp = new Date();
+  exp.setFullYear(exp.getFullYear() + 1);
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${exp.toUTCString()}; path=/; SameSite=Lax`;
+};
+
 const CustomPhoneInput = React.forwardRef<HTMLInputElement, any>((props, ref) => (
   <input
     {...props}
@@ -209,25 +216,19 @@ const QuoteForm: React.FC = () => {
       setSubmitError(null);
       setSubmitSuccess(false);
 
+      // Write cookies synchronously — GTM gtm.formSubmit reads these at document level
+      // (React 18 root fires before document, so cookies are ready when GTM tag executes)
+      const eventId = `lead_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const cityParts = data.city.split(' - ');
+      writeCookie('ck_cidade', cityParts[0] || '');      // IBGE precise — overwrites Stape geo
+      writeCookie('ck_estado', cityParts[1] || '');
+      writeCookie('ck_email', data.email);
+      writeCookie('ck_phone', data.phone);
+      writeCookie('ck_first_name', data.name.split(' ')[0].toLowerCase());
+      writeCookie('ck_event_id', eventId);
+
       const { error } = await supabase.from('leads').insert([data]);
       if (error) throw error;
-
-      // GTM / Pixel dataLayer event
-      const eventId = `lead_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      (window as any).dataLayer = (window as any).dataLayer || [];
-      (window as any).dataLayer.push({
-        event: 'lead_orcamento',
-        event_id: eventId,
-        lead_email: data.email,
-        lead_phone: data.phone,                          // E.164 (+5547...)
-        lead_first_name: data.name.split(' ')[0].toLowerCase(),
-        lead_city: data.city.split(' - ')[0],            // "São Paulo - SP" → "São Paulo"
-        lead_state: data.city.split(' - ')[1] ?? '',     // "SP"
-        lead_segment: data.segment,
-        lead_client_type: data.client_type,
-        lead_products: data.products.join(', '),
-        lead_source: data.source,
-      });
 
       setSubmitSuccess(true);
 
