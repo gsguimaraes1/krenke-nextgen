@@ -14,6 +14,8 @@ const normalizeText = (text: string) =>
 
 const writeCookie = (name: string, value: string) => {
   if (!value) return;
+  // expire legacy hostOnly cookie (written before domain fix)
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:01 UTC; path=/; SameSite=Lax`;
   const exp = new Date();
   exp.setFullYear(exp.getFullYear() + 1);
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${exp.toUTCString()}; path=/; domain=.krenke.com.br; SameSite=Lax`;
