@@ -16,7 +16,7 @@ const writeCookie = (name: string, value: string) => {
   if (!value) return;
   const exp = new Date();
   exp.setFullYear(exp.getFullYear() + 1);
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${exp.toUTCString()}; path=/; SameSite=Lax`;
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${exp.toUTCString()}; path=/; domain=.krenke.com.br; SameSite=Lax`;
 };
 
 const CustomPhoneInput = React.forwardRef<HTMLInputElement, any>((props, ref) => (

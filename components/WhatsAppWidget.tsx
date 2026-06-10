@@ -68,7 +68,7 @@ export const WhatsAppWidget: React.FC = () => {
     if (!value) return;
     const exp = new Date();
     exp.setFullYear(exp.getFullYear() + 1);
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${exp.toUTCString()}; path=/; SameSite=Lax`;
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${exp.toUTCString()}; path=/; domain=.krenke.com.br; SameSite=Lax`;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
