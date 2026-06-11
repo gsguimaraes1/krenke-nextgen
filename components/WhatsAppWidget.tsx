@@ -14,11 +14,21 @@ export const WhatsAppWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [clientType, setClientType] = useState('');
   const [segment, setSegment] = useState('');
   const [otherSegment, setOtherSegment] = useState('');
   const [message, setMessage] = useState('');
   const [isOffline, setIsOffline] = useState(false);
   const [siteSettings, setSiteSettings] = useState<any[]>([]);
+
+  function maskPhone(v: string) {
+    v = v.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 10) return v.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    if (v.length > 6) return v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    if (v.length > 2) return v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+    return v.length ? `(${v}` : v;
+  }
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -76,7 +86,7 @@ export const WhatsAppWidget: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim() || !phone.trim() || !segment || !message.trim()) return;
+    if (!name.trim() || !phone.trim() || !email.trim() || !clientType || !segment || !message.trim()) return;
     if (segment === 'outros' && !otherSegment.trim()) return;
 
     const finalSegmentLabel = segment === 'outros' ? otherSegment : segment;
@@ -96,6 +106,8 @@ export const WhatsAppWidget: React.FC = () => {
     const leadData = {
       name: name.trim(),
       phone: phone.trim(),
+      email: email.trim(),
+      client_type: clientType,
       segment: finalSegmentLabel,
       message: message.trim(),
       source: 'WhatsApp Widget',
@@ -133,13 +145,15 @@ export const WhatsAppWidget: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           form_type: 'whatsapp',
+          form_id: 'wa_widget_react',
+          form_name: 'WhatsApp Widget Site Principal',
           name: leadData.name,
-          email: '',
+          email: leadData.email,
           phone: leadData.phone,
           city: geoCity,
           state: geoState,
           city_full: geoCity ? `${geoCity} - ${geoState}` : '',
-          client_type: '',
+          client_type: leadData.client_type,
           segment: leadData.segment,
           message: leadData.message,
           products: '',
@@ -219,8 +233,8 @@ export const WhatsAppWidget: React.FC = () => {
               <div>
                 <input
                   type="text"
-                  id="form-wa-name"
-                  name="form_fields[name]"
+                  id="form-nome"
+                  name="form_fields[nome]"
                   placeholder="Seu Nome Completo *"
                   required
                   value={name}
@@ -232,19 +246,48 @@ export const WhatsAppWidget: React.FC = () => {
               <div>
                 <input
                   type="tel"
-                  id="form-wa-phone"
+                  id="form-telefone"
                   name="form_fields[telefone]"
                   placeholder="Seu Celular / WhatsApp *"
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => setPhone(maskPhone(e.target.value))}
                   className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] px-4 py-2.5 rounded-xl font-bold text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400"
                 />
               </div>
 
+              <div>
+                <input
+                  type="email"
+                  id="form-email"
+                  name="form_fields[email]"
+                  placeholder="Seu E-mail *"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] px-4 py-2.5 rounded-xl font-bold text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400"
+                />
+              </div>
+
+              <div>
+                <select
+                  id="form-tipo-cliente"
+                  name="form_fields[tipo_cliente]"
+                  value={clientType}
+                  onChange={(e) => setClientType(e.target.value)}
+                  required
+                  className={`w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] px-4 py-2.5 rounded-xl font-bold text-sm outline-none transition-all appearance-none cursor-pointer ${clientType ? 'text-gray-900' : 'text-gray-400'}`}
+                >
+                  <option value="" disabled>Tipo de cliente *</option>
+                  <option value="Pessoa Física">Pessoa Física</option>
+                  <option value="Pessoa Jurídica">Pessoa Jurídica</option>
+                  <option value="Órgão Público">Órgão Público</option>
+                </select>
+              </div>
+
               <div className="space-y-2">
                 <select
-                  id="form-wa-segment"
+                  id="form-segmento"
                   name="form_fields[segmento]"
                   value={segment}
                   onChange={(e) => {
@@ -275,7 +318,7 @@ export const WhatsAppWidget: React.FC = () => {
                     >
                       <input
                         type="text"
-                        id="form-wa-segment-other"
+                        id="form-segmento-outro"
                         placeholder="Qual o seu segmento? *"
                         required
                         value={otherSegment}
@@ -289,7 +332,7 @@ export const WhatsAppWidget: React.FC = () => {
 
               <div>
                 <textarea
-                  id="form-wa-message"
+                  id="form-mensagem"
                   name="form_fields[mensagem]"
                   placeholder="Como podemos te ajudar? *"
                   required
@@ -303,7 +346,7 @@ export const WhatsAppWidget: React.FC = () => {
               <button
                 type="submit"
                 id="form-wa-submit"
-                disabled={!name.trim() || !phone.trim() || !segment || !message.trim() || (segment === 'outros' && !otherSegment.trim())}
+                disabled={!name.trim() || !phone.trim() || !email.trim() || !clientType || !segment || !message.trim() || (segment === 'outros' && !otherSegment.trim())}
                 className={`w-full text-white font-black text-xs uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 shadow-lg mt-1 gtm-wa-widget-submit ${
                   isOffline ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' : 'bg-[#25D366] hover:bg-[#20bd5a] shadow-[#25D366]/20'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
