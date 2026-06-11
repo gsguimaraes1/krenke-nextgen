@@ -166,6 +166,8 @@ function WhatsAppWidget() {
   const [isOnline, setIsOnline] = useState(true);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [clientType, setClientType] = useState('');
   const [segment, setSegment] = useState('');
   const [otherSegment, setOtherSegment] = useState('');
   const [message, setMessage] = useState('');
@@ -189,8 +191,8 @@ function WhatsAppWidget() {
     return v.length ? `(${v}` : v;
   }
 
-  const canSubmit = name.trim() && phone.trim() && segment &&
-    message.trim() && (segment !== 'Outros' || otherSegment.trim());
+  const canSubmit = name.trim() && phone.trim() && email.trim() && clientType &&
+    segment && message.trim() && (segment !== 'Outros' || otherSegment.trim());
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -203,8 +205,8 @@ function WhatsAppWidget() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        Nome: name, Telefone: phone, 'Selecione um segmento': finalSegment,
-        Mensagem: message, ...utms,
+        Nome: name, Telefone: phone, Email: email, TipoCliente: clientType,
+        'Selecione um segmento': finalSegment, Mensagem: message, ...utms,
         Data: new Date().toLocaleDateString('pt-BR'),
         Horário: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
         form_id: 'wa_widget_react',
@@ -263,6 +265,25 @@ function WhatsAppWidget() {
                 placeholder="Seu Celular / WhatsApp *"
                 value={phone} onChange={e => setPhone(maskPhone(e.target.value))} required
               />
+              <input
+                id="form-email"
+                name="form_fields[email]"
+                type="email"
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors"
+                placeholder="Seu E-mail *"
+                value={email} onChange={e => setEmail(e.target.value)} required
+              />
+              <select
+                id="form-tipo-cliente"
+                name="form_fields[tipo_cliente]"
+                className={`w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors ${!clientType ? 'text-gray-400' : 'text-gray-900'}`}
+                value={clientType} onChange={e => setClientType(e.target.value)} required
+              >
+                <option value="" disabled>Tipo de cliente *</option>
+                <option value="Pessoa Física">Pessoa Física</option>
+                <option value="Pessoa Jurídica">Pessoa Jurídica</option>
+                <option value="Órgão Público">Órgão Público</option>
+              </select>
               <select
                 id="form-segmento"
                 name="form_fields[segmento]"
