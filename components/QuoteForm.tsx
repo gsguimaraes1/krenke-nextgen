@@ -127,12 +127,12 @@ const QuoteForm: React.FC = () => {
     const formData = new FormData(e.target as HTMLFormElement);
     const finalSegment = segment === 'outros' ? otherSegment : segment;
     const data = {
-      name: (formData.get('form_fields[name]') as string || '').trim(),
+      name: (formData.get('form_orc_name') as string || '').trim(),
       phone: phone || '',
-      email: (formData.get('form_fields[email]') as string || '').trim().toLowerCase(),
+      email: (formData.get('form_orc_email') as string || '').trim().toLowerCase(),
       client_type: clientType,
       segment: finalSegment,
-      message: (formData.get('form_fields[mensagem]') as string || '').trim(),
+      message: (formData.get('form_orc_mensagem') as string || '').trim(),
       products: selectedProducts.map(id => products.find(p => p.id === id)?.name || id),
       source: 'Site Krenke - Orçamento',
       submitted_at: new Date().toISOString(),
@@ -192,19 +192,24 @@ const QuoteForm: React.FC = () => {
       const { error } = await supabase.from('leads').insert([data]);
       if (error) throw error;
 
-      // GTM / Pixel dataLayer event
+      /* GTM evento lead_orcamento — desativado
       (window as any).dataLayer = (window as any).dataLayer || [];
+      const phoneRaw = data.phone.replace(/\D/g, '');
+      const phoneFormatted = phoneRaw.startsWith('55') ? phoneRaw : '55' + phoneRaw;
       (window as any).dataLayer.push({
         event: 'lead_orcamento',
         event_id: eventId,
-        lead_email: data.email,
-        lead_phone: data.phone,
+        lead_name: data.name,
         lead_first_name: data.name.split(' ')[0].toLowerCase(),
+        lead_email: data.email,
+        lead_phone: phoneFormatted,
         lead_segment: data.segment,
         lead_client_type: data.client_type,
+        lead_message: data.message,
         lead_products: data.products.join(', '),
         lead_source: data.source,
       });
+      */
 
       setSubmitSuccess(true);
       navigate('/obrigado');
@@ -295,7 +300,7 @@ const QuoteForm: React.FC = () => {
                 autoComplete="off"
               />
             </div>
-            
+
             {/* UTM Hidden Fields */}
             {Object.entries(utms).map(([key, value]) => (
               <input key={key} type="hidden" name={key} value={value as string || ''} />
@@ -306,7 +311,7 @@ const QuoteForm: React.FC = () => {
               <div className="space-y-4">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Identificação</label>
                 <input
-                  name="form_fields[name]"
+                  name="form_orc_name"
                   id="form-quote-name"
                   value={nameInput}
                   onChange={e => setNameInput(e.target.value)}
@@ -324,7 +329,7 @@ const QuoteForm: React.FC = () => {
                     defaultCountry="BR"
                     value={phone}
                     onChange={setPhone}
-                    name="form_fields[telefone]"
+                    name="form_orc_telefone"
                     placeholder="(00) 00000-0000"
                     inputComponent={CustomPhoneInput}
                     className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus-within:border-vibrant-purple rounded-2xl outline-none font-black text-gray-900 transition-all shadow-sm focus-within:shadow-vibrant-purple flex items-center gap-4"
@@ -338,7 +343,7 @@ const QuoteForm: React.FC = () => {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Tipo de Cliente</label>
                 <select
                   id="form-quote-client-type"
-                  name="form_fields[tipo_cliente]"
+                  name="form_orc_tipo_cliente"
                   value={clientType}
                   onChange={(e) => setClientType(e.target.value)}
                   required
@@ -354,7 +359,7 @@ const QuoteForm: React.FC = () => {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Seu E-mail Corporativo</label>
                 <input
                   type="email"
-                  name="form_fields[email]"
+                  name="form_orc_email"
                   id="form-quote-email"
                   value={emailInput}
                   onChange={e => setEmailInput(e.target.value)}
@@ -371,7 +376,7 @@ const QuoteForm: React.FC = () => {
                 <div className="space-y-4">
                   <select
                     id="form-quote-segment"
-                    name="form_fields[segmento]"
+                    name="form_orc_segmento"
                     value={segment}
                     onChange={(e) => setSegment(e.target.value)}
                     required
@@ -462,7 +467,7 @@ const QuoteForm: React.FC = () => {
             <div className="space-y-4">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Detalhes do Projeto</label>
               <textarea
-                name="form_fields[mensagem]"
+                name="form_orc_mensagem"
                 id="form-quote-message"
                 value={messageInput}
                 onChange={e => setMessageInput(e.target.value)}

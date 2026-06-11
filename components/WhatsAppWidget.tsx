@@ -43,22 +43,22 @@ export const WhatsAppWidget: React.FC = () => {
     const checkStatus = () => {
       const now = new Date();
       const day = now.getDay();
-      
+
       // 0 = Dom, 6 = Sáb
       if (day === 0 || day === 6) {
         setIsOffline(true);
         return;
       }
-      
+
       const hour = now.getHours();
       const minute = now.getMinutes();
       const time = hour + (minute / 60);
-      
+
       // Matutino: 07:30 - 12:00
       const isMorning = time >= 7.5 && time < 12;
       // Vespertino: 13:00 - 17:30
       const isAfternoon = time >= 13 && time < 17.5;
-      
+
       setIsOffline(!(isMorning || isAfternoon));
     };
 
@@ -120,18 +120,25 @@ export const WhatsAppWidget: React.FC = () => {
       if (error) console.error('Supabase lead error:', error);
     });
 
-    // GTM / Pixel dataLayer event
+    /* GTM evento lead_whatsapp — desativado
+    const phoneRaw = phone.trim().replace(/\D/g, '');
+    const phoneFormatted = phoneRaw.startsWith('55') ? phoneRaw : '55' + phoneRaw;
     (window as any).dataLayer = (window as any).dataLayer || [];
     (window as any).dataLayer.push({
       event: 'lead_whatsapp',
       event_id: eventId,
+      lead_name: leadData.name,
       lead_first_name: leadData.name.split(' ')[0].toLowerCase(),
-      lead_phone: leadData.phone,
+      lead_email: leadData.email,
+      lead_phone: phoneFormatted,
+      lead_client_type: leadData.client_type,
       lead_segment: leadData.segment,
+      lead_message: leadData.message,
       lead_source: leadData.source,
       lead_city: geoCity,
       lead_state: geoState,
     });
+    */
 
     // 2. Send to Webhook
     const mode = siteSettings.find(s => s.key === 'webhook_mode')?.value || 'test';
@@ -145,7 +152,7 @@ export const WhatsAppWidget: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           form_type: 'whatsapp',
-          form_id: 'wa_widget_react',
+          //form_id: 'wa_widget_react',
           form_name: 'WhatsApp Widget Site Principal',
           name: leadData.name,
           email: leadData.email,
@@ -171,10 +178,10 @@ export const WhatsAppWidget: React.FC = () => {
 
     let finalMessage = `Olá, me chamo ${name}.`;
     if (finalSegmentLabel) finalMessage += ` Sou do segmento de ${finalSegmentLabel}.`;
-    
+
     const baseText = message.trim();
     finalMessage += `\n\n${baseText}`;
-    
+
     const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(finalMessage)}`;
     window.open(waUrl, '_blank');
     setIsOpen(false);
@@ -205,7 +212,7 @@ export const WhatsAppWidget: React.FC = () => {
                   <p className="text-[10px] font-bold text-white/90 uppercase">{isOffline ? 'Fora de Atendimento' : 'Atendimento Online'}</p>
                 </div>
               </div>
-              <button 
+              <button
                 id="btn-wa-widget-close"
                 onClick={() => setIsOpen(false)}
                 className="text-white hover:bg-white/20 p-2 rounded-full transition-all relative z-10 gtm-wa-widget-close"
@@ -233,8 +240,8 @@ export const WhatsAppWidget: React.FC = () => {
               <div>
                 <input
                   type="text"
-                  id="form-quote-name"
-                  name="form_fields[nome]"
+                  id="wa-form-name"
+                  name="wa_widget_nome"
                   placeholder="Seu Nome Completo *"
                   required
                   value={name}
@@ -246,8 +253,8 @@ export const WhatsAppWidget: React.FC = () => {
               <div>
                 <input
                   type="tel"
-                  id="form-quote-phone"
-                  name="form_fields[telefone]"
+                  id="wa-form-phone"
+                  name="wa_widget_telefone"
                   placeholder="Seu Celular / WhatsApp *"
                   required
                   value={phone}
@@ -259,8 +266,8 @@ export const WhatsAppWidget: React.FC = () => {
               <div>
                 <input
                   type="email"
-                  id="form-quote-email"
-                  name="form_fields[email]"
+                  id="wa-form-email"
+                  name="wa_widget_email"
                   placeholder="Seu E-mail *"
                   required
                   value={email}
@@ -271,8 +278,8 @@ export const WhatsAppWidget: React.FC = () => {
 
               <div>
                 <select
-                  id="form-quote-client-type"
-                  name="form_fields[tipo_cliente]"
+                  id="wa-form-client-type"
+                  name="wa_widget_tipo_cliente"
                   value={clientType}
                   onChange={(e) => setClientType(e.target.value)}
                   required
@@ -287,8 +294,8 @@ export const WhatsAppWidget: React.FC = () => {
 
               <div className="space-y-2">
                 <select
-                  id="form-quote-segment"
-                  name="form_fields[segmento]"
+                  id="wa-form-segment"
+                  name="wa_widget_segmento"
                   value={segment}
                   onChange={(e) => {
                     setSegment(e.target.value);
@@ -318,7 +325,7 @@ export const WhatsAppWidget: React.FC = () => {
                     >
                       <input
                         type="text"
-                        id="form-quote-segment-other"
+                        id="wa-form-segment-other"
                         placeholder="Qual o seu segmento? *"
                         required
                         value={otherSegment}
@@ -332,8 +339,8 @@ export const WhatsAppWidget: React.FC = () => {
 
               <div>
                 <textarea
-                  id="form-quote-message"
-                  name="form_fields[mensagem]"
+                  id="wa-form-message"
+                  name="wa_widget_mensagem"
                   placeholder="Como podemos te ajudar? *"
                   required
                   rows={2}
@@ -366,14 +373,14 @@ export const WhatsAppWidget: React.FC = () => {
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
         className={`w-14 h-14 md:w-16 md:h-16 text-white rounded-full flex items-center justify-center transition-all relative group gtm-wa-widget-toggle ${
-          isOffline 
-            ? 'bg-red-500 shadow-[0_8px_30px_rgba(239,68,68,0.4)] hover:shadow-[0_8px_30px_rgba(239,68,68,0.6)]' 
+          isOffline
+            ? 'bg-red-500 shadow-[0_8px_30px_rgba(239,68,68,0.4)] hover:shadow-[0_8px_30px_rgba(239,68,68,0.6)]'
             : 'bg-[#25D366] shadow-[0_8px_30px_rgba(37,211,102,0.4)] hover:shadow-[0_8px_30px_rgba(37,211,102,0.6)]'
         }`}
       >
         <div className="absolute inset-0 bg-white/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
         {isOpen ? <X size={28} className="relative z-10" /> : <WhatsAppIcon className="w-8 h-8 relative z-10" />}
-        
+
         {/* Pulse effect when closed */}
         {!isOpen && (
           <>

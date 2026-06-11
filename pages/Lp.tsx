@@ -718,13 +718,13 @@ export default function LpPage() {
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
               <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/15">
                 <p className="text-white font-bold text-base mb-6">Preencha os campos para ser atendido.</p>
-                <form onSubmit={handleFormSubmit} className="space-y-4">
+                <form id="form-lp" onSubmit={handleFormSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Nome</label>
                       <input
                         id="form-quote-name"
-                        name="form_fields[nome]"
+                        name="form_lp_nome"
                         className={inputCls}
                         placeholder="Nome completo"
                         value={formData.nome} onChange={field('nome')} required
@@ -734,7 +734,7 @@ export default function LpPage() {
                       <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Telefone</label>
                       <input
                         id="form-quote-phone"
-                        name="form_fields[telefone]"
+                        name="form_lp_telefone"
                         className={inputCls}
                         placeholder="(00) 00000-0000"
                         value={formData.telefone} onChange={field('telefone')} required
@@ -745,7 +745,7 @@ export default function LpPage() {
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">E-mail</label>
                     <input
                       id="form-quote-email"
-                      name="form_fields[email]"
+                      name="form_lp_email"
                       type="email"
                       className={inputCls}
                       placeholder="seu@email.com"
@@ -756,7 +756,7 @@ export default function LpPage() {
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Tipo de Cliente</label>
                     <select
                       id="form-quote-client-type"
-                      name="form_fields[tipo_cliente]"
+                      name="form_lp_tipo_cliente"
                       className={selectCls(formData.tipo_cliente)}
                       value={formData.tipo_cliente} onChange={field('tipo_cliente')} required
                     >
@@ -770,7 +770,7 @@ export default function LpPage() {
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Segmento</label>
                     <select
                       id="form-quote-segment"
-                      name="form_fields[segmento]"
+                      name="form_lp_segmento"
                       className={selectCls(formData.segmento)}
                       value={formData.segmento} onChange={field('segmento')} required
                     >
@@ -782,7 +782,7 @@ export default function LpPage() {
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Mensagem</label>
                     <textarea
                       id="form-quote-message"
-                      name="form_fields[mensagem]"
+                      name="form_lp_mensagem"
                       className={`${inputCls} resize-none`}
                       placeholder="Como podemos te ajudar?"
                       rows={3}
