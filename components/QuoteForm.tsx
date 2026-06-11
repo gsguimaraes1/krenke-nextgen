@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Search, Loader2, Send, Phone, Mail, MapPin, Plus } from 'lucide-react';
+import { Check, Search, Loader2, Send, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Product } from '../types';
-import Select, { createFilter } from 'react-select';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { getStoredUTMs } from '../lib/utm-tracker';
+import { useNavigate } from 'react-router-dom';
 
 
 const normalizeText = (text: string) =>
@@ -24,13 +24,14 @@ const writeCookie = (name: string, value: string) => {
 const CustomPhoneInput = React.forwardRef<HTMLInputElement, any>((props, ref) => (
   <input
     {...props}
-    id="form-quote-phone"
+    id="form-telefone"
     ref={ref}
     className="w-full bg-transparent outline-none font-black text-gray-900 placeholder:text-gray-300"
   />
 ));
 
 const QuoteForm: React.FC = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>(() => {
     try {
@@ -58,14 +59,10 @@ const QuoteForm: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // New fields
-  const [cities, setCities] = useState<{ value: string, label: string }[]>([]);
-  const [selectedCity, setSelectedCity] = useState<{ value: string, label: string } | null>(null);
   const [phone, setPhone] = useState<string | undefined>('');
   const [segment, setSegment] = useState<string>('');
   const [otherSegment, setOtherSegment] = useState<string>('');
-  const [isLoadingCities, setIsLoadingCities] = useState(false);
   const [siteSettings, setSiteSettings] = useState<any[]>([]);
-  const [citySearch, setCitySearch] = useState('');
   const [utms, setUtms] = useState<any>({});
   const [clientType, setClientType] = useState<string>('');
   const [nameInput, setNameInput] = useState('');
@@ -81,9 +78,8 @@ const QuoteForm: React.FC = () => {
     const fetchConfigs = async () => {
       try {
         // Fetch products, cities and site settings in parallel
-        const [productsRes, citiesRes, settingsRes] = await Promise.all([
+        const [productsRes, settingsRes] = await Promise.all([
           supabase.from('products').select('*').order('name', { ascending: true }),
-          fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios?orderBy=nome'),
           supabase.from('site_settings').select('*')
         ]);
 
@@ -91,19 +87,6 @@ const QuoteForm: React.FC = () => {
         if (!productsRes.error) {
           setProducts(productsRes.data || []);
         }
-
-        // Handle Cities
-        const citiesData = await citiesRes.json();
-        const formattedCities = citiesData.map((city: any) => {
-          const uf = city.microrregiao?.mesorregiao?.UF?.sigla ||
-            city['regiao-imediata']?.['regiao-intermediaria']?.UF?.sigla ||
-            '';
-          return {
-            value: `${city.nome} - ${uf}`,
-            label: `${city.nome} - ${uf}`
-          };
-        });
-        setCities(formattedCities);
 
         // Handle Settings (Webhooks)
         if (!settingsRes.error && settingsRes.data) {
@@ -115,7 +98,6 @@ const QuoteForm: React.FC = () => {
         setProducts([]);
       } finally {
         setLoading(false);
-        setIsLoadingCities(false);
       }
     };
     fetchConfigs();
@@ -131,18 +113,6 @@ const QuoteForm: React.FC = () => {
       p.category.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [products, searchTerm]);
-
-  // Optimize City options by using useMemo
-  const cityOptions = useMemo(() => cities, [cities]);
-
-  // Limit city results to 50 for extreme performance
-  const displayedCities = useMemo(() => {
-    if (!citySearch) return cityOptions.slice(0, 20);
-    const search = normalizeText(citySearch);
-    return cityOptions
-      .filter(city => normalizeText(city.label).includes(search))
-      .slice(0, 50);
-  }, [cityOptions, citySearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +130,6 @@ const QuoteForm: React.FC = () => {
       name: (formData.get('form_fields[name]') as string || '').trim(),
       phone: phone || '',
       email: (formData.get('form_fields[email]') as string || '').trim().toLowerCase(),
-      city: selectedCity?.value || '',
       client_type: clientType,
       segment: finalSegment,
       message: (formData.get('form_fields[mensagem]') as string || '').trim(),
@@ -190,12 +159,6 @@ const QuoteForm: React.FC = () => {
       return;
     }
 
-    if (!data.city) {
-      setSubmitError('Por favor, selecione sua cidade.');
-      setIsSubmitting(false);
-      return;
-    }
-
     if (!clientType) {
       setSubmitError('Por favor, selecione o tipo de cliente.');
       setIsSubmitting(false);
@@ -221,9 +184,6 @@ const QuoteForm: React.FC = () => {
       // Write cookies with precise IBGE data — overwrites Stape geo (less accurate)
       // Also persists lead data for cross-page remarketing audiences
       const eventId = `lead_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      const cityParts = data.city.split(' - ');
-      writeCookie('ck_cidade', cityParts[0] || '');
-      writeCookie('ck_estado', cityParts[1] || '');
       writeCookie('ck_email', data.email);
       writeCookie('ck_phone', data.phone);
       writeCookie('ck_first_name', data.name.split(' ')[0].toLowerCase());
@@ -240,8 +200,6 @@ const QuoteForm: React.FC = () => {
         lead_email: data.email,
         lead_phone: data.phone,
         lead_first_name: data.name.split(' ')[0].toLowerCase(),
-        lead_city: cityParts[0] || '',
-        lead_state: cityParts[1] ?? '',
         lead_segment: data.segment,
         lead_client_type: data.client_type,
         lead_products: data.products.join(', '),
@@ -249,6 +207,7 @@ const QuoteForm: React.FC = () => {
       });
 
       setSubmitSuccess(true);
+      navigate('/obrigado');
 
       // SEND TO WEBHOOK
       const mode = siteSettings.find(s => s.key === 'webhook_mode')?.value || 'test';
@@ -265,9 +224,6 @@ const QuoteForm: React.FC = () => {
             name: data.name,
             email: data.email,
             phone: data.phone,
-            city: data.city.split(' - ')[0] || '',
-            state: data.city.split(' - ')[1] || '',
-            city_full: data.city,
             client_type: data.client_type,
             segment: data.segment,
             message: data.message,
@@ -286,7 +242,6 @@ const QuoteForm: React.FC = () => {
 
       setSelectedProducts([]);
       localStorage.removeItem('krenke_quote_cart');
-      setSelectedCity(null);
       setPhone('');
       setSegment('');
       setClientType('');
@@ -352,7 +307,7 @@ const QuoteForm: React.FC = () => {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Identificação</label>
                 <input
                   name="form_fields[name]"
-                  id="form-quote-name"
+                  id="form-nome"
                   value={nameInput}
                   onChange={e => setNameInput(e.target.value)}
                   placeholder="Seu Nome Completo"
@@ -382,7 +337,7 @@ const QuoteForm: React.FC = () => {
               <div className="space-y-4">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Tipo de Cliente</label>
                 <select
-                  id="form-quote-client-type"
+                  id="form-tipo-cliente"
                   name="form_fields[tipo_cliente]"
                   value={clientType}
                   onChange={(e) => setClientType(e.target.value)}
@@ -400,7 +355,7 @@ const QuoteForm: React.FC = () => {
                 <input
                   type="email"
                   name="form_fields[email]"
-                  id="form-quote-email"
+                  id="form-email"
                   value={emailInput}
                   onChange={e => setEmailInput(e.target.value)}
                   placeholder="exemplo@empresa.com.br"
@@ -410,59 +365,12 @@ const QuoteForm: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-10">
-              <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Cidade</label>
-                <Select
-                  name="form_fields[cidade]"
-                  options={displayedCities}
-                  value={selectedCity}
-                  onChange={setSelectedCity}
-                  onInputChange={(val) => setCitySearch(val)}
-                  isLoading={isLoadingCities}
-                  placeholder="Selecione sua cidade..."
-                  noOptionsMessage={({ inputValue }) =>
-                    !inputValue ? "Digite o nome da sua cidade..." : "Nenhuma cidade encontrada"
-                  }
-                  loadingMessage={() => "Buscando cidades..."}
-                  // We handle filtering manually for performance
-                  filterOption={() => true}
-                  // Optimization: Capture menu scroll and use a fixed height
-                  maxMenuHeight={250}
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      padding: '0.75rem 1rem',
-                      borderRadius: '1rem',
-                      border: '2px solid transparent',
-                      backgroundColor: '#f8fafc',
-                      fontWeight: '800',
-                      boxShadow: 'none',
-                      '&:hover': {
-                        borderColor: '#fe6b01'
-                      }
-                    }),
-                    menu: (base) => ({
-                      ...base,
-                      borderRadius: '1rem',
-                      overflow: 'hidden',
-                      zIndex: 50
-                    }),
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isSelected ? '#fe6b01' : state.isFocused ? '#fff7ed' : 'white',
-                      color: state.isSelected ? 'white' : '#111827',
-                      fontWeight: '700'
-                    })
-                  }}
-                />
-              </div>
-
+            <div>
               <div className="space-y-4">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Segmento</label>
                 <div className="space-y-4">
                   <select
-                    id="form-quote-segment"
+                    id="form-segmento"
                     name="form_fields[segmento]"
                     value={segment}
                     onChange={(e) => setSegment(e.target.value)}
@@ -491,7 +399,7 @@ const QuoteForm: React.FC = () => {
                       >
                         <input
                           value={otherSegment}
-                          id="form-quote-segment-other"
+                          id="form-segmento-outro"
                           onChange={(e) => setOtherSegment(e.target.value)}
                           placeholder="Qual o seu segmento?"
                           required
@@ -555,7 +463,7 @@ const QuoteForm: React.FC = () => {
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Detalhes do Projeto</label>
               <textarea
                 name="form_fields[mensagem]"
-                id="form-quote-message"
+                id="form-mensagem"
                 value={messageInput}
                 onChange={e => setMessageInput(e.target.value)}
                 rows={4}
@@ -568,7 +476,7 @@ const QuoteForm: React.FC = () => {
             <button
               type="submit"
               id="form-quote-submit"
-              disabled={isSubmitting || !nameInput || !emailInput || !phone || !selectedCity || !clientType || !segment || selectedProducts.length === 0 || !messageInput}
+              disabled={isSubmitting || !nameInput || !emailInput || !phone || !clientType || !segment || selectedProducts.length === 0 || !messageInput}
               className="w-full bg-vibrant-orange py-8 rounded-[2.5rem] text-white font-black text-xl uppercase tracking-widest transition-all hover:shadow-vibrant-orange flex items-center justify-center gap-6 group overflow-hidden relative disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>

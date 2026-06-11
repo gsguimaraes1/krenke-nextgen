@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Star, ChevronLeft, ChevronRight, X, Menu, Phone, Mail, MapPin, Instagram, Youtube } from 'lucide-react';
-import Select from 'react-select';
 import heroVideo from '../assets/Home/videokrenke.mp4';
 
 const LP_BASE = 'https://lp.krenke.com.br/wp-content/uploads/2026/04';
@@ -251,16 +250,22 @@ function WhatsAppWidget() {
               )}
               {isOnline && <p className="text-xs font-bold text-gray-500">Preencha para iniciar a conversa:</p>}
               <input
+                id="form-nome"
+                name="form_fields[nome]"
                 className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors"
                 placeholder="Seu Nome Completo *"
                 value={name} onChange={e => setName(e.target.value)} required
               />
               <input
+                id="form-telefone"
+                name="form_fields[telefone]"
                 className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors"
                 placeholder="Seu Celular / WhatsApp *"
                 value={phone} onChange={e => setPhone(maskPhone(e.target.value))} required
               />
               <select
+                id="form-segmento"
+                name="form_fields[segmento]"
                 className={`w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors ${!segment ? 'text-gray-400' : 'text-gray-900'}`}
                 value={segment} onChange={e => setSegment(e.target.value)} required
               >
@@ -275,6 +280,8 @@ function WhatsAppWidget() {
                 />
               )}
               <textarea
+                id="form-mensagem"
+                name="form_fields[mensagem]"
                 className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors resize-none"
                 placeholder="Como podemos te ajudar? *"
                 rows={3} value={message} onChange={e => setMessage(e.target.value)} required
@@ -387,54 +394,8 @@ function BenefitsImages() {
 export default function LpPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formData, setFormData] = useState({ nome: '', telefone: '', segmento: '', email: '' });
-  const [selectedCity, setSelectedCity] = useState<{ value: string; label: string } | null>(null);
-  const [citySearch, setCitySearch] = useState('');
-  const [ibgeCities, setIbgeCities] = useState<{ value: string; label: string }[]>([]);
-  const [loadingCities, setLoadingCities] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
-
-  useEffect(() => {
-    setLoadingCities(true);
-    fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios?orderBy=nome')
-      .then(r => r.json())
-      .then((data: any[]) => {
-        setIbgeCities(data.map(city => {
-          const uf = city.microrregiao?.mesorregiao?.UF?.sigla ||
-            city['regiao-imediata']?.['regiao-intermediaria']?.UF?.sigla || '';
-          return { value: `${city.nome} - ${uf}`, label: `${city.nome} - ${uf}` };
-        }));
-      })
-      .catch(() => {})
-      .finally(() => setLoadingCities(false));
-  }, []);
-
-  const displayedCities = useMemo(() => {
-    if (!citySearch) return ibgeCities.slice(0, 20);
-    const q = normalizeText(citySearch);
-    return ibgeCities.filter(c => normalizeText(c.label).includes(q)).slice(0, 50);
-  }, [ibgeCities, citySearch]);
-
-  const citySelectStyles = {
-    control: (base: any, state: any) => ({
-      ...base,
-      backgroundColor: 'rgba(255,255,255,0.10)',
-      border: state.isFocused ? '1px solid rgba(255,255,255,0.40)' : '1px solid rgba(255,255,255,0.20)',
-      borderRadius: '0.75rem',
-      minHeight: '48px',
-      boxShadow: 'none',
-      cursor: 'text',
-    }),
-    placeholder: (base: any) => ({ ...base, color: 'rgba(255,255,255,0.50)', fontSize: '0.875rem', fontWeight: '500' }),
-    singleValue: (base: any) => ({ ...base, color: 'white', fontSize: '0.875rem', fontWeight: '500' }),
-    input: (base: any) => ({ ...base, color: 'white', fontSize: '0.875rem', fontWeight: '500' }),
-    menu: (base: any) => ({ ...base, backgroundColor: '#1e1a5e', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '0.75rem', zIndex: 50 }),
-    option: (base: any, state: any) => ({ ...base, backgroundColor: state.isFocused ? 'rgba(255,255,255,0.15)' : 'transparent', color: 'white', fontSize: '0.875rem' }),
-    loadingMessage: (base: any) => ({ ...base, color: 'rgba(255,255,255,0.70)' }),
-    noOptionsMessage: (base: any) => ({ ...base, color: 'rgba(255,255,255,0.70)' }),
-    indicatorSeparator: () => ({ display: 'none' }),
-    dropdownIndicator: (base: any) => ({ ...base, color: 'rgba(255,255,255,0.50)' }),
-  };
 
   function maskPhone(v: string) {
     v = v.replace(/\D/g, '').slice(0, 11);
@@ -456,13 +417,9 @@ export default function LpPage() {
     setSubmitting(true);
     setSubmitError('');
     const utms = getUTMs();
-    const [cidadeNome, estadoUF] = selectedCity ? selectedCity.value.split(' - ') : ['', ''];
     const payload = {
       Nome: formData.nome,
       Telefone: formData.telefone,
-      Cidade: cidadeNome,
-      Estado: estadoUF,
-      'Cidade-UF': selectedCity?.value || '',
       Segmento: formData.segmento,
       Email: formData.email,
       ...utms,
@@ -486,7 +443,7 @@ export default function LpPage() {
       ]);
       if ((window as any).dataLayer) (window as any).dataLayer.push({ event: 'form_submit_lp' });
       if ((window as any).fbq) (window as any).fbq('track', 'Lead');
-      window.location.href = 'https://wa.me/554733730693?text=Ol%C3%A1%2C%20vim%20pela%20landing%20page%2C%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es.';
+      window.location.href = '/obrigado';
     } catch {
       setSubmitError('Erro ao enviar. Tente pelo WhatsApp.');
       setSubmitting(false);
@@ -920,6 +877,8 @@ export default function LpPage() {
                     <div>
                       <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Nome</label>
                       <input
+                        id="form-nome"
+                        name="form_fields[nome]"
                         className={inputCls}
                         placeholder="Nome completo"
                         value={formData.nome} onChange={field('nome')} required
@@ -928,6 +887,8 @@ export default function LpPage() {
                     <div>
                       <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Telefone</label>
                       <input
+                        id="form-telefone"
+                        name="form_fields[telefone]"
                         className={inputCls}
                         placeholder="(00) 00000-0000"
                         value={formData.telefone} onChange={field('telefone')} required
@@ -937,6 +898,8 @@ export default function LpPage() {
                   <div>
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">E-mail</label>
                     <input
+                      id="form-email"
+                      name="form_fields[email]"
                       type="email"
                       className={inputCls}
                       placeholder="seu@email.com"
@@ -944,27 +907,10 @@ export default function LpPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Cidade - UF</label>
-                    <Select
-                      options={displayedCities}
-                      value={selectedCity}
-                      onChange={setSelectedCity}
-                      onInputChange={setCitySearch}
-                      isLoading={loadingCities}
-                      placeholder="Digite sua cidade..."
-                      noOptionsMessage={({ inputValue }) =>
-                        !inputValue ? 'Digite o nome da sua cidade...' : 'Nenhuma cidade encontrada'
-                      }
-                      loadingMessage={() => 'Buscando cidades...'}
-                      filterOption={() => true}
-                      maxMenuHeight={220}
-                      styles={citySelectStyles}
-                      required
-                    />
-                  </div>
-                  <div>
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Segmento</label>
                     <select
+                      id="form-segmento"
+                      name="form_fields[segmento]"
                       className={selectCls(formData.segmento)}
                       value={formData.segmento} onChange={field('segmento')} required
                     >
