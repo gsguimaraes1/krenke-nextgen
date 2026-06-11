@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +6,13 @@ import { ArrowLeft, MessageCircle, CheckCircle2 } from 'lucide-react';
 import logobranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
 
 const WA_NUMBER = '554733730693';
-const WA_TEXT = encodeURIComponent('Olá! Acabei de enviar um orçamento pelo site e gostaria de acompanhar o meu pedido.');
+
+function gerarHash(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let hash = '';
+  for (let i = 0; i < 6; i++) hash += chars[Math.floor(Math.random() * chars.length)];
+  return hash;
+}
 
 const PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   id: i,
@@ -19,11 +25,16 @@ const PARTICLES = Array.from({ length: 18 }, (_, i) => ({
 export default function ObrigadoPage() {
   const navigate = useNavigate();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hash = useMemo(() => gerarHash(), []);
+  const waText = encodeURIComponent(
+    `Olá! Acabei de enviar um orçamento pelo site Institucional e gostaria de obter mais informações.\n\nMeu Número de atendimento é ${hash}`
+  );
+  const waUrl = `https://api.whatsapp.com/send/?phone=${WA_NUMBER}&text=${waText}`;
 
   useEffect(() => {
-    timerRef.current = setTimeout(() => navigate('/'), 30000);
+    timerRef.current = setTimeout(() => { window.location.href = waUrl; }, 5000);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [navigate]);
+  }, [waUrl]);
 
   return (
     <>
@@ -112,10 +123,20 @@ export default function ObrigadoPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.62 }}
-              className="text-white/40 text-base max-w-sm mb-12"
+              className="text-white/40 text-base max-w-sm mb-4"
             >
               Nossa equipe vai analisar sua solicitação e entrar em contato em breve com uma proposta personalizada.
             </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.68 }}
+              className="mb-12 flex flex-col items-center gap-1"
+            >
+              <span className="text-white/30 text-xs uppercase tracking-widest font-bold">Número de atendimento</span>
+              <span className="text-[#F39200] text-2xl font-black tracking-[0.3em]">{hash}</span>
+            </motion.div>
 
             {/* Divider */}
             <motion.div
@@ -133,9 +154,7 @@ export default function ObrigadoPage() {
               className="flex flex-col sm:flex-row gap-4 w-full"
             >
               <a
-                href={`https://wa.me/${WA_NUMBER}?text=${WA_TEXT}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={waUrl}
                 className="flex-1 flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-black uppercase tracking-wide text-sm py-4 px-6 rounded-2xl transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_8px_30px_rgba(37,211,102,0.35)]"
               >
                 <MessageCircle className="w-5 h-5" strokeWidth={2.5} />
@@ -158,7 +177,7 @@ export default function ObrigadoPage() {
               transition={{ delay: 1.2 }}
               className="text-white/20 text-xs mt-8"
             >
-              Você será redirecionado automaticamente em 30 segundos
+              Redirecionando para o WhatsApp em 5 segundos...
             </motion.p>
           </div>
         </motion.div>
