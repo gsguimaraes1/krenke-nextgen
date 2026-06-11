@@ -414,7 +414,7 @@ function BenefitsImages() {
 // ─── Main LP Page ─────────────────────────────────────────────────────────────
 export default function LpPage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [formData, setFormData] = useState({ nome: '', telefone: '', segmento: '', email: '' });
+  const [formData, setFormData] = useState({ nome: '', telefone: '', segmento: '', email: '', tipo_cliente: '', mensagem: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
@@ -443,6 +443,8 @@ export default function LpPage() {
       Telefone: formData.telefone,
       Segmento: formData.segmento,
       Email: formData.email,
+      TipoCliente: formData.tipo_cliente,
+      Mensagem: formData.mensagem,
       ...utms,
       Data: new Date().toLocaleDateString('pt-BR'),
       Horário: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
@@ -928,6 +930,20 @@ export default function LpPage() {
                     />
                   </div>
                   <div>
+                    <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Tipo de Cliente</label>
+                    <select
+                      id="form-tipo-cliente"
+                      name="form_fields[tipo_cliente]"
+                      className={selectCls(formData.tipo_cliente)}
+                      value={formData.tipo_cliente} onChange={field('tipo_cliente')} required
+                    >
+                      <option value="">Selecione o tipo</option>
+                      <option value="Pessoa Física">Pessoa Física</option>
+                      <option value="Pessoa Jurídica">Pessoa Jurídica</option>
+                      <option value="Órgão Público">Órgão Público</option>
+                    </select>
+                  </div>
+                  <div>
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Segmento</label>
                     <select
                       id="form-segmento"
@@ -938,6 +954,17 @@ export default function LpPage() {
                       <option value="">Selecione um segmento</option>
                       {SEGMENTOS.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Mensagem</label>
+                    <textarea
+                      id="form-mensagem"
+                      name="form_fields[mensagem]"
+                      className={`${inputCls} resize-none`}
+                      placeholder="Como podemos te ajudar?"
+                      rows={3}
+                      value={formData.mensagem} onChange={field('mensagem') as any}
+                    />
                   </div>
 
                   {submitError && (
