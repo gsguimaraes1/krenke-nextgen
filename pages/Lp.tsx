@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Star, ChevronLeft, ChevronRight, X, Menu, Phone, Mail, MapPin, Instagram, Youtube } from 'lucide-react';
 import heroVideo from '../assets/Home/videokrenke.mp4';
+import { WhatsAppWidget } from '../components/WhatsAppWidget';
 
 const LP_BASE = 'https://lp.krenke.com.br/wp-content/uploads/2026/04';
 const WA_NUMBER = '554733730693';
@@ -160,184 +161,6 @@ const WA_SVG = (
   </svg>
 );
 
-// ─── WhatsApp Widget ──────────────────────────────────────────────────────────
-function WhatsAppWidget() {
-  const [open, setOpen] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [clientType, setClientType] = useState('');
-  const [segment, setSegment] = useState('');
-  const [otherSegment, setOtherSegment] = useState('');
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    const check = () => {
-      const d = new Date();
-      const day = d.getDay();
-      if (day === 0 || day === 6) { setIsOnline(false); return; }
-      const t = d.getHours() + d.getMinutes() / 60;
-      setIsOnline((t >= 7.5 && t < 12) || (t >= 13 && t < 17.5));
-    };
-    check();
-  }, []);
-
-  function maskPhone(v: string) {
-    v = v.replace(/\D/g, '').slice(0, 11);
-    if (v.length > 10) return v.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    if (v.length > 6) return v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-    if (v.length > 2) return v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-    return v.length ? `(${v}` : v;
-  }
-
-  const canSubmit = name.trim() && phone.trim() && email.trim() && clientType &&
-    segment && message.trim() && (segment !== 'Outros' || otherSegment.trim());
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const finalSegment = segment === 'Outros' ? otherSegment : segment;
-    const utms = getUTMs();
-    const text = encodeURIComponent(
-      `Olá! Vim pelo site.\n\nNome: ${name}\nTelefone: ${phone}\nSegmento: ${finalSegment}\nMensagem: ${message}\n\nUTM: ${utms.utm_source || 'direto'}`
-    );
-    fetch('https://n8n.krenke.com.br/webhook/leads-landingpage', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        Nome: name, Telefone: phone, Email: email, TipoCliente: clientType,
-        'Selecione um segmento': finalSegment, Mensagem: message, ...utms,
-        Data: new Date().toLocaleDateString('pt-BR'),
-        Horário: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        form_id: 'wa_widget_react',
-        form_name: 'WhatsApp Widget LP React',
-      }),
-    }).catch(() => {});
-    if ((window as any).dataLayer) (window as any).dataLayer.push({ event: 'whatsapp' });
-    window.open(`https://api.whatsapp.com/send?phone=${WA_NUMBER}&text=${text}`, '_blank');
-  }
-
-  const headerBg = isOnline ? 'bg-[#25D366]' : 'bg-red-500';
-
-  return (
-    <div className="fixed bottom-6 right-6 z-[99999] flex flex-col items-end pointer-events-none">
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="w-80 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden mb-4 pointer-events-auto"
-          >
-            <div className={`${headerBg} px-4 py-3 flex justify-between items-center relative overflow-hidden`}>
-              <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-xl" />
-              <div className="flex items-center gap-3 relative z-10">
-                {WA_SVG}
-                <div>
-                  <p className="text-white font-black text-sm uppercase tracking-wide">Krenke Suporte</p>
-                  <p className="text-white/90 text-[10px] font-bold uppercase">{isOnline ? 'Atendimento Online' : 'Fora de Atendimento'}</p>
-                </div>
-              </div>
-              <button onClick={() => setOpen(false)} className="text-white hover:bg-white/20 p-1.5 rounded-full transition-colors relative z-10">
-                <X size={16} />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-3">
-              {!isOnline && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700 font-bold">
-                  Você pode deixar sua mensagem! Retornaremos o mais breve possível.<br />
-                  <span className="font-black">Seg - Sex: 07:30 - 12:00 e 13:00 - 17:30</span>
-                </div>
-              )}
-              {isOnline && <p className="text-xs font-bold text-gray-500">Preencha para iniciar a conversa:</p>}
-              <input
-                id="form-nome"
-                name="form_fields[nome]"
-                className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors"
-                placeholder="Seu Nome Completo *"
-                value={name} onChange={e => setName(e.target.value)} required
-              />
-              <input
-                id="form-telefone"
-                name="form_fields[telefone]"
-                className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors"
-                placeholder="Seu Celular / WhatsApp *"
-                value={phone} onChange={e => setPhone(maskPhone(e.target.value))} required
-              />
-              <input
-                id="form-email"
-                name="form_fields[email]"
-                type="email"
-                className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors"
-                placeholder="Seu E-mail *"
-                value={email} onChange={e => setEmail(e.target.value)} required
-              />
-              <select
-                id="form-tipo-cliente"
-                name="form_fields[tipo_cliente]"
-                className={`w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors ${!clientType ? 'text-gray-400' : 'text-gray-900'}`}
-                value={clientType} onChange={e => setClientType(e.target.value)} required
-              >
-                <option value="" disabled>Tipo de cliente *</option>
-                <option value="Pessoa Física">Pessoa Física</option>
-                <option value="Pessoa Jurídica">Pessoa Jurídica</option>
-                <option value="Órgão Público">Órgão Público</option>
-              </select>
-              <select
-                id="form-segmento"
-                name="form_fields[segmento]"
-                className={`w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors ${!segment ? 'text-gray-400' : 'text-gray-900'}`}
-                value={segment} onChange={e => setSegment(e.target.value)} required
-              >
-                <option value="" disabled>Selecione um segmento *</option>
-                {SEGMENTOS.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-              {segment === 'Outros' && (
-                <input
-                  className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors"
-                  placeholder="Qual o seu segmento? *"
-                  value={otherSegment} onChange={e => setOtherSegment(e.target.value)} required
-                />
-              )}
-              <textarea
-                id="form-mensagem"
-                name="form_fields[mensagem]"
-                className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none transition-colors resize-none"
-                placeholder="Como podemos te ajudar? *"
-                rows={3} value={message} onChange={e => setMessage(e.target.value)} required
-              />
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                className="w-full bg-[#25D366] disabled:opacity-40 hover:bg-[#1fb855] text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm"
-              >
-                {WA_SVG}
-                {isOnline ? 'Iniciar Conversa' : 'Deixar Mensagem'}
-              </button>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="pointer-events-auto relative w-16 h-16 bg-[#25D366] hover:bg-[#1fb855] text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110"
-      >
-        {!open && (
-          <>
-            <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-30" />
-            <span className="absolute inset-[-6px] rounded-full bg-[#25D366] animate-ping opacity-20" style={{ animationDelay: '0.3s' }} />
-          </>
-        )}
-        {open ? <X size={26} /> : (
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-          </svg>
-        )}
-      </button>
-    </div>
-  );
-}
 
 // ─── Gallery Carousel ─────────────────────────────────────────────────────────
 function GalleryCarousel() {
@@ -900,7 +723,7 @@ export default function LpPage() {
                     <div>
                       <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Nome</label>
                       <input
-                        id="form-nome"
+                        id="form-quote-name"
                         name="form_fields[nome]"
                         className={inputCls}
                         placeholder="Nome completo"
@@ -910,7 +733,7 @@ export default function LpPage() {
                     <div>
                       <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Telefone</label>
                       <input
-                        id="form-telefone"
+                        id="form-quote-phone"
                         name="form_fields[telefone]"
                         className={inputCls}
                         placeholder="(00) 00000-0000"
@@ -921,7 +744,7 @@ export default function LpPage() {
                   <div>
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">E-mail</label>
                     <input
-                      id="form-email"
+                      id="form-quote-email"
                       name="form_fields[email]"
                       type="email"
                       className={inputCls}
@@ -932,7 +755,7 @@ export default function LpPage() {
                   <div>
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Tipo de Cliente</label>
                     <select
-                      id="form-tipo-cliente"
+                      id="form-quote-client-type"
                       name="form_fields[tipo_cliente]"
                       className={selectCls(formData.tipo_cliente)}
                       value={formData.tipo_cliente} onChange={field('tipo_cliente')} required
@@ -946,7 +769,7 @@ export default function LpPage() {
                   <div>
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Segmento</label>
                     <select
-                      id="form-segmento"
+                      id="form-quote-segment"
                       name="form_fields[segmento]"
                       className={selectCls(formData.segmento)}
                       value={formData.segmento} onChange={field('segmento')} required
@@ -958,7 +781,7 @@ export default function LpPage() {
                   <div>
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Mensagem</label>
                     <textarea
-                      id="form-mensagem"
+                      id="form-quote-message"
                       name="form_fields[mensagem]"
                       className={`${inputCls} resize-none`}
                       placeholder="Como podemos te ajudar?"

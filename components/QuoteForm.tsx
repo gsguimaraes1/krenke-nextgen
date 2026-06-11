@@ -24,7 +24,7 @@ const writeCookie = (name: string, value: string) => {
 const CustomPhoneInput = React.forwardRef<HTMLInputElement, any>((props, ref) => (
   <input
     {...props}
-    id="form-telefone"
+    id="form-quote-phone"
     ref={ref}
     className="w-full bg-transparent outline-none font-black text-gray-900 placeholder:text-gray-300"
   />
@@ -307,7 +307,7 @@ const QuoteForm: React.FC = () => {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Identificação</label>
                 <input
                   name="form_fields[name]"
-                  id="form-nome"
+                  id="form-quote-name"
                   value={nameInput}
                   onChange={e => setNameInput(e.target.value)}
                   placeholder="Seu Nome Completo"
@@ -337,7 +337,7 @@ const QuoteForm: React.FC = () => {
               <div className="space-y-4">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Tipo de Cliente</label>
                 <select
-                  id="form-tipo-cliente"
+                  id="form-quote-client-type"
                   name="form_fields[tipo_cliente]"
                   value={clientType}
                   onChange={(e) => setClientType(e.target.value)}
@@ -355,7 +355,7 @@ const QuoteForm: React.FC = () => {
                 <input
                   type="email"
                   name="form_fields[email]"
-                  id="form-email"
+                  id="form-quote-email"
                   value={emailInput}
                   onChange={e => setEmailInput(e.target.value)}
                   placeholder="exemplo@empresa.com.br"
@@ -370,7 +370,7 @@ const QuoteForm: React.FC = () => {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Segmento</label>
                 <div className="space-y-4">
                   <select
-                    id="form-segmento"
+                    id="form-quote-segment"
                     name="form_fields[segmento]"
                     value={segment}
                     onChange={(e) => setSegment(e.target.value)}
@@ -399,7 +399,7 @@ const QuoteForm: React.FC = () => {
                       >
                         <input
                           value={otherSegment}
-                          id="form-segmento-outro"
+                          id="form-quote-segment-other"
                           onChange={(e) => setOtherSegment(e.target.value)}
                           placeholder="Qual o seu segmento?"
                           required
@@ -463,7 +463,7 @@ const QuoteForm: React.FC = () => {
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Detalhes do Projeto</label>
               <textarea
                 name="form_fields[mensagem]"
-                id="form-mensagem"
+                id="form-quote-message"
                 value={messageInput}
                 onChange={e => setMessageInput(e.target.value)}
                 rows={4}

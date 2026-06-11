@@ -233,7 +233,7 @@ export const WhatsAppWidget: React.FC = () => {
               <div>
                 <input
                   type="text"
-                  id="form-nome"
+                  id="form-quote-name"
                   name="form_fields[nome]"
                   placeholder="Seu Nome Completo *"
                   required
@@ -246,7 +246,7 @@ export const WhatsAppWidget: React.FC = () => {
               <div>
                 <input
                   type="tel"
-                  id="form-telefone"
+                  id="form-quote-phone"
                   name="form_fields[telefone]"
                   placeholder="Seu Celular / WhatsApp *"
                   required
@@ -259,7 +259,7 @@ export const WhatsAppWidget: React.FC = () => {
               <div>
                 <input
                   type="email"
-                  id="form-email"
+                  id="form-quote-email"
                   name="form_fields[email]"
                   placeholder="Seu E-mail *"
                   required
@@ -271,7 +271,7 @@ export const WhatsAppWidget: React.FC = () => {
 
               <div>
                 <select
-                  id="form-tipo-cliente"
+                  id="form-quote-client-type"
                   name="form_fields[tipo_cliente]"
                   value={clientType}
                   onChange={(e) => setClientType(e.target.value)}
@@ -287,7 +287,7 @@ export const WhatsAppWidget: React.FC = () => {
 
               <div className="space-y-2">
                 <select
-                  id="form-segmento"
+                  id="form-quote-segment"
                   name="form_fields[segmento]"
                   value={segment}
                   onChange={(e) => {
@@ -318,7 +318,7 @@ export const WhatsAppWidget: React.FC = () => {
                     >
                       <input
                         type="text"
-                        id="form-segmento-outro"
+                        id="form-quote-segment-other"
                         placeholder="Qual o seu segmento? *"
                         required
                         value={otherSegment}
@@ -332,7 +332,7 @@ export const WhatsAppWidget: React.FC = () => {
 
               <div>
                 <textarea
-                  id="form-mensagem"
+                  id="form-quote-message"
                   name="form_fields[mensagem]"
                   placeholder="Como podemos te ajudar? *"
                   required
