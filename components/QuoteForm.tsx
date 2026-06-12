@@ -9,6 +9,18 @@ import { getStoredUTMs } from '../lib/utm-tracker';
 import { useNavigate } from 'react-router-dom';
 
 
+const STATES = [
+  { uf: 'AC', name: 'Acre' }, { uf: 'AL', name: 'Alagoas' }, { uf: 'AP', name: 'Amap\u00e1' },
+  { uf: 'AM', name: 'Amazonas' }, { uf: 'BA', name: 'Bahia' }, { uf: 'CE', name: 'Cear\u00e1' },
+  { uf: 'DF', name: 'Distrito Federal' }, { uf: 'ES', name: 'Esp\u00edrito Santo' }, { uf: 'GO', name: 'Goi\u00e1s' },
+  { uf: 'MA', name: 'Maranh\u00e3o' }, { uf: 'MT', name: 'Mato Grosso' }, { uf: 'MS', name: 'Mato Grosso do Sul' },
+  { uf: 'MG', name: 'Minas Gerais' }, { uf: 'PA', name: 'Par\u00e1' }, { uf: 'PB', name: 'Para\u00edba' },
+  { uf: 'PR', name: 'Paran\u00e1' }, { uf: 'PE', name: 'Pernambuco' }, { uf: 'PI', name: 'Piau\u00ed' },
+  { uf: 'RJ', name: 'Rio de Janeiro' }, { uf: 'RN', name: 'Rio Grande do Norte' }, { uf: 'RS', name: 'Rio Grande do Sul' },
+  { uf: 'RO', name: 'Rond\u00f4nia' }, { uf: 'RR', name: 'Roraima' }, { uf: 'SC', name: 'Santa Catarina' },
+  { uf: 'SP', name: 'S\u00e3o Paulo' }, { uf: 'SE', name: 'Sergipe' }, { uf: 'TO', name: 'Tocantins' },
+];
+
 const normalizeText = (text: string) =>
   text ? text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
 
@@ -68,10 +80,25 @@ const QuoteForm: React.FC = () => {
   const [nameInput, setNameInput] = useState('');
   const [emailInput, setEmailInput] = useState('');
   const [messageInput, setMessageInput] = useState('');
+  const [uf, setUf] = useState('');
+  const [city, setCity] = useState('');
+  const [cities, setCities] = useState<string[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
 
   useEffect(() => {
     setUtms(getStoredUTMs());
   }, []);
+
+  useEffect(() => {
+    if (!uf) { setCities([]); setCity(''); return; }
+    setLoadingCities(true);
+    setCity('');
+    fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`)
+      .then(r => r.json())
+      .then((data: any[]) => setCities(data.map((m: any) => m.nome)))
+      .catch(() => setCities([]))
+      .finally(() => setLoadingCities(false));
+  }, [uf]);
 
 
   useEffect(() => {
@@ -133,6 +160,8 @@ const QuoteForm: React.FC = () => {
       client_type: clientType,
       segment: finalSegment,
       message: (formData.get('form_orc_mensagem') as string || '').trim(),
+      city: city,
+      state: uf,
       products: selectedProducts.map(id => products.find(p => p.id === id)?.name || id),
       source: 'Site Krenke - Orçamento',
       submitted_at: new Date().toISOString(),
@@ -171,6 +200,12 @@ const QuoteForm: React.FC = () => {
       return;
     }
 
+    if (!uf || !city) {
+      setSubmitError('Por favor, selecione seu estado e cidade.');
+      setIsSubmitting(false);
+      return;
+    }
+
     if (selectedProducts.length === 0) {
       setSubmitError('Por favor, selecione ao menos um produto para o orçamento.');
       setIsSubmitting(false);
@@ -188,6 +223,8 @@ const QuoteForm: React.FC = () => {
       writeCookie('ck_phone', data.phone);
       writeCookie('ck_first_name', data.name.split(' ')[0].toLowerCase());
       writeCookie('ck_event_id', eventId);
+      writeCookie('ck_cidade', city);
+      writeCookie('ck_estado', uf);
 
       const { error } = await supabase.from('leads').insert([data]);
       if (error) throw error;
@@ -233,6 +270,9 @@ const QuoteForm: React.FC = () => {
             segment: data.segment,
             message: data.message,
             products: Array.isArray(data.products) ? data.products.join(', ') : '',
+            city: city,
+            state: uf,
+            city_full: city ? `${city} - ${uf}` : '',
             source: 'Site Krenke - Orçamento',
             submitted_at: new Date().toISOString(),
             utm_source: data.utm_source || '',
@@ -255,6 +295,9 @@ const QuoteForm: React.FC = () => {
       setNameInput('');
       setEmailInput('');
       setMessageInput('');
+      setUf('');
+      setCity('');
+      setCities([]);
       (e.target as HTMLFormElement).reset();
 
       // Clear success message after 5 seconds
@@ -367,6 +410,44 @@ const QuoteForm: React.FC = () => {
                   required
                   className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-vibrant-cyan rounded-2xl outline-none font-black text-gray-900 transition-all shadow-sm focus:shadow-vibrant-cyan"
                 />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-10">
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Estado</label>
+                <select
+                  id="form-quote-state"
+                  name="form_orc_estado"
+                  value={uf}
+                  onChange={(e) => setUf(e.target.value)}
+                  required
+                  className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-vibrant-orange rounded-2xl outline-none font-black text-gray-900 transition-all shadow-sm focus:shadow-vibrant-orange appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>Selecione o estado</option>
+                  {STATES.map(s => (
+                    <option key={s.uf} value={s.uf}>{s.name} — {s.uf}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Cidade</label>
+                <select
+                  id="form-quote-city"
+                  name="form_orc_cidade"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  disabled={!uf || loadingCities}
+                  className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-vibrant-orange rounded-2xl outline-none font-black text-gray-900 transition-all shadow-sm focus:shadow-vibrant-orange appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>
+                    {loadingCities ? 'Carregando...' : !uf ? 'Selecione o estado primeiro' : 'Selecione a cidade'}
+                  </option>
+                  {cities.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -529,7 +610,7 @@ const QuoteForm: React.FC = () => {
             <button
               type="submit"
               id="form-quote-submit"
-              disabled={isSubmitting || !nameInput || !emailInput || !phone || !clientType || !segment || selectedProducts.length === 0 || !messageInput}
+              disabled={isSubmitting || !nameInput || !emailInput || !phone || !clientType || !uf || !city || !segment || selectedProducts.length === 0 || !messageInput}
               className="w-full bg-vibrant-orange py-8 rounded-[2.5rem] text-white font-black text-xl uppercase tracking-widest transition-all hover:shadow-vibrant-orange flex items-center justify-center gap-6 group overflow-hidden relative disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>
