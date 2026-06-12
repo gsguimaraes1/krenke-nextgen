@@ -108,11 +108,15 @@ const QuoteForm: React.FC = () => {
   };
 
   const filteredProducts = useMemo(() => {
-    return products.filter(p =>
+    const filtered = products.filter(p =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.category.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [products, searchTerm]);
+    return [
+      ...filtered.filter(p => selectedProducts.includes(p.id)),
+      ...filtered.filter(p => !selectedProducts.includes(p.id)),
+    ];
+  }, [products, searchTerm, selectedProducts]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
