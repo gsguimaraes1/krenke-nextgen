@@ -140,6 +140,18 @@ const TESTIMONIALS = [
   },
 ];
 
+const STATES = [
+  { uf: 'AC', name: 'Acre' }, { uf: 'AL', name: 'Alagoas' }, { uf: 'AP', name: 'Amapá' },
+  { uf: 'AM', name: 'Amazonas' }, { uf: 'BA', name: 'Bahia' }, { uf: 'CE', name: 'Ceará' },
+  { uf: 'DF', name: 'Distrito Federal' }, { uf: 'ES', name: 'Espírito Santo' }, { uf: 'GO', name: 'Goiás' },
+  { uf: 'MA', name: 'Maranhão' }, { uf: 'MT', name: 'Mato Grosso' }, { uf: 'MS', name: 'Mato Grosso do Sul' },
+  { uf: 'MG', name: 'Minas Gerais' }, { uf: 'PA', name: 'Pará' }, { uf: 'PB', name: 'Paraíba' },
+  { uf: 'PR', name: 'Paraná' }, { uf: 'PE', name: 'Pernambuco' }, { uf: 'PI', name: 'Piauí' },
+  { uf: 'RJ', name: 'Rio de Janeiro' }, { uf: 'RN', name: 'Rio Grande do Norte' }, { uf: 'RS', name: 'Rio Grande do Sul' },
+  { uf: 'RO', name: 'Rondônia' }, { uf: 'RR', name: 'Roraima' }, { uf: 'SC', name: 'Santa Catarina' },
+  { uf: 'SP', name: 'São Paulo' }, { uf: 'SE', name: 'Sergipe' }, { uf: 'TO', name: 'Tocantins' },
+];
+
 const normalizeText = (t: string) =>
   t ? t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase() : '';
 
@@ -238,8 +250,23 @@ function BenefitsImages() {
 export default function LpPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formData, setFormData] = useState({ nome: '', telefone: '', segmento: '', email: '', tipo_cliente: '', mensagem: '' });
+  const [uf, setUf] = useState('');
+  const [city, setCity] = useState('');
+  const [cities, setCities] = useState<string[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  useEffect(() => {
+    if (!uf) { setCities([]); setCity(''); return; }
+    setLoadingCities(true);
+    setCity('');
+    fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`)
+      .then(r => r.json())
+      .then((data: any[]) => setCities(data.map((m: any) => m.nome)))
+      .catch(() => setCities([]))
+      .finally(() => setLoadingCities(false));
+  }, [uf]);
 
   function maskPhone(v: string) {
     v = v.replace(/\D/g, '').slice(0, 11);
@@ -268,6 +295,9 @@ export default function LpPage() {
       Email: formData.email,
       TipoCliente: formData.tipo_cliente,
       Mensagem: formData.mensagem,
+      city: city,
+      state: uf,
+      city_full: city ? `${city} - ${uf}` : '',
       ...utms,
       Data: new Date().toLocaleDateString('pt-BR'),
       Horário: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
@@ -752,6 +782,39 @@ export default function LpPage() {
                       value={formData.email} onChange={field('email')} required
                     />
                   </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Estado</label>
+                      <select
+                        id="form-lp-state"
+                        name="form_lp_estado"
+                        className={selectCls(uf)}
+                        value={uf}
+                        onChange={e => setUf(e.target.value)}
+                        required
+                      >
+                        <option value="" disabled>Selecione o estado</option>
+                        {STATES.map(s => <option key={s.uf} value={s.uf}>{s.name} — {s.uf}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Cidade</label>
+                      <select
+                        id="form-lp-city"
+                        name="form_lp_cidade"
+                        className={`${selectCls(city)} disabled:opacity-50 disabled:cursor-not-allowed`}
+                        value={city}
+                        onChange={e => setCity(e.target.value)}
+                        required
+                        disabled={!uf || loadingCities}
+                      >
+                        <option value="" disabled>
+                          {loadingCities ? 'Carregando...' : !uf ? 'Selecione o estado primeiro' : 'Selecione a cidade'}
+                        </option>
+                        {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-xs font-bold text-white/70 mb-1 uppercase tracking-wide">Tipo de Cliente</label>
                     <select
@@ -796,7 +859,7 @@ export default function LpPage() {
 
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || !uf || !city}
                     className="w-full py-4 bg-[#F39200] hover:bg-orange-500 disabled:opacity-60 text-white font-black text-base rounded-full shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wide"
                   >
                     {submitting ? (
