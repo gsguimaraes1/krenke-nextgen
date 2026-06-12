@@ -108,15 +108,11 @@ const QuoteForm: React.FC = () => {
   };
 
   const filteredProducts = useMemo(() => {
-    const filtered = products.filter(p =>
+    return products.filter(p =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.category.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    return [
-      ...filtered.filter(p => selectedProducts.includes(p.id)),
-      ...filtered.filter(p => !selectedProducts.includes(p.id)),
-    ];
-  }, [products, searchTerm, selectedProducts]);
+  }, [products, searchTerm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -442,7 +438,20 @@ const QuoteForm: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar p-1">
                 <AnimatePresence>
-                  {filteredProducts.map(product => (
+                  {filteredProducts.some(p => selectedProducts.includes(p.id)) && (
+                    <motion.div
+                      key="divider-selected"
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="col-span-full flex items-center gap-3"
+                    >
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-vibrant-orange">✓ Selecionados</span>
+                      <div className="flex-1 h-px bg-vibrant-orange/20" />
+                    </motion.div>
+                  )}
+                  {filteredProducts.filter(p => selectedProducts.includes(p.id)).map(product => (
                     <motion.div
                       key={product.id}
                       id={`form-quote-product-card-${product.id}`}
@@ -450,10 +459,45 @@ const QuoteForm: React.FC = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       onClick={() => toggleProduct(product.id)}
-                      className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 ${selectedProducts.includes(product.id) ? 'bg-vibrant-orange/5 border-vibrant-orange shadow-vibrant-orange' : 'bg-white border-slate-100 hover:border-slate-200 shadow-sm'}`}
+                      className="relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 bg-vibrant-orange/5 border-vibrant-orange shadow-vibrant-orange"
                     >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${selectedProducts.includes(product.id) ? 'bg-vibrant-orange text-white' : 'bg-slate-50 text-slate-300'}`}>
-                        {selectedProducts.includes(product.id) ? <Check size={20} strokeWidth={3} /> : <Plus size={20} />}
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-vibrant-orange text-white">
+                        <Check size={20} strokeWidth={3} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-black text-xs uppercase tracking-tighter truncate text-gray-900">{product.name}</p>
+                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{product.category}</p>
+                      </div>
+                      <div className="w-12 h-12 bg-white rounded-lg flex-shrink-0 p-1 border border-slate-50">
+                        <img src={product.image} alt="" className="w-full h-full object-contain" />
+                      </div>
+                    </motion.div>
+                  ))}
+                  {filteredProducts.some(p => selectedProducts.includes(p.id)) && filteredProducts.some(p => !selectedProducts.includes(p.id)) && (
+                    <motion.div
+                      key="divider-available"
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="col-span-full flex items-center gap-3 mt-2"
+                    >
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Todos os Produtos</span>
+                      <div className="flex-1 h-px bg-slate-100" />
+                    </motion.div>
+                  )}
+                  {filteredProducts.filter(p => !selectedProducts.includes(p.id)).map(product => (
+                    <motion.div
+                      key={product.id}
+                      id={`form-quote-product-card-${product.id}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      onClick={() => toggleProduct(product.id)}
+                      className="relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 bg-white border-slate-100 hover:border-slate-200 shadow-sm"
+                    >
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-slate-50 text-slate-300">
+                        <Plus size={20} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-black text-xs uppercase tracking-tighter truncate text-gray-900">{product.name}</p>
