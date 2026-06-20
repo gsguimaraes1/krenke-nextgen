@@ -25,6 +25,8 @@ const DynamicPage = React.lazy(() => import('./pages/DynamicPage'));
 const ResellerArea = React.lazy(() => import('./pages/ResellerArea'));
 const LpPage = React.lazy(() => import('./pages/Lp'));
 const ObrigadoPage = React.lazy(() => import('./pages/Obrigado'));
+const CareersPage = React.lazy(() => import('./pages/Careers'));
+const ObrigadoCurriculoPage = React.lazy(() => import('./pages/ObrigadoCurriculo'));
 
 import { captureUTMs } from './lib/utm-tracker';
 import { Analytics } from "@vercel/analytics/react";
@@ -71,6 +73,7 @@ const App: React.FC = () => {
               <Route path="/downloads" element={<DownloadsPage />} />
               <Route path="/catalogo" element={<CatalogoPage />} />
               <Route path="/orcamento" element={<QuotePage />} />
+              <Route path="/trabalhe-conosco" element={<CareersPage />} />
               <Route path="/politica-de-privacidade" element={<PrivacyPage />} />
               <Route path="/termos-de-uso" element={<TermsPage />} />
               <Route path="/404" element={<Navigate to="/" replace />} />
@@ -80,8 +83,9 @@ const App: React.FC = () => {
             {/* Landing Page - no main layout */}
             <Route path="/lp" element={<LpPage />} />
 
-            {/* Thank you page - no main layout */}
+            {/* Thank you pages - no main layout */}
             <Route path="/obrigado" element={<ObrigadoPage />} />
+            <Route path="/obrigado-curriculo" element={<ObrigadoCurriculoPage />} />
 
             {/* Deep Link WebView redirect - no layout */}
 

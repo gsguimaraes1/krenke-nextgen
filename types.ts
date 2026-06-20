@@ -109,3 +109,41 @@ export interface Profile {
   phone: string | null;
   created_at: string;
 }
+
+export interface JobOpening {
+  id: string;
+  title: string;
+  contract_types: string[];
+  department: string | null;
+  location: string | null;
+  description: string | null;
+  requirements: string | null;
+  is_active: boolean;
+  application_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JobApplication {
+  id: string;
+  opening_id: string | null;
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  state: string;
+  application_type: string;
+  experience: string | null;
+  education: string | null;
+  salary_expectation: string | null;
+  motivation: string | null;
+  message: string | null;
+  cv_url: string | null;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  utm_id?: string;
+  submitted_at: string;
+}

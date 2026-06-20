@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Product, AppScript, Page, NavItem, Profile } from '../types';
+import { Product, AppScript, Page, NavItem, Profile, JobOpening, JobApplication } from '../types';
 import AdminLayout from '../components/AdminLayout';
 import RichTextEditor from '../components/RichTextEditor';
 import ProductSpecsManager from '../components/ProductSpecsManager';
@@ -1258,6 +1258,8 @@ const AdminPage: React.FC = () => {
         if (path.includes('/paginas')) return 'paginas';
         if (path.includes('/blog')) return 'blog';
         if (path.includes('/leads')) return 'leads';
+        if (path.includes('/candidaturas')) return 'candidaturas';
+        if (path.includes('/vagas')) return 'vagas';
         if (path.includes('/usuarios')) return 'usuarios';
         if (path.includes('/scripts')) return 'scripts';
         if (path.includes('/configuracoes')) return 'configuracoes';
@@ -1266,6 +1268,10 @@ const AdminPage: React.FC = () => {
     }, [location.pathname]);
     const [products, setProducts] = useState<Product[]>([]);
     const [leads, setLeads] = useState<Lead[]>([]);
+    const [jobOpenings, setJobOpenings] = useState<JobOpening[]>([]);
+    const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
+    const [jobOpeningForm, setJobOpeningForm] = useState<Partial<JobOpening>>({ contract_types: [], is_active: true });
+    const [editingOpening, setEditingOpening] = useState<JobOpening | null>(null);
     const { user, profile, refreshProfile } = useAuth();
     const [posts, setPosts] = useState<Post[]>([]);
     const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -1310,9 +1316,50 @@ const AdminPage: React.FC = () => {
             fetchScripts(),
             fetchSettings(),
             fetchCurrentUserProfile(),
-            fetchPages()
+            fetchPages(),
+            fetchJobOpenings(),
+            fetchJobApplications(),
         ]);
         setLoading(false);
+    };
+
+    const fetchJobOpenings = async () => {
+        if (!supabase) return;
+        const { data } = await supabase.from('job_openings').select('*').order('created_at', { ascending: false });
+        setJobOpenings(data || []);
+    };
+
+    const fetchJobApplications = async () => {
+        if (!supabase) return;
+        const { data } = await supabase.from('job_applications').select('*').order('submitted_at', { ascending: false });
+        setJobApplications(data || []);
+    };
+
+    const saveJobOpening = async () => {
+        if (!supabase) return;
+        const form = editingOpening ? { ...jobOpeningForm } : { ...jobOpeningForm };
+        if (!form.title?.trim()) { alert('Informe o título da vaga.'); return; }
+        if (editingOpening) {
+            await supabase.from('job_openings').update(form).eq('id', editingOpening.id);
+        } else {
+            await supabase.from('job_openings').insert([form]);
+        }
+        setEditingOpening(null);
+        setJobOpeningForm({ contract_types: [], is_active: true });
+        fetchJobOpenings();
+    };
+
+    const deleteJobOpening = async (id: string) => {
+        if (!supabase) return;
+        if (!confirm('Excluir esta vaga? As candidaturas associadas não serão apagadas.')) return;
+        await supabase.from('job_openings').delete().eq('id', id);
+        fetchJobOpenings();
+    };
+
+    const toggleJobOpening = async (opening: JobOpening) => {
+        if (!supabase) return;
+        await supabase.from('job_openings').update({ is_active: !opening.is_active }).eq('id', opening.id);
+        fetchJobOpenings();
     };
 
     const fetchProfiles = async () => {
@@ -2196,6 +2243,256 @@ const AdminPage: React.FC = () => {
                                     </div>
                                 ))}
                                 {leads.length === 0 && <div className="text-center py-20 text-gray-400 italic">Nenhum orçamento recebido ainda.</div>}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- Vagas (Job Openings CMS) --- */}
+                    {activeView === 'vagas' && (
+                        <div className="space-y-8">
+                            <div className="flex items-center justify-between">
+                                <h1 className="text-2xl font-black text-krenke-blue">Vagas — Trabalhe Conosco</h1>
+                                <button onClick={fetchJobOpenings} className="p-2 text-gray-400 hover:text-krenke-orange transition-colors"><RefreshCw size={20} /></button>
+                            </div>
+
+                            {/* Form */}
+                            <div className="bg-white rounded-2xl border shadow-sm p-8">
+                                <h2 className="font-black text-krenke-blue text-lg mb-6">{editingOpening ? 'Editar Vaga' : 'Nova Vaga'}</h2>
+                                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label className="text-xs font-black text-gray-400 uppercase mb-1 block">Título *</label>
+                                        <input
+                                            type="text"
+                                            value={jobOpeningForm.title || ''}
+                                            onChange={e => setJobOpeningForm(f => ({ ...f, title: e.target.value }))}
+                                            placeholder="Ex: Vendedor Externo"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-krenke-orange outline-none text-sm font-medium"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-black text-gray-400 uppercase mb-1 block">Departamento</label>
+                                        <input
+                                            type="text"
+                                            value={jobOpeningForm.department || ''}
+                                            onChange={e => setJobOpeningForm(f => ({ ...f, department: e.target.value }))}
+                                            placeholder="Ex: Comercial"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-krenke-orange outline-none text-sm font-medium"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="text-xs font-black text-gray-400 uppercase mb-1 block">Localização</label>
+                                        <input
+                                            type="text"
+                                            value={jobOpeningForm.location || ''}
+                                            onChange={e => setJobOpeningForm(f => ({ ...f, location: e.target.value }))}
+                                            placeholder="Ex: Guaramirim, SC (Remoto)"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-krenke-orange outline-none text-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="text-xs font-black text-gray-400 uppercase mb-2 block">Tipos de Contrato *</label>
+                                    <div className="flex flex-wrap gap-3">
+                                        {['CLT', 'PJ', 'Estágio', 'Freelancer/Temporário', 'Banco de Talentos'].map(ct => {
+                                            const checked = (jobOpeningForm.contract_types || []).includes(ct);
+                                            return (
+                                                <label key={ct} className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 cursor-pointer text-sm font-bold transition-all ${checked ? 'border-krenke-orange bg-orange-50 text-krenke-orange' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checked}
+                                                        onChange={() => setJobOpeningForm(f => {
+                                                            const cur = f.contract_types || [];
+                                                            return { ...f, contract_types: checked ? cur.filter(t => t !== ct) : [...cur, ct] };
+                                                        })}
+                                                        className="sr-only"
+                                                    />
+                                                    {checked && <Check size={14} />}
+                                                    {ct}
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="text-xs font-black text-gray-400 uppercase mb-1 block">Descrição</label>
+                                    <textarea
+                                        value={jobOpeningForm.description || ''}
+                                        onChange={e => setJobOpeningForm(f => ({ ...f, description: e.target.value }))}
+                                        placeholder="Descreva a vaga, responsabilidades e benefícios..."
+                                        rows={4}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-krenke-orange outline-none text-sm font-medium resize-none"
+                                    />
+                                </div>
+                                <div className="mb-6">
+                                    <label className="text-xs font-black text-gray-400 uppercase mb-1 block">Requisitos</label>
+                                    <textarea
+                                        value={jobOpeningForm.requirements || ''}
+                                        onChange={e => setJobOpeningForm(f => ({ ...f, requirements: e.target.value }))}
+                                        placeholder="Liste os requisitos e diferenciais..."
+                                        rows={3}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-krenke-orange outline-none text-sm font-medium resize-none"
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={jobOpeningForm.is_active ?? true}
+                                            onChange={e => setJobOpeningForm(f => ({ ...f, is_active: e.target.checked }))}
+                                            className="w-5 h-5 accent-krenke-orange"
+                                        />
+                                        <span className="text-sm font-bold text-gray-600">Vaga ativa (visível no site)</span>
+                                    </label>
+                                    <div className="flex gap-3">
+                                        {editingOpening && (
+                                            <button
+                                                onClick={() => { setEditingOpening(null); setJobOpeningForm({ contract_types: [], is_active: true }); }}
+                                                className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm font-bold hover:bg-gray-50"
+                                            >
+                                                Cancelar
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={saveJobOpening}
+                                            className="px-8 py-2.5 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 flex items-center gap-2 text-sm"
+                                        >
+                                            <Save size={16} /> {editingOpening ? 'Salvar Alterações' : 'Criar Vaga'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* List */}
+                            <div className="space-y-4">
+                                {jobOpenings.map(o => (
+                                    <div key={o.id} className="bg-white rounded-2xl border shadow-sm p-5 flex items-center gap-4">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                <span className="font-black text-krenke-blue">{o.title}</span>
+                                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${o.is_active ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                                                    {o.is_active ? 'Ativa' : 'Inativa'}
+                                                </span>
+                                                {(o.contract_types || []).map(ct => (
+                                                    <span key={ct} className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{ct}</span>
+                                                ))}
+                                                {o.application_count > 0 && (
+                                                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-50 text-krenke-orange">{o.application_count} candidatura{o.application_count !== 1 ? 's' : ''}</span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-400 font-medium">{[o.department, o.location].filter(Boolean).join(' · ')}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <button
+                                                onClick={() => toggleJobOpening(o)}
+                                                title={o.is_active ? 'Desativar' : 'Ativar'}
+                                                className={`p-2 rounded-lg transition-colors ${o.is_active ? 'text-green-500 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-100'}`}
+                                            >
+                                                {o.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                                            </button>
+                                            <button
+                                                onClick={() => { setEditingOpening(o); setJobOpeningForm({ ...o }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                                className="p-2 rounded-lg text-krenke-blue hover:bg-blue-50 transition-colors"
+                                            >
+                                                <Settings size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => deleteJobOpening(o.id)}
+                                                className="p-2 rounded-lg text-red-400 hover:bg-red-50 transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {jobOpenings.length === 0 && (
+                                    <div className="text-center py-16 text-gray-400 italic">Nenhuma vaga cadastrada. Crie a primeira acima.</div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- Candidaturas (Job Applications) --- */}
+                    {activeView === 'candidaturas' && (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h1 className="text-2xl font-black text-krenke-blue">Candidaturas Recebidas</h1>
+                                <button onClick={fetchJobApplications} className="p-2 text-gray-400 hover:text-krenke-orange transition-colors"><RefreshCw size={20} /></button>
+                            </div>
+
+                            <div className="grid gap-4">
+                                {jobApplications.map(app => {
+                                    const opening = jobOpenings.find(o => o.id === app.opening_id);
+                                    return (
+                                        <div key={app.id} className="bg-white p-6 rounded-2xl border shadow-sm hover:shadow-md transition-shadow">
+                                            {/* Header */}
+                                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                                                <div>
+                                                    <h3 className="font-black text-krenke-blue text-lg flex items-center gap-2">
+                                                        <Users size={18} className="text-krenke-orange" /> {app.name}
+                                                    </h3>
+                                                    <div className="flex flex-wrap gap-3 mt-1 text-sm text-gray-600">
+                                                        <a href={`mailto:${app.email}`} className="flex items-center gap-1.5 hover:text-krenke-orange"><Mail size={13} /> {app.email}</a>
+                                                        <a href={`tel:${app.phone}`} className="flex items-center gap-1.5 hover:text-krenke-orange"><Phone size={13} /> {app.phone}</a>
+                                                        <span className="flex items-center gap-1.5 text-gray-400"><Calendar size={13} /> {new Date(app.submitted_at).toLocaleString('pt-BR')}</span>
+                                                    </div>
+                                                </div>
+                                                {app.cv_url && (
+                                                    <a
+                                                        href={app.cv_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        download
+                                                        className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-krenke-blue text-white text-xs font-black rounded-xl hover:bg-[#241f6b] transition-colors"
+                                                    >
+                                                        <FileText size={14} /> Baixar Currículo PDF
+                                                    </a>
+                                                )}
+                                            </div>
+
+                                            {/* Badges */}
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                <span className="px-3 py-1 bg-gray-50 text-gray-500 border border-gray-100 rounded-full text-xs font-bold">{app.city} — {app.state}</span>
+                                                {opening && (
+                                                    <span className="px-3 py-1 bg-orange-50 text-krenke-orange border border-orange-100 rounded-full text-xs font-bold">{opening.title}</span>
+                                                )}
+                                                {!opening && (
+                                                    <span className="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-full text-xs font-bold">Candidatura Espontânea</span>
+                                                )}
+                                                {app.education && (
+                                                    <span className="px-3 py-1 bg-teal-50 text-teal-600 border border-teal-100 rounded-full text-xs font-bold">{app.education}</span>
+                                                )}
+                                                {app.salary_expectation && (
+                                                    <span className="px-3 py-1 bg-green-50 text-green-600 border border-green-100 rounded-full text-xs font-bold">💰 {app.salary_expectation}</span>
+                                                )}
+                                            </div>
+
+                                            {/* Resume fields */}
+                                            <div className="grid md:grid-cols-2 gap-4">
+                                                {app.experience && (
+                                                    <div>
+                                                        <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Experiência</label>
+                                                        <p className="text-gray-700 bg-gray-50 p-3 rounded-xl text-sm border leading-relaxed">{app.experience}</p>
+                                                    </div>
+                                                )}
+                                                {app.motivation && (
+                                                    <div>
+                                                        <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Por que a Krenke?</label>
+                                                        <p className="text-gray-700 bg-gray-50 p-3 rounded-xl text-sm border leading-relaxed italic">"{app.motivation}"</p>
+                                                    </div>
+                                                )}
+                                                {app.message && (
+                                                    <div className="md:col-span-2">
+                                                        <label className="text-[10px] font-black text-gray-400 uppercase mb-1 block">Mensagem adicional</label>
+                                                        <p className="text-gray-700 bg-gray-50 p-3 rounded-xl text-sm border">{app.message}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {jobApplications.length === 0 && (
+                                    <div className="text-center py-20 text-gray-400 italic">Nenhuma candidatura recebida ainda.</div>
+                                )}
                             </div>
                         </div>
                     )}

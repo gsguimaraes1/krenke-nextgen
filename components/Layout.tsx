@@ -506,6 +506,7 @@ export const Footer: React.FC = () => {
             <Link id="footer-link-privacy" to="/politica-de-privacidade" className="hover:text-vibrant-orange transition-colors px-2 py-1">Privacidade</Link>
             <Link id="footer-link-terms" to="/termos-de-uso" className="hover:text-vibrant-orange transition-colors px-2 py-1">Termos</Link>
             <Link id="footer-link-reseller" to="/revendedor" className="hover:text-vibrant-orange transition-colors px-2 py-1">Área do Revendedor</Link>
+            <Link id="footer-link-trabalhe-conosco" to="/trabalhe-conosco" className="hover:text-vibrant-orange transition-colors px-2 py-1">Trabalhe Conosco</Link>
           </div>
         </div>
       </div>

@@ -11,7 +11,8 @@ import {
     X,
     Users,
     User,
-    LayoutTemplate
+    LayoutTemplate,
+    Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -31,6 +32,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { icon: LayoutTemplate, label: 'Páginas', path: '/pgadmin/paginas', testId: 'nav-paginas' },
         { icon: MessageSquare, label: 'Blog', path: '/pgadmin/blog', testId: 'nav-blog' },
         { icon: BarChart3, label: 'Leads', path: '/pgadmin/leads', testId: 'nav-leads' },
+        { icon: Briefcase, label: 'Vagas', path: '/pgadmin/vagas', testId: 'nav-vagas' },
+        { icon: Briefcase, label: 'Candidaturas', path: '/pgadmin/candidaturas', testId: 'nav-candidaturas' },
         { icon: User, label: 'Meu Perfil', path: '/pgadmin/perfil', testId: 'nav-perfil' },
     ];
 
