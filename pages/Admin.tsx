@@ -1337,7 +1337,8 @@ const AdminPage: React.FC = () => {
 
     const deleteJobApplication = async (id: string) => {
         if (!confirm('Cancelar esta candidatura? A ação não pode ser desfeita.')) return;
-        await supabase.from('job_applications').delete().eq('id', id);
+        const { error } = await supabase.from('job_applications').delete().eq('id', id);
+        if (error) { alert('Erro ao cancelar candidatura: ' + error.message); return; }
         setJobApplications(prev => prev.filter(a => a.id !== id));
     };
 

@@ -124,7 +124,7 @@ const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) =
       let cvUrl: string | null = null;
       if (cvFile) {
         try {
-          const { publicUrl } = await uploadToR2(cvFile, 'revendedor/curriculos');
+          const { publicUrl } = await uploadToR2(cvFile, 'curriculos');
           cvUrl = publicUrl;
         } catch {
           // CV upload failed — proceed without it
