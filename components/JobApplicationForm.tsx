@@ -179,8 +179,8 @@ const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) =
       }).catch(() => {});
 
       navigate('/obrigado-curriculo');
-    } catch {
-      setSubmitError('Erro ao enviar candidatura. Tente novamente.');
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Erro ao enviar candidatura. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
