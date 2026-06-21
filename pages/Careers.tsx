@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { Briefcase, MapPin, Users, Heart, Lightbulb, Trophy, ChevronDown, ChevronUp, Building2 } from 'lucide-react';
@@ -154,6 +154,7 @@ export default function CareersPage() {
   const [loadingOpenings, setLoadingOpenings] = useState(true);
   const [preselected, setPreselected] = useState<JobOpening | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const vagasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase
@@ -161,7 +162,7 @@ export default function CareersPage() {
       .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data }: { data: JobOpening[] | null }) => {
         setOpenings(data || []);
         setLoadingOpenings(false);
       });
@@ -177,12 +178,34 @@ export default function CareersPage() {
   return (
     <>
       <Helmet>
-        <title>Trabalhe Conosco — Krenke Brinquedos</title>
-        <meta
-          name="description"
-          content="Faça parte do time Krenke! Vagas em aberto para CLT, PJ, Estágio e Banco de Talentos. Envie seu currículo."
-        />
-        <link rel="canonical" href="https://www.site.krenke.com.br/trabalhe-conosco" />
+        <title>Trabalhe Conosco — Krenke Brinquedos Pedagógicos</title>
+        <meta name="description" content="Faça parte do time Krenke! Vagas em aberto para CLT, PJ, Estágio e Banco de Talentos em Guaramirim/SC e Palmares/PE. Envie seu currículo agora." />
+        <meta name="keywords" content="vagas krenke, emprego guaramirim sc, trabalhe conosco krenke, vagas playground, emprego brinquedos, banco de talentos krenke" />
+        <meta property="og:title" content="Trabalhe Conosco — Krenke Brinquedos" />
+        <meta property="og:description" content="Há mais de 40 anos construindo infâncias felizes. Junte-se ao time Krenke — vagas CLT, PJ, Estágio e Banco de Talentos." />
+        <meta property="og:url" content="https://site.krenke.com.br/trabalhe-conosco" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://site.krenke.com.br/trabalhe-conosco" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Trabalhe Conosco — Krenke Brinquedos",
+          "url": "https://site.krenke.com.br/trabalhe-conosco",
+          "description": "Página de vagas e candidaturas da Krenke Brinquedos Pedagógicos LTDA.",
+          "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://site.krenke.com.br/" },
+              { "@type": "ListItem", "position": 2, "name": "Trabalhe Conosco", "item": "https://site.krenke.com.br/trabalhe-conosco" }
+            ]
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Krenke Brinquedos Pedagógicos LTDA",
+            "url": "https://site.krenke.com.br",
+            "logo": "https://site.krenke.com.br/favicon.png"
+          }
+        })}</script>
       </Helmet>
 
       {/* Hero */}
@@ -226,10 +249,10 @@ export default function CareersPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            onClick={() => scrollToForm()}
+            onClick={() => vagasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
             className="inline-flex items-center gap-3 bg-[#F39200] hover:bg-orange-500 text-white font-black uppercase tracking-wider text-sm py-5 px-10 rounded-2xl transition-all hover:scale-105 hover:shadow-[0_8px_30px_rgba(243,146,0,0.4)]"
           >
-            Enviar Currículo
+            Ver Vagas
             <ChevronDown size={18} />
           </motion.button>
         </div>
@@ -263,7 +286,7 @@ export default function CareersPage() {
       </section>
 
       {/* Job Openings */}
-      <section className="py-24 bg-slate-50">
+      <section ref={vagasRef} className="py-24 bg-slate-50 scroll-mt-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div {...fadeUp} className="text-center mb-16">
             <span className="text-[#F39200] font-black text-xs uppercase tracking-widest">Oportunidades</span>

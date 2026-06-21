@@ -226,13 +226,13 @@ export const Navbar: React.FC = () => {
                       </div>
                     </div>
 
-                    {['Blog', 'Catálogo'].map((item, i) => (
+                    {[{ label: 'Trabalhe Conosco', path: '/trabalhe-conosco' }, { label: 'Catálogo', path: '/catalogo' }].map((item, i) => (
                       <Link
                         key={i}
-                        to={`/${item === 'Catálogo' ? 'catalogo' : item.toLowerCase()}`}
+                        to={item.path}
                         className="text-white font-black text-sm uppercase tracking-widest hover:text-vibrant-orange transition-all relative group mx-2"
                       >
-                        {item}
+                        {item.label}
                         <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-vibrant-orange transition-all group-hover:w-full"></span>
                       </Link>
                     ))}
@@ -350,7 +350,7 @@ export const Navbar: React.FC = () => {
                     )}
                   </div>
 
-                  <Link to="/blog" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-blog">{t('nav.blog')}</Link>
+                  <Link to="/trabalhe-conosco" className="text-white font-medium border-b border-white/10 pb-4">Trabalhe Conosco</Link>
                   <Link to="/catalogo" className="text-white font-medium border-b border-white/10 pb-4 gtm-nav-mobile-catalogo">{t('nav.catalog')}</Link>
                 </>
               )}
@@ -450,15 +450,21 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-3">
             <h4 className="text-vibrant-orange font-black uppercase tracking-[0.2em] text-sm mb-10">Nossos Produtos</h4>
             <ul className="grid grid-cols-1 gap-4">
-              {['Home', 'Empresa', 'Produtos', 'Blog', 'Catálogo'].map((item) => (
-                <li key={item}>
+              {[
+                { label: 'Home', path: '/' },
+                { label: 'Empresa', path: '/empresa' },
+                { label: 'Produtos', path: '/produtos' },
+                { label: 'Trabalhe Conosco', path: '/trabalhe-conosco' },
+                { label: 'Catálogo', path: '/catalogo' },
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
-                    to={item === 'Home' ? '/' : (item === 'Catálogo' ? '/catalogo' : `/${item.toLowerCase()}`)}
-                    id={`footer-link-${item.toLowerCase()}`}
+                    to={item.path}
+                    id={`footer-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                     className="text-gray-400 font-bold hover:text-white transition-colors flex items-center gap-2 group"
                   >
                     <span className="w-0 h-0.5 bg-vibrant-orange transition-all group-hover:w-4"></span>
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -515,6 +521,7 @@ export const Footer: React.FC = () => {
 };
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
   return (
     <div className="flex flex-col min-h-screen font-sans text-gray-900 overflow-x-hidden">
       <SecurityGuard />
@@ -524,7 +531,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {children}
       </main>
       <WhatsAppWidget />
-      <MapSection />
+      {location.pathname === '/' && <MapSection />}
       <Footer />
       <CookieConsent />
     </div>
