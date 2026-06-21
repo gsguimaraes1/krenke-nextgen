@@ -8,16 +8,16 @@ import { Helmet } from 'react-helmet-async';
 import { ShowcaseCard } from '../components/ui/ShowcaseCard';
 // heroVideo removido — vídeo agora hospedado no YouTube para evitar bandwidth do Vercel
 const HERO_YOUTUBE_ID = 'C_KbvW2MjB8';
-import bannerKrenke from '../assets/banner Krenke.png';
+import bannerKrenke from '../assets/banner Krenke.webp';
 import { ImageCarousel } from '../components/ImageCarousel';
 import sobreImg from '../assets/Home/Menino-Home-krenke.webp';
 import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
-import imgPlaygroundsPadroes from '../assets/playgrounds_padroes/kmp_0502/kmp 0502 - render perspectiva.png';
-import imgBrinquedosAvulsos from '../assets/brinquedos-avulsos/cavalo-de-molas/cavalinho de mola - laranja - render.png';
-import imgAquaticos from '../assets/aquatico/KAQ 0302/KAQ 0302 - render perspectiva 2.png';
+import imgPlaygroundsPadroes from '../assets/playgrounds_padroes/kmp_0502/kmp 0502 - render perspectiva.webp';
+import imgBrinquedosAvulsos from '../assets/brinquedos-avulsos/cavalo-de-molas/cavalinho de mola - laranja - render.webp';
+import imgAquaticos from '../assets/aquatico/KAQ 0302/KAQ 0302 - render perspectiva 2.webp';
 import imgLittlePlay from '../assets/Little Play/KLP0201/krenke-playground-Little-Play-0201-render-perspectiva-2.webp';
-import imgMobiliarios from '../assets/Mobiliario/banco4.png';
-import imgTematicos from '../assets/tematicos/TRATOR/trator - render 1.png';
+import imgMobiliarios from '../assets/Mobiliario/banco4.webp';
+import imgTematicos from '../assets/tematicos/TRATOR/trator - render 1.webp';
 import { useTranslation } from 'react-i18next';
 import { TranslatableText } from '../components/TranslatableText';
 

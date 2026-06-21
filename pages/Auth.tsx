@@ -10,7 +10,7 @@ import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
 
 // ── Images ─────────────────────────────────────────────────────────────────
-const imageModules = import.meta.glob('../assets/login/*.png', { eager: true }) as Record<
+const imageModules = import.meta.glob('../assets/login/*.webp', { eager: true }) as Record<
   string,
   { default: string }
 >;
