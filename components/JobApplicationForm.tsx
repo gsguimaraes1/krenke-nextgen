@@ -123,8 +123,12 @@ const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) =
     try {
       let cvUrl: string | null = null;
       if (cvFile) {
-        const { publicUrl } = await uploadToR2(cvFile, 'curriculos');
-        cvUrl = publicUrl;
+        try {
+          const { publicUrl } = await uploadToR2(cvFile, 'curriculos', 'vagas-krenke');
+          cvUrl = publicUrl;
+        } catch {
+          // CV upload failed — proceed without it
+        }
       }
 
       const selectedOpening = openings.find(o => o.id === openingId);
@@ -154,7 +158,13 @@ const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) =
         utm_id: utms.utm_id || null,
       };
 
-      await supabase.from('job_applications').insert([payload]);
+      const { error: insertError } = await supabase.from('job_applications').insert([payload]);
+      if (insertError) {
+        if (insertError.code === '23505') {
+          throw new Error('Você já enviou uma candidatura para esta vaga. Aguarde nosso contato!');
+        }
+        throw new Error(insertError.message);
+      }
 
       const webhookPayload = {
         ...payload,
