@@ -123,8 +123,12 @@ const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) =
     try {
       let cvUrl: string | null = null;
       if (cvFile) {
-        const { publicUrl } = await uploadToR2(cvFile, 'curriculos');
-        cvUrl = publicUrl;
+        try {
+          const { publicUrl } = await uploadToR2(cvFile, 'curriculos');
+          cvUrl = publicUrl;
+        } catch {
+          // CV upload failed — proceed without it
+        }
       }
 
       const selectedOpening = openings.find(o => o.id === openingId);
@@ -179,8 +183,8 @@ const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) =
       }).catch(() => {});
 
       navigate('/obrigado-curriculo');
-    } catch (err: any) {
-      setSubmitError(err?.message || 'Erro ao enviar candidatura. Tente novamente.');
+    } catch {
+      setSubmitError('Erro ao enviar candidatura. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
