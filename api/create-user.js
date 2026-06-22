@@ -35,7 +35,13 @@ export default async function handler(req, res) {
     data: { full_name: full_name || '' },
   });
 
-  if (error) return res.status(400).json({ error: error.message });
+  if (error) {
+    const msg = error.message || '';
+    if (msg.includes('Database error saving new user') || msg.includes('already registered') || msg.includes('already been registered')) {
+      return res.status(400).json({ error: 'E-mail já cadastrado. Use o botão "Enviar Convite" na linha do usuário para reenviar.' });
+    }
+    return res.status(400).json({ error: msg });
+  }
 
   if (data?.user) {
     await supabaseAdmin.from('profiles').update({
