@@ -103,11 +103,14 @@ export interface ResellerFile {
 export interface Profile {
   id: string;
   email: string;
-  role: 'super' | 'restricted' | 'reseller';
+  role: 'super' | 'restricted' | 'reseller' | 'hr';
   full_name: string | null;
   avatar_url: string | null;
   phone: string | null;
   created_at: string;
+  email_confirmed_at: string | null;
+  last_sign_in_at: string | null;
+  invited_at: string | null;
 }
 
 export interface JobOpening {

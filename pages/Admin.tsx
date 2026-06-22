@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Product, AppScript, Page, NavItem, Profile, JobOpening, JobApplication } from '../types';
 import AdminLayout from '../components/AdminLayout';
@@ -415,63 +415,177 @@ const DashboardView = ({ stats }: { stats: any }) => (
 );
 
 // --- Users View Component ---
-const UsersView = ({ users, onUpdateRole }: { users: Profile[], onUpdateRole: (id: string, role: 'super' | 'restricted' | 'reseller') => void }) => (
-    <div className="space-y-6">
-        <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-black text-krenke-blue">Gestão de Usuários</h1>
-        </div>
+const UsersView = ({
+    users,
+    onUpdateRole,
+    onCreateUser,
+    onResendInvite,
+    onDeleteUser,
+}: {
+    users: Profile[],
+    onUpdateRole: (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr') => void,
+    onCreateUser: (data: { full_name: string; email: string; phone: string; role: string }) => Promise<void>,
+    onResendInvite: (email: string) => Promise<void>,
+    onDeleteUser: (id: string, email: string) => Promise<void>,
+}) => {
+    const [showCreate, setShowCreate] = React.useState(false);
+    const [creating, setCreating] = React.useState(false);
+    const [newUser, setNewUser] = React.useState({ full_name: '', email: '', phone: '', role: 'restricted' });
 
-        <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-            <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b">
-                    <tr>
-                        <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Usuário</th>
-                        <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Email</th>
-                        <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Nível de Acesso</th>
-                        <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Data de Cadastro</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y">
-                    {users.map((u) => (
-                        <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                    {u.avatar_url ? (
-                                        <img src={u.avatar_url} className="w-10 h-10 rounded-full object-cover border-2 border-slate-100" />
+    const handleCreate = async () => {
+        if (!newUser.full_name || !newUser.email) {
+            alert('Preencha nome e e-mail.');
+            return;
+        }
+        setCreating(true);
+        try {
+            await onCreateUser(newUser);
+            setNewUser({ full_name: '', email: '', phone: '', role: 'restricted' });
+            setShowCreate(false);
+        } finally {
+            setCreating(false);
+        }
+    };
+
+    const roleColor = (role: string) => {
+        if (role === 'super') return 'bg-orange-100 text-krenke-orange';
+        if (role === 'reseller') return 'bg-green-100 text-green-600';
+        if (role === 'hr') return 'bg-purple-100 text-purple-600';
+        return 'bg-blue-100 text-krenke-blue';
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-black text-krenke-blue">Gestão de Usuários</h1>
+                <button
+                    onClick={() => setShowCreate(v => !v)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 transition-colors"
+                >
+                    <Plus size={18} /> Novo Usuário
+                </button>
+            </div>
+
+            {showCreate && (
+                <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
+                    <h2 className="font-black text-krenke-blue text-lg">Criar Novo Usuário</h2>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-xs font-black text-gray-400 uppercase">Nome Completo</label>
+                            <input type="text" className="w-full p-3 bg-gray-50 border rounded-xl font-bold" value={newUser.full_name} onChange={e => setNewUser(p => ({ ...p, full_name: e.target.value }))} placeholder="Nome completo" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-black text-gray-400 uppercase">E-mail</label>
+                            <input type="email" className="w-full p-3 bg-gray-50 border rounded-xl" value={newUser.email} onChange={e => setNewUser(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-black text-gray-400 uppercase">Telefone / WhatsApp</label>
+                            <input type="text" className="w-full p-3 bg-gray-50 border rounded-xl" value={newUser.phone} onChange={e => setNewUser(p => ({ ...p, phone: e.target.value }))} placeholder="(00) 00000-0000" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-black text-gray-400 uppercase">Nível de Acesso</label>
+                            <select className="w-full p-3 bg-gray-50 border rounded-xl font-bold" value={newUser.role} onChange={e => setNewUser(p => ({ ...p, role: e.target.value }))}>
+                                <option value="super">Super Admin</option>
+                                <option value="hr">RH (Vagas e Candidaturas)</option>
+                                <option value="reseller">Revendedor</option>
+                                <option value="restricted">Acesso Restrito</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button onClick={handleCreate} disabled={creating} className="px-6 py-2.5 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2">
+                            {creating ? <RefreshCw size={16} className="animate-spin" /> : <Plus size={16} />} Criar Usuário
+                        </button>
+                        <button onClick={() => setShowCreate(false)} className="px-6 py-2.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200">Cancelar</button>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-gray-50 border-b">
+                        <tr>
+                            <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Usuário</th>
+                            <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Email</th>
+                            <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Nível de Acesso</th>
+                            <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Status</th>
+                            <th className="px-6 py-4 text-xs font-black text-gray-400 uppercase">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                        {users.map((u) => (
+                            <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        {u.avatar_url ? (
+                                            <img src={u.avatar_url} className="w-10 h-10 rounded-full object-cover border-2 border-slate-100" />
+                                        ) : (
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-white text-lg ${u.role === 'super' ? 'bg-krenke-orange' : u.role === 'hr' ? 'bg-purple-500' : 'bg-krenke-blue'}`}>
+                                                {u.email[0].toUpperCase()}
+                                            </div>
+                                        )}
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-gray-900">{u.full_name || 'Usuário Krenke'}</span>
+                                            {u.role === 'restricted' && <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight">Aguardando Autorização</span>}
+                                            {u.role === 'reseller' && <span className="text-[10px] text-green-500 font-bold uppercase tracking-tight">Revendedor Autorizado</span>}
+                                            {u.role === 'hr' && <span className="text-[10px] text-purple-500 font-bold uppercase tracking-tight">RH</span>}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 font-medium text-gray-600">{u.email}</td>
+                                <td className="px-6 py-4">
+                                    <select
+                                        value={u.role}
+                                        onChange={(e) => onUpdateRole(u.id, e.target.value as any)}
+                                        className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-full border-none focus:ring-2 focus:ring-krenke-orange/20 cursor-pointer ${roleColor(u.role)}`}
+                                    >
+                                        <option value="super">Super Admin</option>
+                                        <option value="hr">RH</option>
+                                        <option value="reseller">Revendedor</option>
+                                        <option value="restricted">Acesso Restrito</option>
+                                    </select>
+                                </td>
+                                <td className="px-6 py-4">
+                                    {u.email_confirmed_at ? (
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-[10px] font-black uppercase text-green-500">Confirmado</span>
+                                            <span className="text-[10px] text-gray-400">{u.last_sign_in_at ? `Último acesso: ${new Date(u.last_sign_in_at).toLocaleDateString('pt-BR')}` : 'Nunca acessou'}</span>
+                                        </div>
                                     ) : (
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-white text-lg ${u.role === 'super' ? 'bg-krenke-orange' : 'bg-krenke-blue'}`}>
-                                            {u.email[0].toUpperCase()}
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-[10px] font-black uppercase text-amber-500">Aguardando convite</span>
+                                            <span className="text-[10px] text-gray-400">Desde {new Date(u.created_at).toLocaleDateString('pt-BR')}</span>
                                         </div>
                                     )}
-                                    <div className="flex flex-col">
-                                        <span className="font-bold text-gray-900">{u.full_name || 'Usuário Krenke'}</span>
-                                        {u.role === 'restricted' && <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight">Aguardando Autorização</span>}
-                                        {u.role === 'reseller' && <span className="text-[10px] text-green-500 font-bold uppercase tracking-tight">Revendedor Autorizado</span>}
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-2">
+                                        {!u.email_confirmed_at && (
+                                            <button
+                                                onClick={() => onResendInvite(u.email)}
+                                                title="Reenviar convite por e-mail"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase text-blue-500 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                                            >
+                                                <Mail size={12} /> Enviar Convite
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => onDeleteUser(u.id, u.email)}
+                                            title="Excluir usuário"
+                                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
                                     </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 font-medium text-gray-600">{u.email}</td>
-                            <td className="px-6 py-4">
-                                <select
-                                    value={u.role}
-                                    onChange={(e) => onUpdateRole(u.id, e.target.value as any)}
-                                    className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-full border-none focus:ring-2 focus:ring-krenke-orange/20 cursor-pointer ${u.role === 'super' ? 'bg-orange-100 text-krenke-orange' : u.role === 'reseller' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-krenke-blue'}`}
-                                >
-                                    <option value="super">Super Admin</option>
-                                    <option value="reseller">Revendedor</option>
-                                    <option value="restricted">Acesso Restrito</option>
-                                </select>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-500">
-                                {new Date(u.created_at).toLocaleDateString()}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 // --- Profile View Component ---
 const ProfileView = ({
@@ -1272,7 +1386,14 @@ const AdminPage: React.FC = () => {
     const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
     const [jobOpeningForm, setJobOpeningForm] = useState<Partial<JobOpening>>({ contract_types: [], is_active: true });
     const [editingOpening, setEditingOpening] = useState<JobOpening | null>(null);
-    const { user, profile, refreshProfile } = useAuth();
+    const navigate = useNavigate();
+    const { user, profile, refreshProfile, role } = useAuth();
+
+    useEffect(() => {
+        if (role === 'hr' && activeView === 'dashboard') {
+            navigate('/pgadmin/vagas', { replace: true });
+        }
+    }, [role, activeView]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const [currentUserProfile, setCurrentUserProfile] = useState<Partial<Profile>>({});
@@ -1372,7 +1493,7 @@ const AdminPage: React.FC = () => {
     const fetchProfiles = async () => {
         if (!supabase) return;
         try {
-            const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabase.rpc('get_users_with_auth');
             if (error) throw error;
             setProfiles(data || []);
         } catch (err) {
@@ -1380,7 +1501,53 @@ const AdminPage: React.FC = () => {
         }
     };
 
-    const updateUserRole = async (id: string, role: 'super' | 'restricted' | 'reseller') => {
+    const handleCreateUser = async (data: { full_name: string; email: string; phone: string; role: string }) => {
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { alert('Sessão expirada. Faça login novamente.'); return; }
+
+        const res = await fetch('/api/create-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify(data),
+        });
+        const json = await res.json();
+        if (!res.ok) { alert('Erro ao criar usuário: ' + json.error); return; }
+        alert('Convite enviado para ' + data.email + '! O usuário receberá um e-mail para definir a própria senha.');
+        fetchProfiles();
+    };
+
+    const handleResendInvite = async (email: string) => {
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { alert('Sessão expirada.'); return; }
+        const res = await fetch('/api/resend-invite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify({ email }),
+        });
+        const json = await res.json();
+        if (!res.ok) { alert('Erro ao enviar convite: ' + json.error); return; }
+        alert('Convite reenviado para ' + email + '!');
+    };
+
+    const handleDeleteUser = async (id: string, email: string) => {
+        if (!supabase) return;
+        if (!confirm(`Excluir o usuário ${email}? Esta ação não pode ser desfeita.`)) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { alert('Sessão expirada.'); return; }
+        const res = await fetch('/api/delete-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify({ userId: id }),
+        });
+        const json = await res.json();
+        if (!res.ok) { alert('Erro ao excluir usuário: ' + json.error); return; }
+        alert('Usuário excluído.');
+        fetchProfiles();
+    };
+
+    const updateUserRole = async (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr') => {
         if (!supabase) return;
         const roleLabel = role === 'super' ? 'Super Admin' : role === 'reseller' ? 'Revendedor' : 'Acesso Restrito';
         if (!confirm(`Deseja alterar o nível de acesso deste usuário para ${roleLabel}?`)) return;
@@ -2007,7 +2174,7 @@ const AdminPage: React.FC = () => {
                         }} />
                     )}
                     {activeView === 'usuarios' && (
-                        <UsersView users={profiles} onUpdateRole={updateUserRole} />
+                        <UsersView users={profiles} onUpdateRole={updateUserRole} onCreateUser={handleCreateUser} onResendInvite={handleResendInvite} onDeleteUser={handleDeleteUser} />
                     )}
                     {activeView === 'scripts' && (
                         <ScriptsView

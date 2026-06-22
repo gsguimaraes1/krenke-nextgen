@@ -26,7 +26,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
     const { user, role, profile, signOut } = useAuth();
 
-    const menuItems = [
+    const isHR = role === 'hr';
+
+    const menuItems = isHR ? [
+        { icon: Briefcase, label: 'Vagas', path: '/pgadmin/vagas', testId: 'nav-vagas' },
+        { icon: Briefcase, label: 'Candidaturas', path: '/pgadmin/candidaturas', testId: 'nav-candidaturas' },
+        { icon: User, label: 'Meu Perfil', path: '/pgadmin/perfil', testId: 'nav-perfil' },
+    ] : [
         { icon: BarChart3, label: 'Dashboard', path: '/pgadmin', testId: 'nav-dashboard' },
         { icon: Package, label: 'Produtos', path: '/pgadmin/produtos', testId: 'nav-produtos' },
         { icon: LayoutTemplate, label: 'Páginas', path: '/pgadmin/paginas', testId: 'nav-paginas' },

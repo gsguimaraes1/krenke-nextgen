@@ -94,7 +94,7 @@ const App: React.FC = () => {
 
             {/* Admin Routes - Layout handled inside AdminPage */}
             <Route path="/pgadmin/*" element={
-              <ProtectedRoute allowedRoles={['super']}>
+              <ProtectedRoute allowedRoles={['super', 'hr']}>
                 <AdminPage />
               </ProtectedRoute>
             } />
