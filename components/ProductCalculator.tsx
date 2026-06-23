@@ -83,6 +83,11 @@ const ProductCalculator: React.FC = () => {
   const [clientName, setClientName] = useState('');
   const [clientCnpj, setClientCnpj] = useState('');
   const [clientNumber, setClientNumber] = useState('');
+  const [cnpjLoading, setCnpjLoading] = useState(false);
+  const [cnpjError, setCnpjError] = useState<string | null>(null);
+
+  // Margin
+  const [margin, setMargin] = useState(0);
 
   // Disclaimer
   const [useFullDisclaimer, setUseFullDisclaimer] = useState(false);
@@ -153,9 +158,32 @@ const ProductCalculator: React.FC = () => {
     }
   };
 
-  const totalBruto = useMemo(() => cart.reduce((s, i) => s + i.unit_price * i.qty, 0), [cart]);
+  const marginMult = 1 + margin / 100;
+  const effectivePrice = (p: number) => p * marginMult;
+
+  const totalBruto = useMemo(() => cart.reduce((s, i) => s + effectivePrice(i.unit_price) * i.qty, 0), [cart, margin]);
   const totalIPI = totalBruto * IPI_RATE;
   const totalComIPI = totalBruto + totalIPI;
+
+  // ── CNPJ lookup ────────────────────────────────────
+  const lookupCnpj = async (raw: string) => {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length !== 14) return;
+    setCnpjLoading(true);
+    setCnpjError(null);
+    try {
+      const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`);
+      if (!res.ok) throw new Error('CNPJ não encontrado');
+      const data = await res.json();
+      const formatted = digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+      setClientCnpj(formatted);
+      if (!clientName) setClientName(data.razao_social || '');
+    } catch {
+      setCnpjError('CNPJ não encontrado');
+    } finally {
+      setCnpjLoading(false);
+    }
+  };
 
   // ── Park image attachment ──────────────────────────
   const handleParkImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -314,12 +342,13 @@ const ProductCalculator: React.FC = () => {
         doc.setFillColor(idx % 2 === 0 ? 255 : 249, idx % 2 === 0 ? 255 : 249, idx % 2 === 0 ? 255 : 253);
         doc.rect(margin, y, contentW, 7.5, 'F');
         doc.setTextColor(70, 70, 70);
+        const ep = item.unit_price * marginMult;
         doc.text(item.code, margin + 2, y + 5);
         const desc = item.description.length > 60 ? item.description.substring(0, 57) + '...' : item.description;
         doc.text(desc, margin + 22, y + 5);
         doc.text(String(item.qty), margin + contentW - 66, y + 5, { align: 'right' });
-        doc.text(formatBRL(item.unit_price), margin + contentW - 40, y + 5, { align: 'right' });
-        doc.text(formatBRL(item.unit_price * item.qty), margin + contentW, y + 5, { align: 'right' });
+        doc.text(formatBRL(ep), margin + contentW - 40, y + 5, { align: 'right' });
+        doc.text(formatBRL(ep * item.qty), margin + contentW, y + 5, { align: 'right' });
         y += 7.5;
       });
 
@@ -569,7 +598,7 @@ const ProductCalculator: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-black text-slate-800 text-sm leading-tight truncate">{product.description}</p>
                     <p className="text-xs text-slate-400 font-bold mt-0.5">
-                      Cód. {product.code} • {formatBRL(product.unit_price)}
+                      Cód. {product.code} • {formatBRL(effectivePrice(product.unit_price))}
                     </p>
                   </div>
 
@@ -611,7 +640,7 @@ const ProductCalculator: React.FC = () => {
 
                   {qty > 0 && (
                     <div className="w-24 text-right shrink-0">
-                      <p className="text-sm font-black text-[#312783]">{formatBRL(product.unit_price * qty)}</p>
+                      <p className="text-sm font-black text-[#312783]">{formatBRL(effectivePrice(product.unit_price) * qty)}</p>
                     </div>
                   )}
                 </div>
@@ -642,12 +671,19 @@ const ProductCalculator: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block">CNPJ</label>
-                  <input
-                    className={inputCls}
-                    placeholder="00.000.000/0001-00"
-                    value={clientCnpj}
-                    onChange={e => setClientCnpj(e.target.value)}
-                  />
+                  <div className="relative">
+                    <input
+                      className={inputCls + (cnpjError ? ' border-red-300' : '')}
+                      placeholder="00.000.000/0001-00"
+                      value={clientCnpj}
+                      onChange={e => { setClientCnpj(e.target.value); setCnpjError(null); }}
+                      onBlur={e => lookupCnpj(e.target.value)}
+                    />
+                    {cnpjLoading && (
+                      <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-[#312783]" />
+                    )}
+                  </div>
+                  {cnpjError && <p className="text-xs text-red-500 font-bold mt-1">{cnpjError}</p>}
                 </div>
                 <div>
                   <label className="text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block">Nº Cliente</label>
@@ -665,6 +701,32 @@ const ProductCalculator: React.FC = () => {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Margin */}
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-5 py-4 flex items-center gap-4">
+            <div className="flex-1">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-wide block mb-1">Margem</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min={0}
+                  max={200}
+                  step={0.5}
+                  value={margin === 0 ? '' : margin}
+                  placeholder="0"
+                  onChange={e => setMargin(Math.max(0, parseFloat(e.target.value) || 0))}
+                  className="w-full pr-8 pl-3 py-2 rounded-xl border border-slate-200 text-sm font-black outline-none focus:ring-2 focus:ring-[#312783] transition-all"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">%</span>
+              </div>
+            </div>
+            {margin > 0 && (
+              <div className="text-right shrink-0">
+                <p className="text-xs text-slate-400 font-bold">Multiplicador</p>
+                <p className="text-sm font-black text-[#312783]">×{marginMult.toFixed(3)}</p>
+              </div>
+            )}
           </div>
 
           {/* Cart summary */}
@@ -688,9 +750,9 @@ const ProductCalculator: React.FC = () => {
                       <div key={item.id} className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-black text-slate-700 leading-tight line-clamp-2">{item.description}</p>
-                          <p className="text-xs text-slate-400 font-bold">{item.qty}× {formatBRL(item.unit_price)}</p>
+                          <p className="text-xs text-slate-400 font-bold">{item.qty}× {formatBRL(effectivePrice(item.unit_price))}</p>
                         </div>
-                        <p className="text-xs font-black text-[#312783] shrink-0">{formatBRL(item.unit_price * item.qty)}</p>
+                        <p className="text-xs font-black text-[#312783] shrink-0">{formatBRL(effectivePrice(item.unit_price) * item.qty)}</p>
                       </div>
                     ))}
                   </div>
