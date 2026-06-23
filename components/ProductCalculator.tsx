@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, FileDown, Trash2, Calculator, Package, AlertCircle,
-  Plus, Edit2, Check, X, Loader2, ImagePlus, Image as ImageIcon
+  Plus, Edit2, Check, X, Loader2, ImagePlus, Image as ImageIcon,
+  User, FileText, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { supabase } from '../lib/supabase';
@@ -10,6 +11,25 @@ import { CalculatorProduct } from '../types';
 
 const IPI_RATE = 0.065;
 const LOGO_URL = 'https://cdn.awsli.com.br/2185/2185627/arquivos/krenke-brinquedos-logo-branco-d__fogmt.webp';
+
+const DEFAULT_DISCLAIMER = 'Esta cotação é válida por 30 dias. Preços sujeitos a alteração sem aviso prévio. IPI conforme legislação vigente.\nKrenke Brinquedos Pedagógicos  •  www.krenke.com.br';
+
+function buildFullDisclaimer(name: string, phone: string, email: string): string {
+  const today = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+  return `À vista 5% desconto sendo 50% no fechamento do pedido via PIX e restante no boleto para 7 dias;
+Entrada de 50% e restante no boleto bancário em 3X sem juros e sem desconto.
+Obs. Será emitida uma nota do PRODUTO e outra M.O sendo 30% do valor;
+Frete, instalação por conta da KRENKE;
+Parque conforme as normas NBR 16.071/12;
+Proposta válida por 7 dias;
+Garantia de 2 anos (contra qualquer defeito de fabricação);
+Material como cimento, areia e britas são fornecidos pelo cliente para chumbar.
+Prazo de entrega 30 dias a partir da confirmação do pedido e pagamento da entrada.
+${name || 'Comercial Krenke'} - Comercial
+Krenke Brinquedos Pedagógicos - Matriz
+${phone || '(47) 99755-1416'} - ${email || 'vendas@krenke.com.br'}
+Guaramirim, ${today}`;
+}
 
 interface CartItem extends CalculatorProduct { qty: number }
 
@@ -50,7 +70,7 @@ function getImageNaturalSize(base64: string): Promise<{ w: number; h: number }> 
 // Main component
 // ──────────────────────────────────────────────────────
 const ProductCalculator: React.FC = () => {
-  const { isSuperAdmin } = useAuth();
+  const { isSuperAdmin, profile, user } = useAuth();
   const [products, setProducts] = useState<CalculatorProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,8 +79,17 @@ const ProductCalculator: React.FC = () => {
   const [quoteNumber] = useState(generateQuoteNumber);
   const [generatingPDF, setGeneratingPDF] = useState(false);
 
+  // Client info
+  const [clientName, setClientName] = useState('');
+  const [clientCnpj, setClientCnpj] = useState('');
+  const [clientNumber, setClientNumber] = useState('');
+
+  // Disclaimer
+  const [useFullDisclaimer, setUseFullDisclaimer] = useState(false);
+  const [disclaimerText, setDisclaimerText] = useState('');
+
   // Park image attachment (not saved to DB)
-  const [parkImage, setParkImage] = useState<string | null>(null); // base64
+  const [parkImage, setParkImage] = useState<string | null>(null);
   const parkImageInputRef = useRef<HTMLInputElement>(null);
 
   // Admin CRUD state
@@ -89,6 +118,15 @@ const ProductCalculator: React.FC = () => {
   };
 
   useEffect(() => { loadProducts(); }, []);
+
+  // Pre-fill disclaimer when toggled on or when profile loads
+  useEffect(() => {
+    if (useFullDisclaimer) {
+      setDisclaimerText(
+        buildFullDisclaimer(profile?.full_name || '', profile?.phone || '', user?.email || '')
+      );
+    }
+  }, [useFullDisclaimer, profile, user]);
 
   const filtered = useMemo(() =>
     products.filter(p =>
@@ -142,6 +180,8 @@ const ProductCalculator: React.FC = () => {
       const margin = 14;
       const contentW = pageW - margin * 2;
 
+      const responsibleName = profile?.full_name || user?.email || '';
+
       // ── Header background
       doc.setFillColor(49, 39, 131);
       doc.rect(0, 0, pageW, 38, 'F');
@@ -175,6 +215,52 @@ const ProductCalculator: React.FC = () => {
         pageW - margin, 23, { align: 'right' }
       );
 
+      // ── Client info block (left side, below header)
+      let clientBlockEndY = 40;
+      const hasClientInfo = clientName || clientCnpj || clientNumber;
+      if (hasClientInfo || responsibleName) {
+        let cy = 44;
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(100, 100, 120);
+
+        if (clientName) {
+          doc.text('CLIENTE:', margin, cy);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(40, 40, 60);
+          doc.text(clientName, margin + 18, cy);
+          cy += 5;
+        }
+        if (clientCnpj) {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(100, 100, 120);
+          doc.text('CNPJ:', margin, cy);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(40, 40, 60);
+          doc.text(clientCnpj, margin + 18, cy);
+          cy += 5;
+        }
+        if (clientNumber) {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(100, 100, 120);
+          doc.text('Nº CLIENTE:', margin, cy);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(40, 40, 60);
+          doc.text(clientNumber, margin + 22, cy);
+          cy += 5;
+        }
+        if (responsibleName) {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(100, 100, 120);
+          doc.text('ELABORADO POR:', margin, cy);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(40, 40, 60);
+          doc.text(responsibleName, margin + 30, cy);
+          cy += 5;
+        }
+        clientBlockEndY = cy + 2;
+      }
+
       // ── Park image (right side, preserving aspect ratio)
       let imageEndY = 38;
       if (parkImage) {
@@ -197,7 +283,7 @@ const ProductCalculator: React.FC = () => {
       }
 
       // ── Subtitle strip
-      const subtitleY = parkImage ? Math.max(42, imageEndY) : 40;
+      const subtitleY = Math.max(clientBlockEndY, parkImage ? imageEndY : 40);
       doc.setFillColor(240, 239, 248);
       doc.rect(0, subtitleY - 2, parkImage ? pageW - margin - 74 : pageW, 10, 'F');
       doc.setTextColor(49, 39, 131);
@@ -206,7 +292,7 @@ const ProductCalculator: React.FC = () => {
       doc.text('PROPOSTA COMERCIAL — TABELA DE PRODUTOS', margin, subtitleY + 5);
 
       // ── Table
-      let y = (parkImage ? imageEndY + 6 : subtitleY + 14);
+      let y = subtitleY + 14;
 
       doc.setFillColor(49, 39, 131);
       doc.rect(margin, y, contentW, 8, 'F');
@@ -229,7 +315,6 @@ const ProductCalculator: React.FC = () => {
         doc.rect(margin, y, contentW, 7.5, 'F');
         doc.setTextColor(70, 70, 70);
         doc.text(item.code, margin + 2, y + 5);
-        // truncate long descriptions
         const desc = item.description.length > 60 ? item.description.substring(0, 57) + '...' : item.description;
         doc.text(desc, margin + 22, y + 5);
         doc.text(String(item.qty), margin + contentW - 66, y + 5, { align: 'right' });
@@ -273,13 +358,17 @@ const ProductCalculator: React.FC = () => {
       doc.text(formatBRL(totalComIPI), margin + contentW - 1, y + 7.5, { align: 'right' });
       y += 17;
 
-      // ── Footer note
+      // ── Disclaimer
+      if (y > 270) { doc.addPage(); y = 16; }
+      const disclaimerLines = (useFullDisclaimer ? disclaimerText : DEFAULT_DISCLAIMER).split('\n');
       doc.setFontSize(6.5);
-      doc.setFont('helvetica', 'italic');
-      doc.setTextColor(160, 160, 160);
-      doc.text('Esta cotação é válida por 30 dias. Preços sujeitos a alteração sem aviso prévio. IPI conforme legislação vigente.', margin, y);
-      y += 4;
-      doc.text('Krenke Brinquedos Pedagógicos  •  www.krenke.com.br', margin, y);
+      doc.setFont('helvetica', useFullDisclaimer ? 'normal' : 'italic');
+      doc.setTextColor(useFullDisclaimer ? 80 : 160, useFullDisclaimer ? 80 : 160, useFullDisclaimer ? 80 : 160);
+      for (const line of disclaimerLines) {
+        if (y > 278) { doc.addPage(); y = 16; }
+        doc.text(line, margin, y);
+        y += 4;
+      }
 
       // ── Page footers
       const pageCount = (doc as any).internal.getNumberOfPages();
@@ -364,6 +453,8 @@ const ProductCalculator: React.FC = () => {
     </div>
   );
 
+  const inputCls = 'w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#312783] transition-all';
+
   return (
     <div className="space-y-8">
       {/* ── Top bar */}
@@ -372,6 +463,7 @@ const ProductCalculator: React.FC = () => {
           <h2 className="text-2xl font-black text-[#312783]">Calculadora de Produtos</h2>
           <p className="text-slate-400 font-bold text-sm mt-1">
             Cotação: <span className="text-[#312783]">{quoteNumber}</span> • IPI {(IPI_RATE * 100).toFixed(1)}%
+            {profile?.full_name && <span className="ml-2">• {profile.full_name}</span>}
           </p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -405,7 +497,6 @@ const ProductCalculator: React.FC = () => {
             <span className="ml-auto text-xs text-slate-400 font-bold">{filtered.length} itens</span>
           </div>
 
-          {/* Add new row (admin) */}
           {isSuperAdmin && addingNew && (
             <div className="flex items-center gap-2 px-5 py-3 bg-blue-50 border-b border-blue-100">
               <input
@@ -529,8 +620,53 @@ const ProductCalculator: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Right panel: totals + image + export */}
+        {/* ── Right panel */}
         <div className="space-y-5">
+
+          {/* Client info */}
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+              <User size={18} className="text-[#312783]" />
+              <span className="font-black text-slate-700">Dados do Cliente</span>
+            </div>
+            <div className="p-5 space-y-3">
+              <div>
+                <label className="text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block">Nome do Cliente</label>
+                <input
+                  className={inputCls}
+                  placeholder="Razão social ou nome"
+                  value={clientName}
+                  onChange={e => setClientName(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block">CNPJ</label>
+                  <input
+                    className={inputCls}
+                    placeholder="00.000.000/0001-00"
+                    value={clientCnpj}
+                    onChange={e => setClientCnpj(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block">Nº Cliente</label>
+                  <input
+                    className={inputCls}
+                    placeholder="Ex: 10234"
+                    value={clientNumber}
+                    onChange={e => setClientNumber(e.target.value)}
+                  />
+                </div>
+              </div>
+              {profile?.full_name && (
+                <p className="text-xs text-slate-400 font-bold pt-1">
+                  Elaborado por: <span className="text-[#312783]">{profile.full_name}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
           {/* Cart summary */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
@@ -575,6 +711,39 @@ const ProductCalculator: React.FC = () => {
                 </>
               )}
             </div>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+            <button
+              onClick={() => setUseFullDisclaimer(v => !v)}
+              className="w-full px-5 py-4 flex items-center gap-2 hover:bg-slate-50 transition-colors"
+            >
+              <FileText size={18} className="text-[#312783]" />
+              <span className="font-black text-slate-700">Observações / Disclaimer</span>
+              <span className={`ml-auto text-xs font-black px-2.5 py-1 rounded-full transition-colors ${useFullDisclaimer ? 'bg-[#312783] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                {useFullDisclaimer ? 'Completo' : 'Padrão'}
+              </span>
+              {useFullDisclaimer ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+            </button>
+            {useFullDisclaimer && (
+              <div className="px-5 pb-5">
+                <p className="text-xs text-slate-400 font-bold mb-2">Edite o texto que será incluído no PDF:</p>
+                <textarea
+                  className="w-full text-xs font-mono border border-slate-200 rounded-2xl p-3 outline-none focus:ring-2 focus:ring-[#312783] transition-all resize-none"
+                  rows={12}
+                  value={disclaimerText}
+                  onChange={e => setDisclaimerText(e.target.value)}
+                />
+              </div>
+            )}
+            {!useFullDisclaimer && (
+              <div className="px-5 pb-4">
+                <p className="text-xs text-slate-400 font-bold italic">
+                  "Esta cotação é válida por 30 dias. Preços sujeitos a alteração sem aviso prévio..."
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Park image attachment */}
