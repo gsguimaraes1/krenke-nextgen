@@ -38,7 +38,8 @@ import {
     LayoutTemplate,
     Sliders,
     GripVertical,
-    Check
+    Check,
+    KeyRound
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -429,6 +430,21 @@ const UsersView = ({
     onDeleteUser: (id: string, email: string) => Promise<void>,
 }) => {
     const [showCreate, setShowCreate] = React.useState(false);
+    const [resetingId, setResetingId] = React.useState<string | null>(null);
+
+    const handleResetPassword = async (userId: string, email: string) => {
+        if (!confirm(`Enviar e-mail de redefinição de senha para ${email}?`)) return;
+        setResetingId(userId);
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/revendedor`
+        });
+        setResetingId(null);
+        if (error) {
+            alert('Erro ao enviar e-mail: ' + error.message);
+        } else {
+            alert(`E-mail de redefinição enviado para ${email}!`);
+        }
+    };
     const [creating, setCreating] = React.useState(false);
     const [newUser, setNewUser] = React.useState({ full_name: '', email: '', phone: '', role: 'restricted' });
 
@@ -569,6 +585,14 @@ const UsersView = ({
                                                 <Mail size={12} /> Enviar Convite
                                             </button>
                                         )}
+                                        <button
+                                            onClick={() => handleResetPassword(u.id, u.email)}
+                                            title="Enviar e-mail de redefinição de senha"
+                                            disabled={resetingId === u.id}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors disabled:opacity-50"
+                                        >
+                                            {resetingId === u.id ? <RefreshCw size={12} className="animate-spin" /> : <KeyRound size={12} />} Senha
+                                        </button>
                                         <button
                                             onClick={() => onDeleteUser(u.id, u.email)}
                                             title="Excluir usuário"

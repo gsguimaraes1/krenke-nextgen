@@ -127,6 +127,16 @@ export interface JobOpening {
   updated_at: string;
 }
 
+export interface CalculatorProduct {
+  id: string;
+  code: string;
+  description: string;
+  unit_price: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface JobApplication {
   id: string;
   opening_id: string | null;

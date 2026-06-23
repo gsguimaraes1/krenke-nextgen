@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Folder, 
-  File, 
-  FileText, 
-  Image as ImageIcon, 
-  Table, 
-  Download, 
-  Plus, 
-  Upload, 
-  Trash2, 
-  ChevronRight, 
-  MoreVertical, 
+import {
+  Folder,
+  File,
+  FileText,
+  Image as ImageIcon,
+  Table,
+  Download,
+  Plus,
+  Upload,
+  Trash2,
+  ChevronRight,
+  MoreVertical,
   ArrowLeft,
   Search,
   Loader2,
@@ -22,8 +22,13 @@ import {
   RefreshCw,
   Calendar,
   ShieldCheck,
-  HardDrive
+  HardDrive,
+  Calculator,
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
+import ProductCalculator from '../components/ProductCalculator';
 import { supabase } from '../lib/supabase';
 import { uploadToR2, deleteFromR2 } from '../lib/r2-upload';
 import { useAuth } from '../context/AuthContext';
@@ -33,7 +38,7 @@ import { compressImage, IMAGE_CONFIGS } from '../lib/image-optimization';
 
 const ResellerArea: React.FC = () => {
   const { user, profile: authProfile, refreshProfile, role, isSuperAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState<'files' | 'profile'>('files');
+  const [activeTab, setActiveTab] = useState<'files' | 'profile' | 'calculator'>('files');
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [folders, setFolders] = useState<ResellerFolder[]>([]);
   const [files, setFiles] = useState<ResellerFile[]>([]);
@@ -354,7 +359,13 @@ const ResellerArea: React.FC = () => {
           >
             <HardDrive size={20} /> Arquivos
           </button>
-          <button 
+          <button
+            onClick={() => setActiveTab('calculator')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'calculator' ? 'bg-[#312783] text-white shadow-lg' : 'text-slate-400 hover:text-[#312783] hover:bg-slate-50'}`}
+          >
+            <Calculator size={20} /> Calculadora
+          </button>
+          <button
             onClick={() => setActiveTab('profile')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'profile' ? 'bg-[#312783] text-white shadow-lg' : 'text-slate-400 hover:text-[#312783] hover:bg-slate-50'}`}
           >
@@ -521,6 +532,15 @@ const ResellerArea: React.FC = () => {
                 </div>
               )}
             </motion.div>
+          ) : activeTab === 'calculator' ? (
+            <motion.div
+              key="calculator-tab"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <ProductCalculator />
+            </motion.div>
           ) : (
             <motion.div
               key="profile-tab"
@@ -528,7 +548,7 @@ const ResellerArea: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <ProfileView 
+              <ProfileView
                 profile={currentUserProfile}
                 saving={saving}
                 onSave={handleSaveProfile}
@@ -601,7 +621,37 @@ const ProfileView = ({
   saving: boolean,
   onProfileChange: (updates: Partial<Profile>) => void,
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
-}) => (
+}) => {
+  const [newPassword, setNewPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [showNew, setShowNew] = React.useState(false);
+  const [showConfirm, setShowConfirm] = React.useState(false);
+  const [pwSaving, setPwSaving] = React.useState(false);
+  const [pwMsg, setPwMsg] = React.useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      setPwMsg({ type: 'err', text: 'Senha deve ter ao menos 6 caracteres.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwMsg({ type: 'err', text: 'As senhas não conferem.' });
+      return;
+    }
+    setPwSaving(true);
+    setPwMsg(null);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPwSaving(false);
+    if (error) {
+      setPwMsg({ type: 'err', text: error.message });
+    } else {
+      setPwMsg({ type: 'ok', text: 'Senha alterada com sucesso!' });
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+  };
+
+  return (
   <div className="max-w-4xl mx-auto space-y-8">
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8 md:p-12">
           <div className="flex flex-col md:flex-row gap-12 items-start">
@@ -680,7 +730,67 @@ const ProfileView = ({
               </div>
           </div>
       </div>
+
+      {/* Password Change Card */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8 md:p-12">
+          <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-[#312783]/10 rounded-2xl">
+                  <Lock size={22} className="text-[#312783]" />
+              </div>
+              <div>
+                  <h2 className="text-xl font-black text-slate-900">Alterar Senha</h2>
+                  <p className="text-sm text-slate-400">Mínimo 6 caracteres</p>
+              </div>
+          </div>
+          <div className="space-y-5 max-w-md">
+              <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Nova Senha</label>
+                  <div className="relative">
+                      <input
+                          type={showNew ? 'text' : 'password'}
+                          className="w-full p-4 pr-12 bg-slate-50 border-2 border-transparent focus:border-krenke-orange rounded-2xl font-bold text-slate-900 transition-all outline-none"
+                          value={newPassword}
+                          onChange={e => setNewPassword(e.target.value)}
+                          placeholder="••••••••"
+                      />
+                      <button type="button" onClick={() => setShowNew(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
+                          {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Confirmar Nova Senha</label>
+                  <div className="relative">
+                      <input
+                          type={showConfirm ? 'text' : 'password'}
+                          className="w-full p-4 pr-12 bg-slate-50 border-2 border-transparent focus:border-krenke-orange rounded-2xl font-bold text-slate-900 transition-all outline-none"
+                          value={confirmPassword}
+                          onChange={e => setConfirmPassword(e.target.value)}
+                          placeholder="••••••••"
+                          onKeyDown={e => e.key === 'Enter' && handleChangePassword()}
+                      />
+                      <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700">
+                          {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                  </div>
+              </div>
+              {pwMsg && (
+                  <div className={`p-4 rounded-2xl font-bold text-sm ${pwMsg.type === 'ok' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                      {pwMsg.text}
+                  </div>
+              )}
+              <button
+                  onClick={handleChangePassword}
+                  disabled={pwSaving}
+                  className="w-full py-4 bg-[#312783] text-white font-black rounded-2xl hover:bg-[#3f31a1] shadow-lg shadow-[#312783]/20 disabled:opacity-50 flex items-center justify-center gap-3 transition-all transform active:scale-[0.98]"
+              >
+                  {pwSaving ? <RefreshCw className="animate-spin" size={20} /> : <Lock size={20} />}
+                  ALTERAR SENHA
+              </button>
+          </div>
+      </div>
   </div>
-);
+  );
+};
 
 export default ResellerArea;
