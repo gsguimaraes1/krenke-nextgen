@@ -48,7 +48,48 @@ export default async function handler(req, res) {
       continuationToken = result.NextContinuationToken;
     } while (continuationToken);
 
-    // Get existing tracked files from Supabase
+    // --- Sync folders from R2 prefixes ---
+    // Collect all unique top-level folder names (e.g. "curriculos" from "curriculos/file.pdf")
+    const r2FolderNames = new Set();
+    for (const obj of objects) {
+      const parts = obj.Key?.split('/');
+      if (parts && parts.length > 1 && parts[0]) {
+        r2FolderNames.add(parts[0]);
+      }
+    }
+
+    // Get existing folder names from Supabase (root level only)
+    const existingFoldersRes = await sbFetch('reseller_folders?select=name&parent_id=is.null', {
+      headers: { Prefer: 'return=representation' },
+    });
+    const existingFolders = await existingFoldersRes.json();
+    const existingFolderNames = new Set((existingFolders || []).map(f => f.name));
+
+    // Also build a map of folder name -> id for file assignment
+    const allFoldersRes = await sbFetch('reseller_folders?select=id,name&parent_id=is.null', {
+      headers: { Prefer: 'return=representation' },
+    });
+    const allFolders = await allFoldersRes.json() || [];
+    const folderNameToId = Object.fromEntries(allFolders.map(f => [f.name, f.id]));
+
+    // Insert missing folders
+    let foldersCreated = 0;
+    for (const folderName of r2FolderNames) {
+      if (!existingFolderNames.has(folderName)) {
+        const insertRes = await sbFetch('reseller_folders', {
+          method: 'POST',
+          headers: { Prefer: 'return=representation' },
+          body: JSON.stringify([{ name: folderName, parent_id: null }]),
+        });
+        if (insertRes.ok) {
+          const created = await insertRes.json();
+          if (created?.[0]) folderNameToId[folderName] = created[0].id;
+          foldersCreated++;
+        }
+      }
+    }
+
+    // --- Sync files ---
     const existingRes = await sbFetch('reseller_files?select=storage_path,file_url');
     const existing = await existingRes.json();
     const existingKeys = new Set(
@@ -68,14 +109,20 @@ export default async function handler(req, res) {
       if (!key) continue;
       if (existingKeys.has(key) || existingKeys.has(decodeURIComponent(key))) continue;
 
-      const fileName = decodeURIComponent(key.split('/').pop() || key);
+      const parts = key.split('/');
+      const isInFolder = parts.length > 1 && parts[0];
+      const folderName = isInFolder ? parts[0] : null;
+      const fileName = decodeURIComponent(parts[parts.length - 1] || key);
+      if (!fileName) continue; // skip folder-marker objects
       const ext = fileName.split('.').pop()?.toLowerCase() || '';
+
+      const folderId = folderName ? (folderNameToId[folderName] || null) : null;
 
       toInsert.push({
         name: fileName,
         file_url: `${publicUrlBase}/${key}`,
         file_type: ext,
-        folder_id: null,
+        folder_id: folderId,
         size: obj.Size || 0,
         storage_path: key,
       });
@@ -94,6 +141,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       found: objects.length,
+      foldersCreated,
       synced: toInsert.length,
       files: toInsert.map(f => f.name),
     });

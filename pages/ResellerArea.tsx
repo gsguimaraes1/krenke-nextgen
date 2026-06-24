@@ -68,6 +68,10 @@ const ResellerArea: React.FC = () => {
   // Open context menus
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
+  // Drag & drop
+  const [draggedFile, setDraggedFile] = useState<ResellerFile | null>(null);
+  const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
+
   // Role access editor
   const [rolesTarget, setRolesTarget] = useState<{ type: 'file' | 'folder'; item: ResellerFile | ResellerFolder } | null>(null);
   const [rolesValue, setRolesValue] = useState<string[]>([]);
@@ -502,6 +506,23 @@ const ResellerArea: React.FC = () => {
                 </div>
               </div>
 
+              {/* Drop zone for moving file back to current folder / root */}
+              {draggedFile && currentFolderId && (
+                <div
+                  className="flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50 text-blue-500 font-bold text-sm transition-all"
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => {
+                    e.preventDefault();
+                    if (draggedFile) {
+                      supabase.from('reseller_files').update({ folder_id: null }).eq('id', draggedFile.id).then(() => fetchContent());
+                      setDraggedFile(null);
+                    }
+                  }}
+                >
+                  <Folder size={18} /> Soltar aqui para mover para a raiz (Drive)
+                </div>
+              )}
+
               {/* Admin Actions */}
               {isSuperAdmin && (
                 <div className="flex flex-wrap gap-4">
@@ -547,24 +568,38 @@ const ResellerArea: React.FC = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       key={folder.id}
-                      className="group relative bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer overflow-hidden"
+                      className={`group relative bg-white rounded-3xl p-6 border-2 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer ${
+                        dragOverFolderId === folder.id
+                          ? 'border-blue-400 bg-blue-50 scale-[1.02]'
+                          : 'border-slate-100'
+                      }`}
                       onClick={() => { setOpenMenuId(null); navigateToFolder(folder); }}
+                      onDragOver={e => { e.preventDefault(); setDragOverFolderId(folder.id); }}
+                      onDragLeave={() => setDragOverFolderId(null)}
+                      onDrop={e => {
+                        e.preventDefault();
+                        setDragOverFolderId(null);
+                        if (draggedFile && draggedFile.folder_id !== folder.id) {
+                          supabase.from('reseller_files').update({ folder_id: folder.id }).eq('id', draggedFile.id).then(() => fetchContent());
+                        }
+                        setDraggedFile(null);
+                      }}
                     >
-                      <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500 rounded-l-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                       <div className="flex items-start justify-between mb-4">
                         <div className="p-3 rounded-2xl bg-blue-50 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
                           <Folder size={24} />
                         </div>
                         {isSuperAdmin && (
-                          <div className="relative" onClick={e => e.stopPropagation()}>
+                          <div className="relative z-10" onClick={e => e.stopPropagation()}>
                             <button
-                              onClick={() => setOpenMenuId(openMenuId === folder.id ? null : folder.id)}
+                              onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === folder.id ? null : folder.id); }}
                               className="p-2 text-slate-300 hover:text-slate-600 transition-colors"
                             >
                               <MoreVertical size={18} />
                             </button>
                             {openMenuId === folder.id && (
-                              <div className="absolute right-0 top-8 z-30 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-44">
+                              <div className="absolute right-0 top-8 z-[50] bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-44">
                                 <button onClick={() => { setRenameTarget({ type: 'folder', item: folder }); setRenameValue(folder.name); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Renomear</button>
                                 <button onClick={() => { setRolesTarget({ type: 'folder', item: folder }); setRolesValue(folder.allowed_roles || []); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Acesso...</button>
                                 <button onClick={() => { handleDeleteFolder(folder); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50">Excluir</button>
@@ -575,7 +610,9 @@ const ResellerArea: React.FC = () => {
                       </div>
                       <h3 className="font-bold text-slate-800 line-clamp-1">{folder.name}</h3>
                       <div className="flex items-center justify-between mt-1">
-                        <p className="text-xs text-slate-400 uppercase font-black tracking-widest">Pasta</p>
+                        <p className="text-xs text-slate-400 uppercase font-black tracking-widest">
+                          {dragOverFolderId === folder.id ? '📂 Soltar aqui' : 'Pasta'}
+                        </p>
                         {isSuperAdmin && folder.allowed_roles && folder.allowed_roles.length > 0 && (
                           <span className="text-[9px] uppercase font-black tracking-wider bg-amber-50 text-amber-600 px-2 py-0.5 rounded-lg flex items-center gap-1">
                             <Lock size={9} /> {folder.allowed_roles.join(', ')}
@@ -586,39 +623,48 @@ const ResellerArea: React.FC = () => {
                   ))}
 
                   {/* File List */}
-                  {filteredFiles.map(file => (
-                    <motion.div 
+                  {filteredFiles.map(file => {
+                    const isDraggable = isSuperAdmin && !file.id.startsWith('static-');
+                    const isDragging = draggedFile?.id === file.id;
+                    return (
+                    <motion.div
                       layout
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       key={file.id}
-                      className="group relative bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all overflow-hidden"
+                      draggable={isDraggable}
+                      onDragStart={() => { setDraggedFile(file); setOpenMenuId(null); }}
+                      onDragEnd={() => setDraggedFile(null)}
+                      className={`group relative bg-white rounded-3xl p-6 border shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all select-none ${
+                        isDragging ? 'opacity-40 scale-95 border-[#312783] cursor-grabbing' : 'border-slate-100 cursor-default'
+                      } ${isDraggable ? 'cursor-grab' : ''}`}
                     >
-                      <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-300 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-300 rounded-l-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                       <div className="flex items-start justify-between mb-4">
                         <div className="p-3 rounded-2xl bg-slate-50">
                           {getFileIcon(file.file_type)}
                         </div>
-                        <div className="flex gap-1 items-start">
+                        <div className="flex gap-1 items-start relative z-10">
                           <a
                             href={file.file_url}
                             download={file.name}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 text-slate-300 hover:text-[#312783] transition-colors"
+                            onClick={e => e.stopPropagation()}
                           >
                             <Download size={18} />
                           </a>
-                          {isSuperAdmin && !file.id.startsWith('static-') && (
+                          {isDraggable && (
                             <div className="relative">
                               <button
-                                onClick={() => setOpenMenuId(openMenuId === file.id ? null : file.id)}
+                                onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === file.id ? null : file.id); }}
                                 className="p-2 text-slate-300 hover:text-slate-600 transition-colors"
                               >
                                 <MoreVertical size={18} />
                               </button>
                               {openMenuId === file.id && (
-                                <div className="absolute right-0 top-8 z-30 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-44">
+                                <div className="absolute right-0 top-8 z-[50] bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-44">
                                   <button onClick={() => { setRenameTarget({ type: 'file', item: file }); setRenameValue(file.name); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Renomear</button>
                                   <button onClick={() => { setMoveTarget(file); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Mover para...</button>
                                   <button onClick={() => { setRolesTarget({ type: 'file', item: file }); setRolesValue(file.allowed_roles || []); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Acesso...</button>
@@ -631,20 +677,21 @@ const ResellerArea: React.FC = () => {
                       </div>
                       <h3 className="font-bold text-slate-800 line-clamp-2 mb-4 h-12" title={file.name}>{file.name}</h3>
                       <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
-                          <span className="text-[10px] uppercase font-black tracking-widest text-[#312783] bg-[#312783]/5 px-2 py-1 rounded-lg">
-                              {file.file_type || 'unkn'}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            {isSuperAdmin && file.allowed_roles && file.allowed_roles.length > 0 && (
-                              <span className="text-[9px] uppercase font-black tracking-wider bg-amber-50 text-amber-600 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                                <Lock size={9} /> {file.allowed_roles.join(', ')}
-                              </span>
-                            )}
-                            {file.size > 0 && <span className="text-xs text-slate-400 font-bold">{formatSize(file.size)}</span>}
-                          </div>
+                        <span className="text-[10px] uppercase font-black tracking-widest text-[#312783] bg-[#312783]/5 px-2 py-1 rounded-lg">
+                          {file.file_type || 'unkn'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {isSuperAdmin && file.allowed_roles && file.allowed_roles.length > 0 && (
+                            <span className="text-[9px] uppercase font-black tracking-wider bg-amber-50 text-amber-600 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                              <Lock size={9} /> {file.allowed_roles.join(', ')}
+                            </span>
+                          )}
+                          {file.size > 0 && <span className="text-xs text-slate-400 font-bold">{formatSize(file.size)}</span>}
+                        </div>
                       </div>
                     </motion.div>
-                  ))}
+                    );
+                  })}
 
                   {/* Empty State */}
                   {filteredFolders.length === 0 && filteredFiles.length === 0 && (
