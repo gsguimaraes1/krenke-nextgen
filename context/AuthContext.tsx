@@ -101,6 +101,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (supabase) {
             await supabase.auth.signOut();
         }
+        setUser(null);
+        setSession(null);
+        setRole(null);
+        setProfile(null);
+        window.location.href = '/login';
     };
 
     return (
