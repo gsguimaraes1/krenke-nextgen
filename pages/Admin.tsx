@@ -1598,9 +1598,9 @@ const AdminPage: React.FC = () => {
         fetchProfiles();
     };
 
-    const updateUserRole = async (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr') => {
+    const updateUserRole = async (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt') => {
         if (!supabase) return;
-        const roleLabel = role === 'super' ? 'Super Admin' : role === 'reseller' ? 'Revendedor' : 'Acesso Restrito';
+        const roleLabel = role === 'super' ? 'Super Admin' : role === 'reseller' ? 'Revendedor' : role === 'hr' ? 'RH' : role === 'mkt' ? 'Marketing' : 'Acesso Restrito';
         if (!confirm(`Deseja alterar o nível de acesso deste usuário para ${roleLabel}?`)) return;
 
         try {
