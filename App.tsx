@@ -89,7 +89,11 @@ const App: React.FC = () => {
             <Route path="/obrigado-curriculo" element={<ObrigadoCurriculoPage />} />
 
             {/* Internal-only pages - no layout, not in sitemap */}
-            <Route path="/marketing" element={<MarketingPage />} />
+            <Route path="/marketing" element={
+              <ProtectedRoute allowedRoles={['super', 'mkt']}>
+                <MarketingPage />
+              </ProtectedRoute>
+            } />
 
             {/* Deep Link WebView redirect - no layout */}
 
