@@ -39,7 +39,8 @@ import {
     Sliders,
     GripVertical,
     Check,
-    KeyRound
+    KeyRound,
+    BarChart3
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

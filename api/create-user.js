@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   const { full_name, email, phone, role } = req.body;
   if (!email) return res.status(400).json({ error: 'email required' });
 
-  const allowedRoles = ['super', 'restricted', 'reseller', 'hr'];
+  const allowedRoles = ['super', 'restricted', 'reseller', 'hr', 'mkt'];
   if (role && !allowedRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' });
 
   const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
