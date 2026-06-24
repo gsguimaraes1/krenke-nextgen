@@ -424,7 +424,7 @@ const UsersView = ({
     onDeleteUser,
 }: {
     users: Profile[],
-    onUpdateRole: (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr') => void,
+    onUpdateRole: (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt') => void,
     onCreateUser: (data: { full_name: string; email: string; phone: string; role: string }) => Promise<void>,
     onResendInvite: (email: string) => Promise<void>,
     onDeleteUser: (id: string, email: string) => Promise<void>,
@@ -467,6 +467,7 @@ const UsersView = ({
         if (role === 'super') return 'bg-orange-100 text-krenke-orange';
         if (role === 'reseller') return 'bg-green-100 text-green-600';
         if (role === 'hr') return 'bg-purple-100 text-purple-600';
+        if (role === 'mkt') return 'bg-pink-100 text-pink-600';
         return 'bg-blue-100 text-krenke-blue';
     };
 
@@ -503,6 +504,7 @@ const UsersView = ({
                             <select className="w-full p-3 bg-gray-50 border rounded-xl font-bold" value={newUser.role} onChange={e => setNewUser(p => ({ ...p, role: e.target.value }))}>
                                 <option value="super">Super Admin</option>
                                 <option value="hr">RH (Vagas e Candidaturas)</option>
+                                <option value="mkt">Marketing</option>
                                 <option value="reseller">Revendedor</option>
                                 <option value="restricted">Acesso Restrito</option>
                             </select>
@@ -545,6 +547,7 @@ const UsersView = ({
                                             {u.role === 'restricted' && <span className="text-[10px] text-red-500 font-bold uppercase tracking-tight">Aguardando Autorização</span>}
                                             {u.role === 'reseller' && <span className="text-[10px] text-green-500 font-bold uppercase tracking-tight">Revendedor Autorizado</span>}
                                             {u.role === 'hr' && <span className="text-[10px] text-purple-500 font-bold uppercase tracking-tight">RH</span>}
+                                            {u.role === 'mkt' && <span className="text-[10px] text-pink-500 font-bold uppercase tracking-tight">Marketing</span>}
                                         </div>
                                     </div>
                                 </td>
@@ -557,6 +560,7 @@ const UsersView = ({
                                     >
                                         <option value="super">Super Admin</option>
                                         <option value="hr">RH</option>
+                                        <option value="mkt">Marketing</option>
                                         <option value="reseller">Revendedor</option>
                                         <option value="restricted">Acesso Restrito</option>
                                     </select>
@@ -1282,6 +1286,28 @@ const PagesView = ({
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto">
+                {/* System pages */}
+                <div className="px-3 pt-3 pb-1">
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1 mb-1">Páginas do Sistema</p>
+                    <a
+                        href="/marketing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full p-3 border border-pink-100 bg-pink-50 rounded-xl text-left flex items-center gap-3 hover:bg-pink-100 transition-colors mb-2"
+                    >
+                        <div className="w-8 h-8 rounded bg-pink-200 flex-shrink-0 flex items-center justify-center">
+                            <BarChart3 size={14} className="text-pink-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm text-pink-700 truncate">Marketing</p>
+                            <p className="text-[10px] text-pink-400 uppercase tracking-widest">/marketing · Power BI</p>
+                        </div>
+                        <ExternalLink size={12} className="text-pink-400 shrink-0" />
+                    </a>
+                </div>
+                <div className="px-3 pb-1">
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-1 mb-1">Páginas CMS</p>
+                </div>
                 {pages.map(p => (
                     <button
                         key={p.id}
