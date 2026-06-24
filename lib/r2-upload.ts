@@ -18,6 +18,11 @@ export async function uploadToR2(file: File, folder?: string, bucket?: string): 
   return { publicUrl: data.publicUrl, key: data.key };
 }
 
-export async function deleteFromR2(key: string): Promise<void> {
-  // deletion handled server-side if needed; no-op for now
+export async function deleteFromR2(key: string, bucket?: string): Promise<void> {
+  if (!key) return;
+  await fetch('/api/r2-ops', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', key, bucket }),
+  });
 }

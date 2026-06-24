@@ -54,13 +54,25 @@ const ResellerArea: React.FC = () => {
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Rename state
+  const [renameTarget, setRenameTarget] = useState<{ type: 'file' | 'folder'; item: ResellerFile | ResellerFolder } | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+
+  // Move state
+  const [moveTarget, setMoveTarget] = useState<ResellerFile | null>(null);
+  const [allFolders, setAllFolders] = useState<ResellerFolder[]>([]);
+
+  // Open context menus
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const STATIC_FILES: ResellerFile[] = [
     {
       id: 'static-1',
       name: 'Catálogo Krenke 2026',
-      file_url: 'https://pub-d6b3de974e824cbb8aa6e5256ef4f28b.r2.dev/CataloVFINAL-%20digital.pdf',
+      file_url: 'https://s3.krenke.com.br/CataloVFINAL-%20digital.pdf',
       file_type: 'pdf',
       folder_id: null,
       size: 0,
@@ -69,7 +81,7 @@ const ResellerArea: React.FC = () => {
     {
       id: 'static-2',
       name: 'Produtos Krenke Atualizado AVULSOS 2026',
-      file_url: 'https://pub-d6b3de974e824cbb8aa6e5256ef4f28b.r2.dev/Produtos%20Krenke%20%20Atualizado%20AVULSOS%202026.pdf',
+      file_url: 'https://s3.krenke.com.br/Produtos%20Krenke%20%20Atualizado%20AVULSOS%202026.pdf',
       file_type: 'pdf',
       folder_id: null,
       size: 0,
@@ -78,7 +90,7 @@ const ResellerArea: React.FC = () => {
     {
       id: 'static-3',
       name: 'Tabela Playgrounds Matriz Revenda Atualizada 2026',
-      file_url: 'https://pub-d6b3de974e824cbb8aa6e5256ef4f28b.r2.dev/TABELA%20%20PLAYGROUNDS%20MATRIZ%20REVENDA%20%20ATUALIZADA%202026.pdf',
+      file_url: 'https://s3.krenke.com.br/TABELA%20%20PLAYGROUNDS%20MATRIZ%20REVENDA%20%20ATUALIZADA%202026.pdf',
       file_type: 'pdf',
       folder_id: null,
       size: 0,
@@ -135,9 +147,15 @@ const ResellerArea: React.FC = () => {
     }
   };
 
+  const fetchAllFolders = async () => {
+    const { data } = await supabase.from('reseller_folders').select('*').order('name');
+    setAllFolders(data || []);
+  };
+
   useEffect(() => {
     fetchContent();
     fetchCurrentUserProfile();
+    if (isSuperAdmin) fetchAllFolders();
   }, [currentFolderId]);
 
   // Keep editing state in sync with fresh profile updates from context if needed
@@ -248,6 +266,7 @@ const ResellerArea: React.FC = () => {
           file_type: fileExt,
           folder_id: currentFolderId,
           size: file.size,
+          storage_path: key,
         }]);
 
       if (dbError) throw dbError;
@@ -262,12 +281,45 @@ const ResellerArea: React.FC = () => {
     }
   };
 
+  const handleSyncR2 = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/r2-sync', { method: 'POST' });
+      const text = await res.text();
+      console.log('r2-sync raw response:', res.status, text);
+      const data = text ? JSON.parse(text) : {};
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}: ${text}`);
+      alert(`Sync concluído! ${data.synced} arquivo(s) novo(s) importado(s) de ${data.found} no bucket.`);
+      fetchContent();
+    } catch (err: any) {
+      alert('Erro no sync: ' + err.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleRename = async () => {
+    if (!renameTarget || !renameValue.trim()) return;
+    const { type, item } = renameTarget;
+    const table = type === 'file' ? 'reseller_files' : 'reseller_folders';
+    await supabase.from(table).update({ name: renameValue.trim() }).eq('id', item.id);
+    setRenameTarget(null);
+    fetchContent();
+  };
+
+  const handleMoveFile = async (targetFolderId: string | null) => {
+    if (!moveTarget) return;
+    await supabase.from('reseller_files').update({ folder_id: targetFolderId }).eq('id', moveTarget.id);
+    setMoveTarget(null);
+    fetchContent();
+  };
+
   const handleDeleteFile = async (file: ResellerFile) => {
     if (!window.confirm(`Tem certeza que deseja excluir ${file.name}?`)) return;
 
     try {
-      if ((file as any).storage_path) {
-        await deleteFromR2((file as any).storage_path).catch(console.error);
+      if (file.storage_path) {
+        await deleteFromR2(file.storage_path).catch(console.error);
       }
 
       const { error } = await supabase
@@ -420,19 +472,28 @@ const ResellerArea: React.FC = () => {
               {/* Admin Actions */}
               {isSuperAdmin && (
                 <div className="flex flex-wrap gap-4">
-                  <button 
+                  <button
                     onClick={() => setIsCreatingFolder(true)}
                     className="flex items-center gap-2 bg-white text-[#312783] border-2 border-slate-100 px-6 py-3 rounded-2xl font-bold hover:border-[#312783] transition-all shadow-sm"
                   >
                     <Plus size={20} /> Nova Pasta
                   </button>
-                  <button 
+                  <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
                     className="flex items-center gap-2 bg-[#312783] text-white px-6 py-3 rounded-2xl font-bold hover:bg-[#3f31a1] transition-all shadow-lg disabled:opacity-50"
                   >
                     {isUploading ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                     {isUploading ? 'Enviando...' : 'Subir Arquivo'}
+                  </button>
+                  <button
+                    onClick={handleSyncR2}
+                    disabled={isSyncing}
+                    className="flex items-center gap-2 bg-white text-slate-500 border-2 border-slate-100 px-6 py-3 rounded-2xl font-bold hover:border-slate-400 transition-all shadow-sm disabled:opacity-50"
+                    title="Importa arquivos do bucket R2 que ainda não aparecem aqui"
+                  >
+                    {isSyncing ? <Loader2 className="animate-spin" size={20} /> : <RefreshCw size={20} />}
+                    {isSyncing ? 'Sincronizando...' : 'Sync R2'}
                   </button>
                   <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
                 </div>
@@ -448,13 +509,13 @@ const ResellerArea: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {/* Folder List */}
                   {filteredFolders.map(folder => (
-                    <motion.div 
+                    <motion.div
                       layout
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       key={folder.id}
                       className="group relative bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer overflow-hidden"
-                      onClick={() => navigateToFolder(folder)}
+                      onClick={() => { setOpenMenuId(null); navigateToFolder(folder); }}
                     >
                       <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       <div className="flex items-start justify-between mb-4">
@@ -462,12 +523,20 @@ const ResellerArea: React.FC = () => {
                           <Folder size={24} />
                         </div>
                         {isSuperAdmin && (
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder); }}
-                            className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                          <div className="relative" onClick={e => e.stopPropagation()}>
+                            <button
+                              onClick={() => setOpenMenuId(openMenuId === folder.id ? null : folder.id)}
+                              className="p-2 text-slate-300 hover:text-slate-600 transition-colors"
+                            >
+                              <MoreVertical size={18} />
+                            </button>
+                            {openMenuId === folder.id && (
+                              <div className="absolute right-0 top-8 z-30 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-40">
+                                <button onClick={() => { setRenameTarget({ type: 'folder', item: folder }); setRenameValue(folder.name); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Renomear</button>
+                                <button onClick={() => { handleDeleteFolder(folder); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50">Excluir</button>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
                       <h3 className="font-bold text-slate-800 line-clamp-1">{folder.name}</h3>
@@ -489,9 +558,9 @@ const ResellerArea: React.FC = () => {
                         <div className="p-3 rounded-2xl bg-slate-50">
                           {getFileIcon(file.file_type)}
                         </div>
-                        <div className="flex gap-1">
-                          <a 
-                            href={file.file_url} 
+                        <div className="flex gap-1 items-start">
+                          <a
+                            href={file.file_url}
                             download={file.name}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -500,12 +569,21 @@ const ResellerArea: React.FC = () => {
                             <Download size={18} />
                           </a>
                           {isSuperAdmin && !file.id.startsWith('static-') && (
-                            <button
-                              onClick={() => handleDeleteFile(file)}
-                              className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                            >
-                              <Trash2 size={18} />
-                            </button>
+                            <div className="relative">
+                              <button
+                                onClick={() => setOpenMenuId(openMenuId === file.id ? null : file.id)}
+                                className="p-2 text-slate-300 hover:text-slate-600 transition-colors"
+                              >
+                                <MoreVertical size={18} />
+                              </button>
+                              {openMenuId === file.id && (
+                                <div className="absolute right-0 top-8 z-30 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-40">
+                                  <button onClick={() => { setRenameTarget({ type: 'file', item: file }); setRenameValue(file.name); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Renomear</button>
+                                  <button onClick={() => { setMoveTarget(file); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Mover para...</button>
+                                  <button onClick={() => { handleDeleteFile(file); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50">Excluir</button>
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -556,6 +634,74 @@ const ResellerArea: React.FC = () => {
                 onImageUpload={handleAvatarUpload}
               />
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Close menus on outside click */}
+        {openMenuId && (
+          <div className="fixed inset-0 z-20" onClick={() => setOpenMenuId(null)} />
+        )}
+
+        {/* Modal: Rename */}
+        <AnimatePresence>
+          {renameTarget && (
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-[#312783]/20 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl"
+              >
+                <h3 className="text-2xl font-black text-[#312783] mb-6">Renomear</h3>
+                <input
+                  autoFocus
+                  type="text"
+                  className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-[#312783] mb-8 outline-none transition-all font-bold text-slate-900"
+                  value={renameValue}
+                  onChange={e => setRenameValue(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleRename()}
+                />
+                <div className="flex gap-4">
+                  <button onClick={() => setRenameTarget(null)} className="flex-1 px-4 py-4 rounded-2xl font-black text-slate-400 hover:bg-slate-50 uppercase tracking-widest text-xs">Cancelar</button>
+                  <button onClick={handleRename} className="flex-1 px-4 py-4 rounded-2xl font-black bg-[#312783] text-white hover:bg-[#3f31a1] shadow-lg uppercase tracking-widest text-xs">Salvar</button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Modal: Move File */}
+        <AnimatePresence>
+          {moveTarget && (
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-[#312783]/20 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl"
+              >
+                <h3 className="text-2xl font-black text-[#312783] mb-2">Mover arquivo</h3>
+                <p className="text-slate-500 font-bold mb-6 line-clamp-1">{moveTarget.name}</p>
+                <div className="space-y-2 max-h-64 overflow-y-auto mb-8">
+                  <button
+                    onClick={() => handleMoveFile(null)}
+                    className="w-full text-left px-5 py-3 rounded-2xl font-bold text-slate-700 hover:bg-slate-50 border border-slate-100 flex items-center gap-3"
+                  >
+                    <Folder size={18} className="text-blue-400" /> Drive (raiz)
+                  </button>
+                  {allFolders.filter(f => f.id !== moveTarget.folder_id).map(f => (
+                    <button
+                      key={f.id}
+                      onClick={() => handleMoveFile(f.id)}
+                      className="w-full text-left px-5 py-3 rounded-2xl font-bold text-slate-700 hover:bg-slate-50 border border-slate-100 flex items-center gap-3"
+                    >
+                      <Folder size={18} className="text-blue-400" /> {f.name}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={() => setMoveTarget(null)} className="w-full px-4 py-4 rounded-2xl font-black text-slate-400 hover:bg-slate-50 uppercase tracking-widest text-xs">Cancelar</button>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
 

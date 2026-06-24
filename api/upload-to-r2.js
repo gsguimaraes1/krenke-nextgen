@@ -46,8 +46,9 @@ export default async function handler(req, res) {
       },
     });
 
-    const safeName = file.originalFilename.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const key = folder ? `${folder}/${Date.now()}_${safeName}` : `${Date.now()}_${safeName}`;
+    const safeName = file.originalFilename.replace(/[^a-zA-Z0-9._\- ]/g, '_');
+    const uid = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+    const key = `${uid}_${safeName}`;
     const body = readFileSync(file.filepath);
 
     await r2.send(new PutObjectCommand({

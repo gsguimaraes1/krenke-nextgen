@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
 
   const LOGO_URL =
-    'https://pub-d6b3de974e824cbb8aa6e5256ef4f28b.r2.dev/krenke_marca_preferencial%20(1).jpg';
+    'https://s3.krenke.com.br/krenke_marca_preferencial%20(1).jpg';
 
   try {
     const upstream = await fetch(LOGO_URL);

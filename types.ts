@@ -98,6 +98,7 @@ export interface ResellerFile {
   folder_id: string | null;
   size: number;
   created_at: string;
+  storage_path?: string | null;
 }
 
 export interface Profile {
