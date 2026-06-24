@@ -27,6 +27,7 @@ const LpPage = React.lazy(() => import('./pages/Lp'));
 const ObrigadoPage = React.lazy(() => import('./pages/Obrigado'));
 const CareersPage = React.lazy(() => import('./pages/Careers'));
 const ObrigadoCurriculoPage = React.lazy(() => import('./pages/ObrigadoCurriculo'));
+const MarketingPage = React.lazy(() => import('./pages/Marketing'));
 
 import { captureUTMs } from './lib/utm-tracker';
 import { Analytics } from "@vercel/analytics/react";
@@ -86,6 +87,9 @@ const App: React.FC = () => {
             {/* Thank you pages - no main layout */}
             <Route path="/obrigado" element={<ObrigadoPage />} />
             <Route path="/obrigado-curriculo" element={<ObrigadoCurriculoPage />} />
+
+            {/* Internal-only pages - no layout, not in sitemap */}
+            <Route path="/marketing" element={<MarketingPage />} />
 
             {/* Deep Link WebView redirect - no layout */}
 
