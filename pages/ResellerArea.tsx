@@ -68,6 +68,12 @@ const ResellerArea: React.FC = () => {
   // Open context menus
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
+  // Role access editor
+  const [rolesTarget, setRolesTarget] = useState<{ type: 'file' | 'folder'; item: ResellerFile | ResellerFolder } | null>(null);
+  const [rolesValue, setRolesValue] = useState<string[]>([]);
+
+  const ALL_ROLES = ['super', 'restricted', 'reseller', 'hr', 'mkt'] as const;
+
   const STATIC_FILES: ResellerFile[] = [
     {
       id: 'static-1',
@@ -77,6 +83,7 @@ const ResellerArea: React.FC = () => {
       folder_id: null,
       size: 0,
       created_at: '',
+      allowed_roles: null,
     },
     {
       id: 'static-2',
@@ -86,6 +93,7 @@ const ResellerArea: React.FC = () => {
       folder_id: null,
       size: 0,
       created_at: '',
+      allowed_roles: null,
     },
     {
       id: 'static-3',
@@ -95,8 +103,15 @@ const ResellerArea: React.FC = () => {
       folder_id: null,
       size: 0,
       created_at: '',
+      allowed_roles: null,
     },
   ];
+
+  const isRoleAllowed = (allowedRoles: string[] | null) => {
+    if (!allowedRoles || allowedRoles.length === 0) return true;
+    if (isSuperAdmin) return true;
+    return role ? allowedRoles.includes(role) : false;
+  };
 
   const fetchContent = async () => {
     setLoading(true);
@@ -108,7 +123,8 @@ const ResellerArea: React.FC = () => {
         folderQuery = folderQuery.is('parent_id', null);
       }
       const { data: foldersResult } = await folderQuery.order('name');
-      setFolders(foldersResult || []);
+      const visibleFolders = (foldersResult || []).filter(f => isRoleAllowed(f.allowed_roles));
+      setFolders(visibleFolders);
 
       let fileQuery = supabase.from('reseller_files').select('*');
       if (currentFolderId) {
@@ -117,11 +133,12 @@ const ResellerArea: React.FC = () => {
         fileQuery = fileQuery.is('folder_id', null);
       }
       const { data: filesResult } = await fileQuery.order('name');
+      const visibleFiles = (filesResult || []).filter(f => isRoleAllowed(f.allowed_roles));
 
       if (!currentFolderId) {
-        setFiles([...STATIC_FILES, ...(filesResult || [])]);
+        setFiles([...STATIC_FILES, ...visibleFiles]);
       } else {
-        setFiles(filesResult || []);
+        setFiles(visibleFiles);
       }
     } catch (error) {
       console.error('Error fetching content:', error);
@@ -314,6 +331,16 @@ const ResellerArea: React.FC = () => {
     fetchContent();
   };
 
+  const handleSaveRoles = async () => {
+    if (!rolesTarget) return;
+    const { type, item } = rolesTarget;
+    const table = type === 'file' ? 'reseller_files' : 'reseller_folders';
+    const value = rolesValue.length === 0 ? null : rolesValue;
+    await supabase.from(table).update({ allowed_roles: value }).eq('id', item.id);
+    setRolesTarget(null);
+    fetchContent();
+  };
+
   const handleDeleteFile = async (file: ResellerFile) => {
     if (!window.confirm(`Tem certeza que deseja excluir ${file.name}?`)) return;
 
@@ -453,11 +480,17 @@ const ResellerArea: React.FC = () => {
                   {path.map((p, index) => (
                     <React.Fragment key={p.id || 'root'}>
                       {index > 0 && <ChevronRight size={16} className="text-slate-400 shrink-0" />}
-                      <button 
-                        onClick={() => navigateToFolder({ id: p.id, name: p.name, parent_id: null, created_at: '' } as ResellerFolder)}
+                      <button
+                        onClick={() => {
+                          if (p.id === null) {
+                            navigateToFolder(null);
+                          } else {
+                            navigateToFolder({ id: p.id, name: p.name, parent_id: null, allowed_roles: null, created_at: '' });
+                          }
+                        }}
                         className={`text-sm font-bold whitespace-nowrap px-3 py-1.5 rounded-lg transition-all ${
-                          index === path.length - 1 
-                          ? 'bg-white text-[#312783] shadow-sm ring-1 ring-slate-200' 
+                          index === path.length - 1
+                          ? 'bg-white text-[#312783] shadow-sm ring-1 ring-slate-200'
                           : 'text-slate-500 hover:text-[#312783] hover:bg-slate-100'
                         }`}
                       >
@@ -531,8 +564,9 @@ const ResellerArea: React.FC = () => {
                               <MoreVertical size={18} />
                             </button>
                             {openMenuId === folder.id && (
-                              <div className="absolute right-0 top-8 z-30 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-40">
+                              <div className="absolute right-0 top-8 z-30 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-44">
                                 <button onClick={() => { setRenameTarget({ type: 'folder', item: folder }); setRenameValue(folder.name); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Renomear</button>
+                                <button onClick={() => { setRolesTarget({ type: 'folder', item: folder }); setRolesValue(folder.allowed_roles || []); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Acesso...</button>
                                 <button onClick={() => { handleDeleteFolder(folder); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50">Excluir</button>
                               </div>
                             )}
@@ -540,7 +574,14 @@ const ResellerArea: React.FC = () => {
                         )}
                       </div>
                       <h3 className="font-bold text-slate-800 line-clamp-1">{folder.name}</h3>
-                      <p className="text-xs text-slate-400 mt-1 uppercase font-black tracking-widest">Pasta</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-xs text-slate-400 uppercase font-black tracking-widest">Pasta</p>
+                        {isSuperAdmin && folder.allowed_roles && folder.allowed_roles.length > 0 && (
+                          <span className="text-[9px] uppercase font-black tracking-wider bg-amber-50 text-amber-600 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                            <Lock size={9} /> {folder.allowed_roles.join(', ')}
+                          </span>
+                        )}
+                      </div>
                     </motion.div>
                   ))}
 
@@ -577,9 +618,10 @@ const ResellerArea: React.FC = () => {
                                 <MoreVertical size={18} />
                               </button>
                               {openMenuId === file.id && (
-                                <div className="absolute right-0 top-8 z-30 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-40">
+                                <div className="absolute right-0 top-8 z-30 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 w-44">
                                   <button onClick={() => { setRenameTarget({ type: 'file', item: file }); setRenameValue(file.name); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Renomear</button>
                                   <button onClick={() => { setMoveTarget(file); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Mover para...</button>
+                                  <button onClick={() => { setRolesTarget({ type: 'file', item: file }); setRolesValue(file.allowed_roles || []); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">Acesso...</button>
                                   <button onClick={() => { handleDeleteFile(file); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50">Excluir</button>
                                 </div>
                               )}
@@ -592,7 +634,14 @@ const ResellerArea: React.FC = () => {
                           <span className="text-[10px] uppercase font-black tracking-widest text-[#312783] bg-[#312783]/5 px-2 py-1 rounded-lg">
                               {file.file_type || 'unkn'}
                           </span>
-                          {file.size > 0 && <span className="text-xs text-slate-400 font-bold">{formatSize(file.size)}</span>}
+                          <div className="flex items-center gap-2">
+                            {isSuperAdmin && file.allowed_roles && file.allowed_roles.length > 0 && (
+                              <span className="text-[9px] uppercase font-black tracking-wider bg-amber-50 text-amber-600 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                                <Lock size={9} /> {file.allowed_roles.join(', ')}
+                              </span>
+                            )}
+                            {file.size > 0 && <span className="text-xs text-slate-400 font-bold">{formatSize(file.size)}</span>}
+                          </div>
                       </div>
                     </motion.div>
                   ))}
@@ -700,6 +749,57 @@ const ResellerArea: React.FC = () => {
                   ))}
                 </div>
                 <button onClick={() => setMoveTarget(null)} className="w-full px-4 py-4 rounded-2xl font-black text-slate-400 hover:bg-slate-50 uppercase tracking-widest text-xs">Cancelar</button>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Modal: Role Access */}
+        <AnimatePresence>
+          {rolesTarget && (
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-[#312783]/20 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-3 bg-amber-50 rounded-2xl"><Lock size={20} className="text-amber-500" /></div>
+                  <h3 className="text-2xl font-black text-[#312783]">Controle de Acesso</h3>
+                </div>
+                <p className="text-slate-500 font-bold mb-6 line-clamp-1 ml-1">{rolesTarget.item.name}</p>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Roles com acesso (vazio = todos)</p>
+                <div className="space-y-2 mb-8">
+                  {ALL_ROLES.map(r => (
+                    <label key={r} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer border border-slate-100">
+                      <input
+                        type="checkbox"
+                        checked={rolesValue.includes(r)}
+                        onChange={e => {
+                          if (e.target.checked) setRolesValue(prev => [...prev, r]);
+                          else setRolesValue(prev => prev.filter(x => x !== r));
+                        }}
+                        className="w-5 h-5 rounded accent-[#312783]"
+                      />
+                      <span className="font-bold text-slate-700 capitalize">{r}</span>
+                      {r === 'super' && <span className="ml-auto text-[10px] text-slate-400">superadmin</span>}
+                      {r === 'reseller' && <span className="ml-auto text-[10px] text-slate-400">revendedor</span>}
+                      {r === 'restricted' && <span className="ml-auto text-[10px] text-slate-400">restrito</span>}
+                      {r === 'hr' && <span className="ml-auto text-[10px] text-slate-400">RH</span>}
+                      {r === 'mkt' && <span className="ml-auto text-[10px] text-slate-400">marketing</span>}
+                    </label>
+                  ))}
+                </div>
+                <div className="bg-blue-50 rounded-2xl p-4 mb-6 text-xs text-blue-700 font-bold">
+                  {rolesValue.length === 0
+                    ? 'Nenhuma role selecionada = visível para todos os usuários autenticados.'
+                    : `Visível apenas para: ${rolesValue.join(', ')}`}
+                </div>
+                <div className="flex gap-4">
+                  <button onClick={() => setRolesTarget(null)} className="flex-1 px-4 py-4 rounded-2xl font-black text-slate-400 hover:bg-slate-50 uppercase tracking-widest text-xs">Cancelar</button>
+                  <button onClick={handleSaveRoles} className="flex-1 px-4 py-4 rounded-2xl font-black bg-[#312783] text-white hover:bg-[#3f31a1] shadow-lg uppercase tracking-widest text-xs">Salvar</button>
+                </div>
               </motion.div>
             </div>
           )}

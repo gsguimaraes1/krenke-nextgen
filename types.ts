@@ -87,6 +87,7 @@ export interface ResellerFolder {
   id: string;
   name: string;
   parent_id: string | null;
+  allowed_roles: string[] | null;
   created_at: string;
 }
 
@@ -99,6 +100,7 @@ export interface ResellerFile {
   size: number;
   created_at: string;
   storage_path?: string | null;
+  allowed_roles: string[] | null;
 }
 
 export interface Profile {
