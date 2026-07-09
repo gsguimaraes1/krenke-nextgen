@@ -5,6 +5,7 @@ import { Briefcase, MapPin, Users, Heart, Lightbulb, Trophy, ChevronDown, Chevro
 import { supabase } from '../lib/supabase';
 import { JobOpening } from '../types';
 import JobApplicationForm from '../components/JobApplicationForm';
+import { TranslatableText } from '../components/TranslatableText';
 
 const CONTRACT_COLORS: Record<string, string> = {
   'CLT':                   'bg-blue-100 text-blue-700 border-blue-200',
@@ -87,7 +88,7 @@ function JobCard({ job, onApply }: { job: JobOpening; onApply: (j: JobOpening) =
             )}
             {job.application_count > 0 && (
               <span className="flex items-center gap-1 text-[#F39200] font-bold">
-                <Users size={13} /> {job.application_count} candidatura{job.application_count !== 1 ? 's' : ''}
+                <Users size={13} /> {job.application_count} <TranslatableText>{`candidatura${job.application_count !== 1 ? 's' : ''}`}</TranslatableText>
               </span>
             )}
           </div>
@@ -99,14 +100,14 @@ function JobCard({ job, onApply }: { job: JobOpening; onApply: (j: JobOpening) =
               onClick={() => setExpanded(v => !v)}
               className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-[#312783] px-3 py-2 rounded-xl hover:bg-gray-50 transition-all"
             >
-              {expanded ? <><ChevronUp size={15} /> Fechar</> : <><ChevronDown size={15} /> Ver detalhes</>}
+              {expanded ? <><ChevronUp size={15} /> <TranslatableText>Fechar</TranslatableText></> : <><ChevronDown size={15} /> <TranslatableText>Ver detalhes</TranslatableText></>}
             </button>
           )}
           <button
             onClick={() => onApply(job)}
             className="bg-[#F39200] hover:bg-orange-500 text-white font-black uppercase tracking-wider text-xs py-3 px-7 rounded-xl transition-all hover:scale-105 whitespace-nowrap"
           >
-            Candidatar-se
+            <TranslatableText>Candidatar-se</TranslatableText>
           </button>
         </div>
       </div>
@@ -125,13 +126,13 @@ function JobCard({ job, onApply }: { job: JobOpening; onApply: (j: JobOpening) =
             <div className="px-6 pb-6 border-t border-gray-100 pt-5 space-y-4">
               {job.description && (
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Descrição</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2"><TranslatableText>Descrição</TranslatableText></p>
                   <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{job.description}</p>
                 </div>
               )}
               {job.requirements && (
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Requisitos</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2"><TranslatableText>Requisitos</TranslatableText></p>
                   <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{job.requirements}</p>
                 </div>
               )}
@@ -139,7 +140,7 @@ function JobCard({ job, onApply }: { job: JobOpening; onApply: (j: JobOpening) =
                 onClick={() => onApply(job)}
                 className="mt-2 inline-flex items-center gap-2 bg-[#312783] text-white font-black uppercase tracking-wider text-xs py-3 px-7 rounded-xl hover:bg-[#241f6b] transition-all"
               >
-                Candidatar-se a esta vaga
+                <TranslatableText>Candidatar-se a esta vaga</TranslatableText>
               </button>
             </div>
           </motion.div>
@@ -223,7 +224,7 @@ export default function CareersPage() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/70 text-xs font-black uppercase tracking-widest mb-8"
           >
             <Briefcase size={14} />
-            Venha crescer com a gente
+            <TranslatableText>Venha crescer com a gente</TranslatableText>
           </motion.div>
 
           <motion.h1
@@ -232,8 +233,8 @@ export default function CareersPage() {
             transition={{ delay: 0.1, duration: 0.6 }}
             className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none mb-6"
           >
-            Trabalhe<br />
-            <span className="text-[#F39200]">Conosco</span>
+            <TranslatableText>Trabalhe</TranslatableText><br />
+            <span className="text-[#F39200]"><TranslatableText>Conosco</TranslatableText></span>
           </motion.h1>
 
           <motion.p
@@ -242,7 +243,7 @@ export default function CareersPage() {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="text-white/60 text-xl max-w-2xl mx-auto mb-12 font-medium"
           >
-            Há mais de 40 anos construindo infâncias felizes. Procuramos pessoas apaixonadas por fazer a diferença — dentro e fora da fábrica.
+            <TranslatableText>Há mais de 40 anos construindo infâncias felizes. Procuramos pessoas apaixonadas por fazer a diferença — dentro e fora da fábrica.</TranslatableText>
           </motion.p>
 
           <motion.button
@@ -252,7 +253,7 @@ export default function CareersPage() {
             onClick={() => vagasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
             className="inline-flex items-center gap-3 bg-[#F39200] hover:bg-orange-500 text-white font-black uppercase tracking-wider text-sm py-5 px-10 rounded-2xl transition-all hover:scale-105 hover:shadow-[0_8px_30px_rgba(243,146,0,0.4)]"
           >
-            Ver Vagas
+            <TranslatableText>Ver Vagas</TranslatableText>
             <ChevronDown size={18} />
           </motion.button>
         </div>
@@ -262,8 +263,8 @@ export default function CareersPage() {
       <section className="py-24 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div {...fadeUp} className="text-center mb-16">
-            <span className="text-[#F39200] font-black text-xs uppercase tracking-widest">Por que a Krenke?</span>
-            <h2 className="text-4xl font-black text-[#312783] mt-3 tracking-tight">Mais que um emprego</h2>
+            <span className="text-[#F39200] font-black text-xs uppercase tracking-widest"><TranslatableText>Por que a Krenke?</TranslatableText></span>
+            <h2 className="text-4xl font-black text-[#312783] mt-3 tracking-tight"><TranslatableText>Mais que um emprego</TranslatableText></h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -277,8 +278,8 @@ export default function CareersPage() {
                 <div className="w-14 h-14 rounded-2xl bg-[#312783]/8 flex items-center justify-center mb-6 group-hover:bg-[#F39200]/10 transition-colors">
                   <v.icon size={26} className="text-[#312783] group-hover:text-[#F39200] transition-colors" />
                 </div>
-                <h3 className="font-black text-[#312783] text-lg mb-3">{v.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{v.desc}</p>
+                <h3 className="font-black text-[#312783] text-lg mb-3"><TranslatableText>{v.title}</TranslatableText></h3>
+                <p className="text-gray-500 text-sm leading-relaxed"><TranslatableText>{v.desc}</TranslatableText></p>
               </motion.div>
             ))}
           </div>
@@ -289,8 +290,8 @@ export default function CareersPage() {
       <section ref={vagasRef} className="py-24 bg-slate-50 scroll-mt-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div {...fadeUp} className="text-center mb-16">
-            <span className="text-[#F39200] font-black text-xs uppercase tracking-widest">Oportunidades</span>
-            <h2 className="text-4xl font-black text-[#312783] mt-3 tracking-tight">Vagas em Aberto</h2>
+            <span className="text-[#F39200] font-black text-xs uppercase tracking-widest"><TranslatableText>Oportunidades</TranslatableText></span>
+            <h2 className="text-4xl font-black text-[#312783] mt-3 tracking-tight"><TranslatableText>Vagas em Aberto</TranslatableText></h2>
           </motion.div>
 
           {loadingOpenings ? (
@@ -300,13 +301,13 @@ export default function CareersPage() {
           ) : openings.length === 0 ? (
             <motion.div {...fadeUp} className="text-center py-16 bg-white rounded-3xl border-2 border-dashed border-gray-200">
               <Briefcase size={48} className="mx-auto text-gray-300 mb-4" />
-              <h3 className="text-xl font-black text-gray-400 mb-2">Nenhuma vaga aberta no momento</h3>
-              <p className="text-gray-400 text-sm mb-8">Mas adoraríamos ter seu currículo no nosso banco de talentos!</p>
+              <h3 className="text-xl font-black text-gray-400 mb-2"><TranslatableText>Nenhuma vaga aberta no momento</TranslatableText></h3>
+              <p className="text-gray-400 text-sm mb-8"><TranslatableText>Mas adoraríamos ter seu currículo no nosso banco de talentos!</TranslatableText></p>
               <button
                 onClick={() => scrollToForm()}
                 className="inline-flex items-center gap-2 bg-[#312783] text-white font-black uppercase tracking-wider text-xs py-3 px-8 rounded-2xl hover:bg-[#241f6b] transition-all"
               >
-                Enviar Candidatura Espontânea
+                <TranslatableText>Enviar Candidatura Espontânea</TranslatableText>
               </button>
             </motion.div>
           ) : (
@@ -323,9 +324,9 @@ export default function CareersPage() {
       <section ref={formRef} className="py-24 bg-white scroll-mt-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div {...fadeUp} className="text-center mb-14">
-            <span className="text-[#F39200] font-black text-xs uppercase tracking-widest">Candidate-se</span>
+            <span className="text-[#F39200] font-black text-xs uppercase tracking-widest"><TranslatableText>Candidate-se</TranslatableText></span>
             <h2 className="text-4xl font-black text-[#312783] mt-3 tracking-tight">
-              {preselected ? preselected.title : 'Envie seu Currículo'}
+              {preselected ? preselected.title : <TranslatableText>Envie seu Currículo</TranslatableText>}
             </h2>
             {preselected && (
               <div className="mt-3 flex flex-wrap justify-center gap-1.5">
@@ -344,7 +345,7 @@ export default function CareersPage() {
                 onClick={() => setPreselected(null)}
                 className="mt-4 text-xs text-gray-400 underline hover:text-gray-600"
               >
-                Limpar seleção
+                <TranslatableText>Limpar seleção</TranslatableText>
               </button>
             )}
           </motion.div>

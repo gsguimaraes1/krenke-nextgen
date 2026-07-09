@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { TranslatableText } from '../TranslatableText';
 
 interface ShowcaseCardProps {
   title: string;
@@ -74,14 +75,14 @@ export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({
                 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/70 mb-2"
                 animate={{ opacity: isHovered ? 1 : 0.7 }}
               >
-                {subtitle}
+                <TranslatableText>{subtitle}</TranslatableText>
               </motion.span>
             )}
             <motion.h3
               className="text-3xl md:text-3xl font-black text-white uppercase leading-tight tracking-tight drop-shadow-2xl"
               animate={{ y: isHovered ? -2 : 0 }}
             >
-              {title}
+              <TranslatableText>{title}</TranslatableText>
             </motion.h3>
           </div>
 
@@ -119,7 +120,7 @@ export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({
               whileHover={{ scale: 1.05, y: -5 }}
               whileTap={{ scale: 0.95 }}
             >
-              Ver Produtos
+              <TranslatableText>Ver Produtos</TranslatableText>
             </motion.button>
           </Link>
 

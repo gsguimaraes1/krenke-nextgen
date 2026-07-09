@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import QuoteForm from '../components/QuoteForm';
+import { TranslatableText } from '../components/TranslatableText';
 
 const QuotePage: React.FC = () => {
   return (
@@ -30,12 +31,12 @@ const QuotePage: React.FC = () => {
           >
             <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-black uppercase tracking-[0.3em] mb-10">
               <Sparkles size={14} className="text-vibrant-orange animate-pulse" />
-              Projetos Customizados
+              <TranslatableText>Projetos Customizados</TranslatableText>
             </div>
 
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.8] tracking-tighter mb-10 uppercase drop-shadow-2xl">
-              TRANSFORME <br />
-              <span className="text-vibrant-orange">SEU ESPAÇO</span>
+              <TranslatableText>TRANSFORME</TranslatableText> <br />
+              <span className="text-vibrant-orange"><TranslatableText>SEU ESPAÇO</TranslatableText></span>
             </h1>
 
             <motion.div

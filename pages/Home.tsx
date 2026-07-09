@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard, X, Calendar, User } from 'lucide-react';
+import { CheckCircle, Award, PenTool, ArrowRight, HeartHandshake, Calculator, Truck, ShieldCheck, Zap, CreditCard, X, Calendar, User, Instagram } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Post } from '../types';
 import { motion } from 'framer-motion';
@@ -155,8 +155,8 @@ const Features = () => (
             <div className="w-20 h-20 bg-white/20 rounded-3xl flex items-center justify-center mb-8 backdrop-blur-xl rotate-12 group-hover:rotate-0 transition-transform">
               <feature.icon size={40} strokeWidth={2.5} />
             </div>
-            <h3 className="text-2xl font-black mb-4 uppercase tracking-tighter leading-none">{feature.title}</h3>
-            <p className="text-white/90 leading-tight font-bold text-lg">{feature.desc}</p>
+            <h3 className="text-2xl font-black mb-4 uppercase tracking-tighter leading-none"><TranslatableText>{feature.title}</TranslatableText></h3>
+            <p className="text-white/90 leading-tight font-bold text-lg"><TranslatableText>{feature.desc}</TranslatableText></p>
           </motion.div>
         ))}
       </div>
@@ -238,10 +238,10 @@ const CategoryPreview = () => {
             viewport={{ once: true }}
             className="text-5xl md:text-7xl font-black text-krenke-purple mb-6 uppercase tracking-tighter"
           >
-            Explore Nossa Linha de <span className="text-vibrant-orange">Playgrounds</span>
+            <TranslatableText>Explore Nossa Linha de</TranslatableText> <span className="text-vibrant-orange"><TranslatableText>Playgrounds</TranslatableText></span>
           </motion.h2>
           <p className="text-xl text-gray-500 max-w-3xl mx-auto font-medium leading-relaxed">
-            Produtos certificados pela ABNT com durabilidade extrema. O melhor investimento para o lazer das crianças.
+            <TranslatableText>Produtos certificados pela ABNT com durabilidade extrema. O melhor investimento para o lazer das crianças.</TranslatableText>
           </p>
           <motion.div
             initial={{ width: 0 }}
@@ -268,7 +268,7 @@ const CategoryPreview = () => {
             id="btn-home-category-full-quote"
             className="inline-flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black text-xl rounded-2xl shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-1 transition-all duration-300 gtm-home-category-button-full-quote"
           >
-            SOLICITAR ORÇAMENTO COMPLETO
+            <TranslatableText>SOLICITAR ORÇAMENTO COMPLETO</TranslatableText>
             <ArrowRight strokeWidth={3} />
           </Link>
         </div>
@@ -292,15 +292,15 @@ const StatsSection = () => (
           className="space-y-10"
         >
           <div>
-            <span className="text-sm font-black text-vibrant-orange uppercase tracking-widest bg-vibrant-orange/10 px-4 py-1.5 rounded-full mb-6 inline-block">Nossa Essência</span>
+            <span className="text-sm font-black text-vibrant-orange uppercase tracking-widest bg-vibrant-orange/10 px-4 py-1.5 rounded-full mb-6 inline-block"><TranslatableText>Nossa Essência</TranslatableText></span>
             <h3 className="text-4xl md:text-6xl font-black text-gray-900 leading-[1.1] tracking-tighter">
-              QUALIDADE EM CADA <br />
-              <span className="text-krenke-purple">PLAYGROUND E BRINQUEDO</span>
+              <TranslatableText>QUALIDADE EM CADA</TranslatableText> <br />
+              <span className="text-krenke-purple"><TranslatableText>PLAYGROUND E BRINQUEDO</TranslatableText></span>
             </h3>
           </div>
 
           <p className="text-xl text-gray-500 leading-relaxed font-medium">
-            Desde 1987, a Krenke lidera o mercado brasileiro com playgrounds que unem robustez técnica a um design focado na diversão e no desenvolvimento infantil.
+            <TranslatableText>Desde 1987, a Krenke lidera o mercado brasileiro com playgrounds que unem robustez técnica a um design focado na diversão e no desenvolvimento infantil.</TranslatableText>
           </p>
 
           <div className="space-y-6">
@@ -312,8 +312,8 @@ const StatsSection = () => (
             ].map((stat, i) => (
               <div key={i} className="group">
                 <div className="flex justify-between mb-2 text-sm font-black uppercase tracking-widest">
-                  <span className="text-gray-900">{stat.label}</span>
-                  <span className="text-vibrant-orange">100%</span>
+                  <span className="text-gray-900"><TranslatableText>{stat.label}</TranslatableText></span>
+                  <span className="text-vibrant-orange"><TranslatableText>100%</TranslatableText></span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden border border-gray-100">
                   <motion.div
@@ -338,7 +338,7 @@ const StatsSection = () => (
           <div className="absolute -inset-4 bg-gradient-to-tr from-vibrant-orange to-krenke-purple opacity-20 blur-2xl rounded-[3rem]"></div>
           <div className="relative rounded-[3rem] overflow-hidden shadow-premium border-[12px] border-white transform lg:rotate-3 hover:rotate-0 transition-all duration-700">
             <div className="absolute top-8 right-8 bg-vibrant-orange text-white px-6 py-3 rounded-2xl shadow-2xl z-20 flex flex-col items-center">
-              <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80">Líder desde</span>
+              <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80"><TranslatableText>Líder desde</TranslatableText></span>
               <span className="text-4xl font-black">1987</span>
             </div>
             <img
@@ -366,8 +366,8 @@ const Differentials = () => (
           viewport={{ once: true }}
           className="text-4xl md:text-6xl font-black text-gray-900 leading-tight uppercase tracking-tighter"
         >
-          DIFERENCIAIS QUE <br />
-          <span className="text-krenke-purple">IMPULSIONAM O MERCADO</span>
+          <TranslatableText>DIFERENCIAIS QUE</TranslatableText> <br />
+          <span className="text-krenke-purple"><TranslatableText>IMPULSIONAM O MERCADO</TranslatableText></span>
         </motion.h2>
       </div>
 
@@ -426,8 +426,8 @@ const Differentials = () => (
               style={{ backgroundColor: `${item.color}20` }}>
               <item.icon size={36} strokeWidth={2.5} style={{ color: item.color }} />
             </div>
-            <h3 className="font-black text-2xl text-gray-900 mb-4 tracking-tight">{item.title}</h3>
-            <p className="text-gray-500 text-lg leading-snug font-medium">{item.text}</p>
+            <h3 className="font-black text-2xl text-gray-900 mb-4 tracking-tight"><TranslatableText>{item.title}</TranslatableText></h3>
+            <p className="text-gray-500 text-lg leading-snug font-medium"><TranslatableText>{item.text}</TranslatableText></p>
           </motion.div>
         ))}
       </div>
@@ -474,10 +474,10 @@ const ComparativeTable = () => {
             viewport={{ once: true }}
             className="text-4xl md:text-7xl font-black text-krenke-purple mb-6 uppercase tracking-tight"
           >
-            A Superioridade <span className="text-vibrant-orange drop-shadow-sm">Krenke</span>
+            <TranslatableText>A Superioridade</TranslatableText> <span className="text-vibrant-orange drop-shadow-sm"><TranslatableText>Krenke</TranslatableText></span>
           </motion.h2>
           <p className="text-xl text-gray-500 max-w-3xl mx-auto font-medium">
-            Por que somos a primeira escolha de quem preza pela máxima segurança.
+            <TranslatableText>Por que somos a primeira escolha de quem preza pela máxima segurança.</TranslatableText>
           </p>
         </div>
 
@@ -491,10 +491,10 @@ const ComparativeTable = () => {
             <thead>
               <tr className="text-white">
                 <th className="bg-krenke-purple px-4 py-6 md:p-12 text-left font-black uppercase tracking-widest text-xs md:text-sm w-1/2 border-r border-white/10">
-                  Especificações Técnicas
+                  <TranslatableText>Especificações Técnicas</TranslatableText>
                 </th>
                 <th className="bg-slate-400 px-2 py-6 md:p-12 text-center font-black uppercase tracking-widest text-xs md:text-sm w-1/4 border-r border-white/10 break-words whitespace-normal leading-relaxed">
-                  Mercado Comum
+                  <TranslatableText>Mercado Comum</TranslatableText>
                 </th>
                 <th className="bg-vibrant-orange px-2 py-6 md:p-12 text-center font-black uppercase tracking-widest text-xs md:text-sm w-1/4 relative overflow-hidden">
                   <div className="flex justify-center items-center h-full scale-125 md:scale-[1.75]">
@@ -512,7 +512,7 @@ const ComparativeTable = () => {
               {comparisons.map((row, idx) => (
                 <tr key={idx} className="group hover:bg-slate-50 transition-colors">
                   <td className="px-5 py-6 md:p-8 md:px-12 text-gray-900 font-bold md:font-black text-sm md:text-lg border-r border-gray-50 leading-snug">
-                    {row.feature}
+                    <TranslatableText>{row.feature}</TranslatableText>
                   </td>
                   <td className="p-4 md:p-8 text-center border-r border-gray-50">
                     {row.common === true ? (
@@ -524,7 +524,7 @@ const ComparativeTable = () => {
                         <X size={24} className="md:w-7 md:h-7" />
                       </div>
                     ) : (
-                      <span className="text-gray-400 italic font-black uppercase text-[10px] md:text-xs tracking-widest">{row.common}</span>
+                      <span className="text-gray-400 italic font-black uppercase text-[10px] md:text-xs tracking-widest"><TranslatableText>{row.common}</TranslatableText></span>
                     )}
                   </td>
                   <td className="p-4 md:p-8 text-center bg-orange-50/20">
@@ -544,6 +544,48 @@ const ComparativeTable = () => {
     </section>
   );
 };
+
+const InstagramFeed = () => (
+  <section className="py-32 bg-white relative overflow-hidden">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="text-center mb-16">
+        <span className="text-sm font-black text-vibrant-orange uppercase tracking-[.3em] bg-vibrant-orange/10 px-6 py-2 rounded-full mb-6 inline-flex items-center gap-2">
+          <Instagram size={16} /> @krenkebrinquedos
+        </span>
+        <h3 className="text-4xl md:text-6xl font-black text-krenke-purple uppercase tracking-tighter leading-none">
+          <TranslatableText>Siga Nossas</TranslatableText> <span className="text-vibrant-orange"><TranslatableText>Aventuras</TranslatableText></span>
+        </h3>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mx-auto max-w-[800px] rounded-[2rem] overflow-hidden shadow-premium border border-gray-100"
+      >
+        <iframe
+          src="https://snapwidget.com/embed/1126759"
+          className="w-full aspect-square border-0 overflow-hidden"
+          title="Últimas postagens do Instagram Krenke Brinquedos"
+          loading="lazy"
+          allowTransparency
+        />
+      </motion.div>
+
+      <div className="text-center mt-10">
+        <a
+          href="https://www.instagram.com/krenkebrinquedos/"
+          target="_blank"
+          rel="noopener noreferrer"
+          id="btn-home-instagram-follow"
+          className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-krenke-purple to-vibrant-orange text-white font-black uppercase text-sm tracking-widest rounded-2xl shadow-premium hover:shadow-2xl hover:-translate-y-1 transition-all gtm-home-instagram-follow"
+        >
+          <Instagram size={20} /> <TranslatableText>Seguir no Instagram</TranslatableText>
+        </a>
+      </div>
+    </div>
+  </section>
+);
 
 const BlogPreview = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -569,11 +611,11 @@ const BlogPreview = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-10">
           <div className="max-w-2xl">
-            <span className="text-sm font-black text-vibrant-orange uppercase tracking-[.3em] bg-white px-6 py-2 rounded-full shadow-sm mb-6 inline-block">Conteúdo & Insights</span>
-            <h3 className="text-4xl md:text-7xl font-black text-krenke-purple uppercase tracking-tighter leading-none">Últimas das <br /> <span className="text-vibrant-orange">Nossas Novidades</span></h3>
+            <span className="text-sm font-black text-vibrant-orange uppercase tracking-[.3em] bg-white px-6 py-2 rounded-full shadow-sm mb-6 inline-block"><TranslatableText>Conteúdo & Insights</TranslatableText></span>
+            <h3 className="text-4xl md:text-7xl font-black text-krenke-purple uppercase tracking-tighter leading-none"><TranslatableText>Últimas das</TranslatableText> <br /> <span className="text-vibrant-orange"><TranslatableText>Nossas Novidades</TranslatableText></span></h3>
           </div>
           <Link id="btn-home-blog-all" to="/blog" className="px-10 py-5 bg-white border-4 border-krenke-purple text-krenke-purple font-black uppercase text-sm tracking-widest rounded-[2rem] hover:bg-krenke-purple hover:text-white transition-all flex items-center gap-3 group shadow-premium">
-            Ver Blog Todo <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
+            <TranslatableText>Ver Blog Todo</TranslatableText> <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
           </Link>
         </div>
 
@@ -599,7 +641,7 @@ const BlogPreview = () => {
                   <h4 className="text-2xl font-black text-krenke-purple mb-6 leading-[1.1] group-hover:text-vibrant-orange transition-colors line-clamp-3 uppercase tracking-tight">{post.title}</h4>
                   <p className="text-gray-500 text-lg leading-snug line-clamp-2 mb-8 flex-grow font-medium">{post.excerpt}</p>
                   <div className="flex items-center gap-3 text-vibrant-orange font-black uppercase text-sm tracking-widest group-hover:gap-6 transition-all mt-auto group-hover:translate-x-2">
-                    Continuar Lendo <ArrowRight size={20} />
+                    <TranslatableText>Continuar Lendo</TranslatableText> <ArrowRight size={20} />
                   </div>
                 </div>
               </Link>
@@ -626,6 +668,7 @@ const HomePage: React.FC = () => {
       <Features />
       <CategoryPreview />
       <StatsSection />
+      <InstagramFeed />
       <BlogPreview />
       <Differentials />
       <ComparativeTable />

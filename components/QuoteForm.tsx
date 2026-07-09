@@ -7,6 +7,7 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { getStoredUTMs } from '../lib/utm-tracker';
 import { useNavigate } from 'react-router-dom';
+import { TranslatableText } from './TranslatableText';
 
 
 const STATES = [
@@ -324,10 +325,10 @@ const QuoteForm: React.FC = () => {
         <div className="p-8 md:p-16">
           <div className="mb-12 text-center">
             <h2 className="text-3xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter leading-none mb-6">
-              PROPOSTA <span className="text-vibrant-orange">RÁPIDA</span>
+              <TranslatableText>PROPOSTA</TranslatableText> <span className="text-vibrant-orange"><TranslatableText>RÁPIDA</TranslatableText></span>
             </h2>
             <p className="text-gray-400 font-medium text-lg italic max-w-2xl mx-auto">
-              Preencha os dados abaixo para receber um orçamento detalhado em tempo recorde.
+              <TranslatableText>Preencha os dados abaixo para receber um orçamento detalhado em tempo recorde.</TranslatableText>
             </p>
           </div>
 
@@ -352,7 +353,7 @@ const QuoteForm: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-10">
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Identificação</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2"><TranslatableText>Identificação</TranslatableText></label>
                 <input
                   name="form_orc_name"
                   id="form-quote-name"
@@ -364,7 +365,7 @@ const QuoteForm: React.FC = () => {
                 />
               </div>
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Telefone / WhatsApp</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2"><TranslatableText>Telefone / WhatsApp</TranslatableText></label>
                 <div className="phone-input-container">
                   <PhoneInput
                     international
@@ -383,7 +384,7 @@ const QuoteForm: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-10">
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Tipo de Cliente</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2"><TranslatableText>Tipo de Cliente</TranslatableText></label>
                 <select
                   id="form-quote-client-type"
                   name="form_orc_tipo_cliente"
@@ -399,7 +400,7 @@ const QuoteForm: React.FC = () => {
                 </select>
               </div>
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Seu E-mail Corporativo</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2"><TranslatableText>Seu E-mail Corporativo</TranslatableText></label>
                 <input
                   type="email"
                   name="form_orc_email"
@@ -415,7 +416,7 @@ const QuoteForm: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-10">
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Estado</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2"><TranslatableText>Estado</TranslatableText></label>
                 <select
                   id="form-quote-state"
                   name="form_orc_estado"
@@ -431,7 +432,7 @@ const QuoteForm: React.FC = () => {
                 </select>
               </div>
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Cidade</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2"><TranslatableText>Cidade</TranslatableText></label>
                 <select
                   id="form-quote-city"
                   name="form_orc_cidade"
@@ -453,7 +454,7 @@ const QuoteForm: React.FC = () => {
 
             <div>
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Segmento</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2"><TranslatableText>Segmento</TranslatableText></label>
                 <div className="space-y-4">
                   <select
                     id="form-quote-segment"
@@ -502,8 +503,8 @@ const QuoteForm: React.FC = () => {
             {/* Product Selector */}
             <div className="space-y-6">
               <div className="flex items-center justify-between px-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Produtos Desejados</label>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-vibrant-orange">{selectedProducts.length} Selecionados</span>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400"><TranslatableText>Produtos Desejados</TranslatableText></label>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-vibrant-orange">{selectedProducts.length} <TranslatableText>Selecionados</TranslatableText></span>
               </div>
 
               <div className="relative group">
@@ -528,7 +529,7 @@ const QuoteForm: React.FC = () => {
                       exit={{ opacity: 0 }}
                       className="col-span-full flex items-center gap-3"
                     >
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-vibrant-orange">✓ Selecionados</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-vibrant-orange">✓ <TranslatableText>Selecionados</TranslatableText></span>
                       <div className="flex-1 h-px bg-vibrant-orange/20" />
                     </motion.div>
                   )}
@@ -563,7 +564,7 @@ const QuoteForm: React.FC = () => {
                       exit={{ opacity: 0 }}
                       className="col-span-full flex items-center gap-3 mt-2"
                     >
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Todos os Produtos</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400"><TranslatableText>Todos os Produtos</TranslatableText></span>
                       <div className="flex-1 h-px bg-slate-100" />
                     </motion.div>
                   )}
@@ -594,7 +595,7 @@ const QuoteForm: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2">Detalhes do Projeto</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 px-2"><TranslatableText>Detalhes do Projeto</TranslatableText></label>
               <textarea
                 name="form_orc_mensagem"
                 id="form-quote-message"
@@ -615,7 +616,7 @@ const QuoteForm: React.FC = () => {
             >
               <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>
               {isSubmitting ? <Loader2 className="animate-spin" /> : <Send size={24} />}
-              {isSubmitting ? 'ENVIANDO...' : 'SOLICITAR PROPOSTA AGORA'}
+              {isSubmitting ? <TranslatableText>ENVIANDO...</TranslatableText> : <TranslatableText>SOLICITAR PROPOSTA AGORA</TranslatableText>}
             </button>
 
             {/* Status Messages */}
@@ -627,7 +628,7 @@ const QuoteForm: React.FC = () => {
                   exit={{ opacity: 0, y: 10 }}
                   className="p-6 bg-red-50 border-2 border-red-100 rounded-2xl text-red-600 font-bold text-center text-sm"
                 >
-                  {submitError}
+                  <TranslatableText>{submitError}</TranslatableText>
                 </motion.div>
               )}
               {submitSuccess && (
@@ -637,7 +638,7 @@ const QuoteForm: React.FC = () => {
                   exit={{ opacity: 0, y: 10 }}
                   className="p-6 bg-green-50 border-2 border-green-100 rounded-2xl text-green-600 font-bold text-center text-sm"
                 >
-                  Orçamento solicitado com sucesso! Nossa equipe entrará em contato em breve.
+                  <TranslatableText>Orçamento solicitado com sucesso! Nossa equipe entrará em contato em breve.</TranslatableText>
                 </motion.div>
               )}
             </AnimatePresence>

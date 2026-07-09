@@ -170,7 +170,7 @@ const ProductModal: React.FC<{
               {/* Thumbnails */}
               {product.images && product.images.length > 0 && (
                 <div className="mt-4 md:mt-6">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 px-2">Galeria de Fotos</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 px-2"><TranslatableText>Galeria de Fotos</TranslatableText></p>
                   <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar px-2 snap-x">
                     {Array.from(new Set([product.image, ...(product.images || [])])).map((img, idx) => (
                       <motion.button
@@ -241,7 +241,7 @@ const ProductModal: React.FC<{
                   onClick={() => toggleCart(product.id)}
                 >
                   <ShoppingCart size={24} />
-                  {inCart ? 'Adicionado ao Orçamento ✓' : 'Adicionar ao Orçamento'}
+                  <TranslatableText>{inCart ? 'Adicionado ao Orçamento ✓' : 'Adicionar ao Orçamento'}</TranslatableText>
                 </button>
                 <div className="flex items-center justify-between opacity-40">
                   <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Krenke Playgrounds © 2026</span>
@@ -439,16 +439,16 @@ export const ProductsPage: React.FC = () => {
             />
             {/* Mobile Category Indicator */}
             <div className="lg:hidden mt-4 flex items-center gap-2 px-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Filtrando:</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400"><TranslatableText>Filtrando:</TranslatableText></span>
               <span className="text-[11px] font-black uppercase tracking-wider text-vibrant-orange bg-orange-50 px-3 py-1 rounded-full border border-orange-100/50">
-                {activeCategory}
+                <TranslatableText>{activeCategory}</TranslatableText>
               </span>
             </div>
           </div>
 
           <div className="hidden md:flex gap-4">
             <div className="flex flex-col items-end text-right">
-              <span className="text-[10px] font-black uppercase text-gray-300 tracking-widest leading-none mb-1">Mostrando</span>
+              <span className="text-[10px] font-black uppercase text-gray-300 tracking-widest leading-none mb-1"><TranslatableText>Mostrando</TranslatableText></span>
               <span className="text-2xl font-black text-krenke-purple uppercase leading-none">{filteredProducts.length} {t('products.items')}</span>
             </div>
           </div>
@@ -535,8 +535,8 @@ export const ProductsPage: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-40 bg-white rounded-[3rem] shadow-premium border-2 border-dashed border-slate-100">
-              <h3 className="text-2xl font-black text-gray-900 uppercase">Nada Encontrado</h3>
-              <button id="btn-products-clear-filters" onClick={() => { setSearch(''); handleCategoryChange('Todos'); }} className="mt-8 px-10 py-4 bg-krenke-purple text-white font-black rounded-2xl">Limpar Filtros</button>
+              <h3 className="text-2xl font-black text-gray-900 uppercase"><TranslatableText>Nada Encontrado</TranslatableText></h3>
+              <button id="btn-products-clear-filters" onClick={() => { setSearch(''); handleCategoryChange('Todos'); }} className="mt-8 px-10 py-4 bg-krenke-purple text-white font-black rounded-2xl"><TranslatableText>Limpar Filtros</TranslatableText></button>
             </div>
           )}
         </main>
@@ -560,7 +560,7 @@ export const ProductsPage: React.FC = () => {
                   className="bg-white rounded-3xl shadow-2xl border-2 border-slate-100 overflow-hidden w-[90vw] md:w-auto md:min-w-[400px] max-w-[500px] mb-2 mx-auto"
                 >
                   <div className="bg-slate-50 p-4 border-b border-slate-100 flex justify-between items-center">
-                    <h4 className="font-black text-sm uppercase tracking-widest text-[#332984]">Itens Selecionados</h4>
+                    <h4 className="font-black text-sm uppercase tracking-widest text-[#332984]"><TranslatableText>Itens Selecionados</TranslatableText></h4>
                     <button 
                       id="btn-cart-clear"
                       onClick={() => setQuoteCart([])} 
@@ -578,8 +578,8 @@ export const ProductsPage: React.FC = () => {
                         <div key={product.id} className="flex gap-3 items-center p-2 hover:bg-slate-50 rounded-xl transition-all">
                           <img src={product.image} alt="" loading="lazy" decoding="async" className="w-12 h-12 rounded-lg bg-white object-contain border border-slate-100 flex-shrink-0" />
                           <div className="flex-1 min-w-0 pr-2">
-                            <p className="text-xs font-black truncate text-gray-900 leading-tight">{product.name}</p>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{product.category}</p>
+                            <p className="text-xs font-black truncate text-gray-900 leading-tight"><TranslatableText>{product.name}</TranslatableText></p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate"><TranslatableText>{product.category}</TranslatableText></p>
                           </div>
                           <button 
                             id={`btn-cart-remove-${product.id}`}
@@ -615,9 +615,9 @@ export const ProductsPage: React.FC = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black uppercase tracking-widest text-vibrant-orange flex items-center gap-1">
-                    Itens no {isCartExpanded ? <ChevronDown size={12}/> : <ChevronUp size={12}/>}
+                    <TranslatableText>Itens no</TranslatableText> {isCartExpanded ? <ChevronDown size={12}/> : <ChevronUp size={12}/>}
                   </span>
-                  <span className="text-base font-black text-gray-900 leading-none">Orçamento</span>
+                  <span className="text-base font-black text-gray-900 leading-none"><TranslatableText>Orçamento</TranslatableText></span>
                 </div>
               </div>
               <button 
@@ -625,7 +625,7 @@ export const ProductsPage: React.FC = () => {
                 onClick={(e) => { e.stopPropagation(); window.location.href = '/orcamento'; }}
                 className="px-8 py-4 bg-gray-900 text-white rounded-3xl font-black text-sm uppercase tracking-widest hover:scale-105 hover:bg-vibrant-orange transition-all shadow-xl flex items-center gap-2"
               >
-                Finalizar <ArrowRight size={18} />
+                <TranslatableText>Finalizar</TranslatableText> <ArrowRight size={18} />
               </button>
             </div>
           </motion.div>

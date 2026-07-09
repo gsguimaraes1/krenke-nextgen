@@ -10,6 +10,7 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { supabase } from '../lib/supabase';
 import { getStoredUTMs } from '../lib/utm-tracker';
+import { TranslatableText } from '../components/TranslatableText';
 
 
 // Configuração necessária para o PDF.js funcionar (CDN da Mozilla)
@@ -147,14 +148,14 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
                 <div className="w-16 h-16 bg-orange-50 text-vibrant-orange rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <User size={32} />
                 </div>
-                <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Identifique-se para acessar</h2>
-                <p className="text-gray-500 font-medium text-sm mt-2">Preencha os dados abaixo para liberar o catálogo completo.</p>
+                <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter"><TranslatableText>Identifique-se para acessar</TranslatableText></h2>
+                <p className="text-gray-500 font-medium text-sm mt-2"><TranslatableText>Preencha os dados abaixo para liberar o catálogo completo.</TranslatableText></p>
             </div>
 
             <form id="form_cat" onSubmit={handleSubmit} className="space-y-6 text-left">
                 <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 flex items-center gap-2">
-                        <User size={12} /> Nome Completo
+                        <User size={12} /> <TranslatableText>Nome Completo</TranslatableText>
                     </label>
                     <input
                         id="form-catalog-name"
@@ -169,7 +170,7 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
 
                 <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 flex items-center gap-2">
-                        <Mail size={12} /> E-mail Corporativo
+                        <Mail size={12} /> <TranslatableText>E-mail Corporativo</TranslatableText>
                     </label>
                     <input
                         type="email"
@@ -185,7 +186,7 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
 
                 <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 flex items-center gap-2">
-                        <Phone size={12} /> WhatsApp
+                        <Phone size={12} /> <TranslatableText>WhatsApp</TranslatableText>
                     </label>
                     <PhoneInput
                         international
@@ -201,7 +202,7 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
 
                 <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 flex items-center gap-2">
-                        <MapPin size={12} /> Cidade
+                        <MapPin size={12} /> <TranslatableText>Cidade</TranslatableText>
                     </label>
                     <Select
                         name="form_fields[cidade]"
@@ -234,7 +235,7 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
 
                 {submitError && (
                     <div className="p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold text-center border border-red-100">
-                        {submitError}
+                        <TranslatableText>{submitError}</TranslatableText>
                     </div>
                 )}
 
@@ -245,7 +246,7 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
                     className="w-full bg-slate-900 py-6 rounded-2xl text-white font-black uppercase tracking-widest hover:bg-vibrant-orange transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-vibrant-orange/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? <Loader2 className="animate-spin" /> : <Send size={20} />}
-                    {isSubmitting ? 'PROCESSANDO...' : 'ACESSAR AGORA'}
+                    {isSubmitting ? <TranslatableText>PROCESSANDO...</TranslatableText> : <TranslatableText>ACESSAR AGORA</TranslatableText>}
                 </button>
             </form>
         </motion.div>
@@ -325,14 +326,14 @@ const CatalogoPage: React.FC = () => {
                     className="mb-8 md:mb-16 text-center"
                 >
                     <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-slate-200 border border-slate-300 text-krenke-purple text-xs font-black uppercase tracking-[0.3em] mb-6">
-                        Mobiliário e Lazer
+                        <TranslatableText>Mobiliário e Lazer</TranslatableText>
                     </div>
                     <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 uppercase tracking-tighter mb-4 leading-none">
-                        Catálogo <br className="md:hidden" /><span className="text-vibrant-orange">Geral 2026</span>
+                        <TranslatableText>Catálogo</TranslatableText> <br className="md:hidden" /><span className="text-vibrant-orange"><TranslatableText>Geral 2026</TranslatableText></span>
                     </h1>
                     <p className="text-base md:text-lg text-slate-500 font-medium max-w-2xl mx-auto mb-8">
-                        Explore a linha completa de playgrounds e estruturas da Krenke.
-                        Projetados para inspirar aventuras e garantir a máxima segurança e durabilidade.
+                        <TranslatableText>Explore a linha completa de playgrounds e estruturas da Krenke.
+                        Projetados para inspirar aventuras e garantir a máxima segurança e durabilidade.</TranslatableText>
                     </p>
 
                     {!hasAccess && (
@@ -357,7 +358,7 @@ const CatalogoPage: React.FC = () => {
                                     loading={
                                         <div className="flex flex-col items-center gap-4 py-20">
                                             <div className="w-12 h-12 border-4 border-vibrant-orange border-t-transparent rounded-full animate-spin"></div>
-                                            <p className="text-gray-900 font-black tracking-widest uppercase">Carregando PDF...</p>
+                                            <p className="text-gray-900 font-black tracking-widest uppercase"><TranslatableText>Carregando PDF...</TranslatableText></p>
                                         </div>
                                     }
                                 >
@@ -401,14 +402,14 @@ const CatalogoPage: React.FC = () => {
                                 <div className="w-20 h-20 bg-orange-50 text-vibrant-orange rounded-3xl flex items-center justify-center mx-auto mb-6">
                                     <Download size={40} />
                                 </div>
-                                <h3 className="text-xl font-black text-gray-900 uppercase mb-2">Acesso Liberado!</h3>
-                                <p className="text-gray-500 font-medium mb-8">Clique no botão abaixo para baixar a versão completa em PDF.</p>
+                                <h3 className="text-xl font-black text-gray-900 uppercase mb-2"><TranslatableText>Acesso Liberado!</TranslatableText></h3>
+                                <p className="text-gray-500 font-medium mb-8"><TranslatableText>Clique no botão abaixo para baixar a versão completa em PDF.</TranslatableText></p>
                                 <button
                                     id="btn-catalog-download-mobile"
                                     onClick={handleDownload}
                                     className="w-full bg-vibrant-orange hover:bg-orange-500 text-white py-5 rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-vibrant-orange/20"
                                 >
-                                    Baixar PDF (16MB)
+                                    <TranslatableText>Baixar PDF (16MB)</TranslatableText>
                                 </button>
                             </div>
                         )}
@@ -420,7 +421,7 @@ const CatalogoPage: React.FC = () => {
                                     onClick={handleDownload}
                                     className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-slate-900 hover:bg-krenke-purple text-white rounded-full font-black uppercase text-xs tracking-widest shadow-xl transition-all"
                                 >
-                                    <Download size={18} /> Baixar PDF Completo
+                                    <Download size={18} /> <TranslatableText>Baixar PDF Completo</TranslatableText>
                                 </button>
                             </div>
                         )}
