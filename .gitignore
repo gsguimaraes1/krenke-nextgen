@@ -58,3 +58,6 @@ lpkrenke.html
 
 # n8n skills cache
 n8n-skills/
+
+.vercel
+.env*
