@@ -7,7 +7,7 @@ const MarketingPage: React.FC = () => {
         title="Relatório Marketing"
         width="100%"
         height="100%"
-        src="https://app.powerbi.com/view?r=eyJrIjoiM2JmNWFiOGEtYzc3MS00MGMxLWIzNzItZTkwZjJjOGJhMjU0IiwidCI6ImU1ZjY5ZGFiLTdkYWYtNGU1MS04MjdhLTEwNjkxOWE4ZjU5MCJ9"
+        src="https://app.powerbi.com/view?r=eyJrIjoiZWNiMWMxYTAtNjNmMi00MmJhLWJhMjctMjdjYTU2NzUwNzgxIiwidCI6ImU1ZjY5ZGFiLTdkYWYtNGU1MS04MjdhLTEwNjkxOWE4ZjU5MCJ9"
         frameBorder="0"
         allowFullScreen
         style={{ display: 'block', border: 'none' }}
