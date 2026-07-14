@@ -6,7 +6,7 @@ import heroVideo from '../assets/Home/videokrenke.mp4';
 import { WhatsAppWidget } from '../components/WhatsAppWidget';
 
 const LP_BASE = 'https://lp.krenke.com.br/wp-content/uploads/2026/04';
-const WA_NUMBER = '554733730693';
+const WA_NUMBER = '5547997680329';
 
 function getUTMs() {
   const p = new URLSearchParams(window.location.search);
@@ -712,11 +712,11 @@ export default function LpPage() {
                   </a>
                 </li>
                 <li>
-                  <a href="tel:4733730693"
+                  <a href="tel:47997680329"
                     className="flex items-center gap-3 text-white/90 hover:text-[#F39200] transition-colors group"
                   >
                     <Phone size={20} className="text-[#F39200] flex-shrink-0" />
-                    <span className="text-sm font-semibold">(47) 3373-0693</span>
+                    <span className="text-sm font-semibold">(47) 99768-0329</span>
                   </a>
                 </li>
                 <li>

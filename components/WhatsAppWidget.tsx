@@ -94,7 +94,7 @@ export const WhatsAppWidget: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const WHATSAPP_NUMBER = '554733730693';
+  const WHATSAPP_NUMBER = '5547997680329';
 
   const readCookie = (name: string) => {
     const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));

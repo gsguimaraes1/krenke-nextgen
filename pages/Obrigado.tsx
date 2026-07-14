@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, CheckCircle2 } from 'lucide-react';
 import logobranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
 
-const WA_NUMBER = '554733730693';
+const WA_NUMBER = '5547997680329';
 
 function gerarHash(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
