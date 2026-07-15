@@ -7,6 +7,7 @@ import { Product } from '../types';
 import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { TranslatableText } from '../components/TranslatableText';
+import { sanitizeHtml } from '../lib/sanitize';
 
 // High-performance image discovery via Vite Glob Import
 const allAssets = import.meta.glob('../assets/**/*', { eager: true, query: '?url', import: 'default' });
@@ -213,7 +214,7 @@ const ProductModal: React.FC<{
                 {product.specs ? (
                   <div
                     className="text-gray-700 leading-relaxed text-sm md:text-base tech-specs-container"
-                    dangerouslySetInnerHTML={{ __html: translatedSpecs || product.specs }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(translatedSpecs || product.specs) }}
                   />
                 ) : (
                   <div className="space-y-4">

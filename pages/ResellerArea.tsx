@@ -305,7 +305,11 @@ const ResellerArea: React.FC = () => {
   const handleSyncR2 = async () => {
     setIsSyncing(true);
     try {
-      const res = await fetch('/api/r2-sync', { method: 'POST' });
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/r2-sync', {
+        method: 'POST',
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+      });
       const text = await res.text();
       console.log('r2-sync raw response:', res.status, text);
       const data = text ? JSON.parse(text) : {};

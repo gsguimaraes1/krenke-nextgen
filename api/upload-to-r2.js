@@ -1,16 +1,23 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { setCors, getCallerRole } from './_utils.js';
 
 export const config = { api: { bodyParser: false } };
 
+const MAX_PUBLIC_CV = 5 * 1024 * 1024;   // 5MB — public job-application CVs
+const MAX_AUTHED = 25 * 1024 * 1024;     // 25MB — staff uploads
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  setCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
+    // Optional auth: staff (super/reseller) may upload anything; unauthenticated
+    // callers are limited to job-application CVs (see below).
+    const role = await getCallerRole(req);
+    const isStaff = role === 'super' || role === 'reseller';
+
     const { IncomingForm } = await import('formidable');
     const form = new IncomingForm();
 
@@ -26,6 +33,16 @@ export default async function handler(req, res) {
     const bucketParam = Array.isArray(fields.bucket) ? fields.bucket[0] : (fields.bucket || '');
 
     if (!file) return res.status(400).json({ error: 'No file provided' });
+
+    // Access control + size/type limits.
+    if (!isStaff) {
+      const isCv = folder === 'curriculos';
+      const isPdf = (file.mimetype || '') === 'application/pdf';
+      if (!isCv || !isPdf) return res.status(401).json({ error: 'Unauthorized' });
+      if ((file.size || 0) > MAX_PUBLIC_CV) return res.status(413).json({ error: 'Arquivo excede 5MB.' });
+    } else if ((file.size || 0) > MAX_AUTHED) {
+      return res.status(413).json({ error: 'Arquivo muito grande (máx. 25MB).' });
+    }
 
     const { readFileSync } = await import('fs');
 

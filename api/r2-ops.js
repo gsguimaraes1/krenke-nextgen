@@ -1,4 +1,5 @@
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { setCors, requireRole } from './_utils.js';
 
 const r2 = () =>
   new S3Client({
@@ -11,11 +12,12 @@ const r2 = () =>
   });
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  setCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Destructive: only super admins may delete objects.
+  if (!(await requireRole(req, res, ['super']))) return;
 
   const { action, key, bucket: bucketParam } = req.body;
   const bucket = bucketParam || process.env.VITE_R2_BUCKET || 'revendedor';

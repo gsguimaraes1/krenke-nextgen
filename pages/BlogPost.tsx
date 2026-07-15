@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Calendar, User, ArrowLeft, Facebook, Twitter, Linkedin, Link as LinkIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
+import { sanitizeHtml } from '../lib/sanitize';
 
 interface Post {
     id: string;
@@ -115,7 +116,7 @@ const BlogPostPage: React.FC = () => {
 
                     <div
                         className="prose prose-lg max-w-none prose-headings:text-krenke-blue prose-headings:font-black prose-p:text-gray-600 prose-img:rounded-3xl prose-a:text-krenke-orange font-medium"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
                     />
 
                     <div className="mt-20 pt-12 border-t border-gray-200">

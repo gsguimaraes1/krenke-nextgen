@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { Page } from '../types';
 import { Layout } from '../components/Layout';
 import { Preloader } from '../components/Preloader';
+import { sanitizeHtml } from '../lib/sanitize';
 
 export const DynamicPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -74,7 +75,7 @@ export const DynamicPage: React.FC = () => {
             
             <div 
               className="prose prose-lg max-w-none prose-headings:text-krenke-blue prose-a:text-krenke-orange prose-img:rounded-2xl space-y-6"
-              dangerouslySetInnerHTML={{ __html: page.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }}
             />
           </div>
         </div>
