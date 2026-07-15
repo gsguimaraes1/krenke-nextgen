@@ -108,7 +108,7 @@ export const Navbar: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col md:flex-row justify-center md:justify-between items-center text-[10px] md:text-sm text-white font-bold opacity-90 py-2 md:py-0 gap-2 md:gap-0">
           <div className="hidden md:flex items-center gap-8">
             <span id="nav-topbar-phone" className="flex items-center gap-2 hover:text-vibrant-orange transition-all cursor-default gtm-topbar-phone">
-              <Phone size={14} /> (47) 99768-0329
+              <Phone size={14} /> (47) 3373-0693
             </span>
             <span id="nav-topbar-email" className="flex items-center gap-2 hover:text-vibrant-orange transition-all cursor-default gtm-topbar-email">
               <Mail size={14} /> comercial06@krenke.com.br
@@ -476,7 +476,7 @@ export const Footer: React.FC = () => {
             <h4 className="text-vibrant-orange font-black uppercase tracking-[0.2em] text-sm mb-10">Contato Direto</h4>
             <div className="space-y-6">
               {[
-                { Icon: Phone, text: "(47) 99768-0329", sub: "Matriz - Santa Catarina" },
+                { Icon: Phone, text: "(47) 3373-0693", sub: "Matriz - Santa Catarina" },
                 { Icon: Phone, text: "(81) 99831-2244", sub: "Filial - Nordeste" },
                 { Icon: Mail, text: "comercial06@krenke.com.br", sub: "Suporte e Dúvidas" },
                 { Icon: MapPin, text: "Guaramirim, SC", sub: "Sede de Produção" },
