@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const CHATWOOT_BASE_URL = 'https://krenke-chatwoot.0yc0it.easypanel.host';
+const CHATWOOT_BASE_URL = 'https://chat.krenke.com.br';
 const CHATWOOT_WEBSITE_TOKEN = 'k2GmRoCSCsWrh7rggpX7wxkr';
 
 export const ChatwootWidget: React.FC = () => {
@@ -9,7 +9,7 @@ export const ChatwootWidget: React.FC = () => {
 
     (window as any).chatwootSettings = {
       position: 'right',
-      type: 'expanded_bubble',
+      type: 'standard',
       launcherTitle: '',
     };
 
