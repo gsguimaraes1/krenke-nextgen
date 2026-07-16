@@ -28,6 +28,7 @@ const ObrigadoPage = React.lazy(() => import('./pages/Obrigado'));
 const CareersPage = React.lazy(() => import('./pages/Careers'));
 const ObrigadoCurriculoPage = React.lazy(() => import('./pages/ObrigadoCurriculo'));
 const MarketingPage = React.lazy(() => import('./pages/Marketing'));
+const RelatorioPage = React.lazy(() => import('./pages/Relatorio'));
 
 import { captureUTMs } from './lib/utm-tracker';
 import { Analytics } from "@vercel/analytics/react";
@@ -92,6 +93,20 @@ const App: React.FC = () => {
             <Route path="/marketing" element={
               <ProtectedRoute allowedRoles={['super', 'mkt']}>
                 <MarketingPage />
+              </ProtectedRoute>
+            } />
+
+            {/* Relatório - restricted to a hardcoded super admin allowlist, not just role */}
+            <Route path="/relatorio" element={
+              <ProtectedRoute
+                allowedRoles={['super']}
+                allowedUserIds={[
+                  'be2d8c0a-6b59-4158-ba51-7a2e8b5dfc17',
+                  'd19952b5-151c-4943-bf74-1a07b199ba75',
+                  '1757670c-5ab0-4642-82b3-9acdbfa14701',
+                ]}
+              >
+                <RelatorioPage />
               </ProtectedRoute>
             } />
 

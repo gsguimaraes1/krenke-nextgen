@@ -5,9 +5,11 @@ import { useAuth, UserRole } from '../context/AuthContext';
 interface ProtectedRouteProps {
     children: React.ReactNode;
     allowedRoles?: UserRole[];
+    // Extra hardcoded gate on top of role — for pages restricted to specific accounts only.
+    allowedUserIds?: string[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles, allowedUserIds }) => {
     const { user, role, loading } = useAuth();
     const location = useLocation();
 
@@ -25,6 +27,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 
     if (allowedRoles && role && !allowedRoles.includes(role)) {
         // If they are logged in but don't have the right role, send to home
+        return <Navigate to="/" replace />;
+    }
+
+    if (allowedUserIds && !allowedUserIds.includes(user.id)) {
         return <Navigate to="/" replace />;
     }
 
