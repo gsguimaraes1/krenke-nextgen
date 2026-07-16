@@ -7,7 +7,7 @@ import logoMarcaBranco from '../assets/Logos/krenke-marca-playgrounds-branco.web
 import { CookieConsent } from './CookieConsent';
 import { SecurityGuard } from './SecurityGuard';
 import { ScriptInjector } from './ScriptInjector';
-import { WhatsAppWidget } from './WhatsAppWidget';
+import { ChatwootWidget } from './ChatwootWidget';
 import { supabase } from '../lib/supabase';
 import { NavItem } from '../types';
 import { useTranslation } from 'react-i18next';
@@ -530,7 +530,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       <main className="flex-grow pt-20 overflow-x-hidden">
         {children}
       </main>
-      <WhatsAppWidget />
+      <ChatwootWidget />
       {location.pathname === '/' && <MapSection />}
       <Footer />
       <CookieConsent />
