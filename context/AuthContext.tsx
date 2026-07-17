@@ -24,8 +24,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    const SUPER_ADMIN_EMAIL = 'gabriel.gbr.fire@gmail.com';
-
     const fetchProfile = async (userId: string) => {
         if (!supabase) return null;
         try {
@@ -69,7 +67,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             if (!profileData) {
-                setRole(currentUser.email === SUPER_ADMIN_EMAIL ? 'super' : 'restricted');
+                // Sem perfil = sem papel. Autorização real vive no RLS/servidor;
+                // nunca atribuir papel no cliente.
+                setRole(null);
             }
         } else {
             setRole(null);
