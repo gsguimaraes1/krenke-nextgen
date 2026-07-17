@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Search, Loader2, Send, Plus } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
+import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { supabase } from '../lib/supabase';
 import { Product } from '../types';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
@@ -43,8 +45,12 @@ const CustomPhoneInput = React.forwardRef<HTMLInputElement, any>((props, ref) =>
   />
 ));
 
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
+
 const QuoteForm: React.FC = () => {
   const navigate = useNavigate();
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>(() => {
     try {
@@ -65,6 +71,11 @@ const QuoteForm: React.FC = () => {
   }, [selectedProducts]);
 
   const [searchTerm, setSearchTerm] = useState('');
+  // Mobile: a lista completa fica atrás de "ver todos" para evitar scroll
+  // aninhado (lista rolável dentro da página rolável). Desktop mantém o
+  // scroll interno de 400px.
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const MOBILE_VISIBLE_PRODUCTS = 8;
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState('');
@@ -75,7 +86,6 @@ const QuoteForm: React.FC = () => {
   const [phone, setPhone] = useState<string | undefined>('');
   const [segment, setSegment] = useState<string>('');
   const [otherSegment, setOtherSegment] = useState<string>('');
-  const [siteSettings, setSiteSettings] = useState<any[]>([]);
   const [utms, setUtms] = useState<any>({});
   const [clientType, setClientType] = useState<string>('');
   const [nameInput, setNameInput] = useState('');
@@ -105,22 +115,10 @@ const QuoteForm: React.FC = () => {
   useEffect(() => {
     const fetchConfigs = async () => {
       try {
-        // Fetch products, cities and site settings in parallel
-        const [productsRes, settingsRes] = await Promise.all([
-          supabase.from('products').select('*').order('name', { ascending: true }),
-          supabase.from('site_settings').select('*')
-        ]);
-
-        // Handle Products
+        const productsRes = await supabase.from('products').select('*').order('name', { ascending: true });
         if (!productsRes.error) {
           setProducts(productsRes.data || []);
         }
-
-        // Handle Settings (Webhooks)
-        if (!settingsRes.error && settingsRes.data) {
-          setSiteSettings(settingsRes.data);
-        }
-
       } catch (err) {
         console.error('Error fetching initial data:', err);
         setProducts([]);
@@ -227,8 +225,17 @@ const QuoteForm: React.FC = () => {
       writeCookie('ck_cidade', city);
       writeCookie('ck_estado', uf);
 
-      const { error } = await supabase.from('leads').insert([data]);
-      if (error) throw error;
+      // Server-side submission: Turnstile verification, insert and webhook
+      // dispatch all happen in /api/submit-lead (service role).
+      const resp = await fetch('/api/submit-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ captchaToken, lead: data }),
+      });
+      if (!resp.ok) {
+        const j = await resp.json().catch(() => ({} as any));
+        throw new Error(j.error || 'Erro ao enviar. Tente novamente.');
+      }
 
       /* GTM evento lead_orcamento — desativado
       (window as any).dataLayer = (window as any).dataLayer || [];
@@ -252,40 +259,6 @@ const QuoteForm: React.FC = () => {
       setSubmitSuccess(true);
       navigate('/obrigado');
 
-      // SEND TO WEBHOOK
-      const mode = siteSettings.find(s => s.key === 'webhook_mode')?.value || 'test';
-      const webhookUrl = mode === 'prod'
-        ? siteSettings.find(s => s.key === 'webhook_prod_url')?.value
-        : siteSettings.find(s => s.key === 'webhook_test_url')?.value;
-
-      if (webhookUrl) {
-        fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            form_type: 'orcamento',
-            name: data.name,
-            email: data.email,
-            phone: data.phone,
-            client_type: data.client_type,
-            segment: data.segment,
-            message: data.message,
-            products: Array.isArray(data.products) ? data.products.join(', ') : '',
-            city: city,
-            state: uf,
-            city_full: city ? `${city} - ${uf}` : '',
-            source: 'Site Krenke - Orçamento',
-            submitted_at: new Date().toISOString(),
-            utm_source: data.utm_source || '',
-            utm_medium: data.utm_medium || '',
-            utm_campaign: data.utm_campaign || '',
-            utm_term: data.utm_term || '',
-            utm_content: data.utm_content || '',
-            utm_id: (data as any).utm_id || '',
-          })
-        }).catch(e => console.error('Webhook error:', e));
-      }
-
       setSelectedProducts([]);
       localStorage.removeItem('krenke_quote_cart');
       setPhone('');
@@ -299,6 +272,8 @@ const QuoteForm: React.FC = () => {
       setUf('');
       setCity('');
       setCities([]);
+      setCaptchaToken(null);
+      turnstileRef.current?.reset();
       (e.target as HTMLFormElement).reset();
 
       // Clear success message after 5 seconds
@@ -518,7 +493,7 @@ const QuoteForm: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar p-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:max-h-[400px] md:overflow-y-auto md:pr-2 custom-scrollbar p-1">
                 <AnimatePresence>
                   {filteredProducts.some(p => selectedProducts.includes(p.id)) && (
                     <motion.div
@@ -568,7 +543,7 @@ const QuoteForm: React.FC = () => {
                       <div className="flex-1 h-px bg-slate-100" />
                     </motion.div>
                   )}
-                  {filteredProducts.filter(p => !selectedProducts.includes(p.id)).map(product => (
+                  {filteredProducts.filter(p => !selectedProducts.includes(p.id)).map((product, idx) => (
                     <motion.div
                       key={product.id}
                       id={`form-quote-product-card-${product.id}`}
@@ -576,7 +551,7 @@ const QuoteForm: React.FC = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       onClick={() => toggleProduct(product.id)}
-                      className="relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 bg-white border-slate-100 hover:border-slate-200 shadow-sm"
+                      className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer items-center gap-4 bg-white border-slate-100 hover:border-slate-200 shadow-sm ${!showAllProducts && idx >= MOBILE_VISIBLE_PRODUCTS ? 'hidden md:flex' : 'flex'}`}
                     >
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-slate-50 text-slate-300">
                         <Plus size={20} />
@@ -591,6 +566,17 @@ const QuoteForm: React.FC = () => {
                     </motion.div>
                   ))}
                 </AnimatePresence>
+
+                {/* Mobile: expandir lista inline em vez de scroll aninhado */}
+                {!showAllProducts && filteredProducts.filter(p => !selectedProducts.includes(p.id)).length > MOBILE_VISIBLE_PRODUCTS && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllProducts(true)}
+                    className="md:hidden col-span-full py-4 rounded-2xl border-2 border-dashed border-slate-200 text-gray-500 font-black text-xs uppercase tracking-widest hover:border-vibrant-orange hover:text-vibrant-orange transition-all"
+                  >
+                    <TranslatableText>Ver todos os produtos</TranslatableText> (+{filteredProducts.filter(p => !selectedProducts.includes(p.id)).length - MOBILE_VISIBLE_PRODUCTS})
+                  </button>
+                )}
               </div>
             </div>
 
@@ -607,6 +593,15 @@ const QuoteForm: React.FC = () => {
                 required
               ></textarea>
             </div>
+
+            {/* Turnstile invisible CAPTCHA — token verified server-side in /api/submit-lead */}
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={TURNSTILE_SITE_KEY}
+              onSuccess={(token) => setCaptchaToken(token)}
+              onExpire={() => { setCaptchaToken(null); turnstileRef.current?.reset(); }}
+              options={{ size: 'flexible' }}
+            />
 
             <button
               type="submit"

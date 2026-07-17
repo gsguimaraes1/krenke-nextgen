@@ -25,6 +25,38 @@ export function supabaseAdmin() {
   );
 }
 
+// Verify a Cloudflare Turnstile token server-side.
+// - No TURNSTILE_SECRET_KEY configured → skip (allows deploy before env setup).
+// - Missing/invalid token → false.
+// - Network error reaching siteverify → allow (availability of the lead form
+//   outweighs the marginal risk of a Cloudflare outage window).
+export async function verifyTurnstile(token, ip) {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    console.warn('TURNSTILE_SECRET_KEY not set — skipping captcha verification');
+    return true;
+  }
+  if (!token) return false;
+  try {
+    const body = new URLSearchParams({ secret, response: token });
+    if (ip) body.set('remoteip', ip);
+    const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+    const data = await r.json();
+    return !!data.success;
+  } catch (err) {
+    console.error('Turnstile siteverify unreachable:', err);
+    return true;
+  }
+}
+
+export function callerIp(req) {
+  return (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || undefined;
+}
+
 // Resolve the caller's role from the Bearer token, or null if unauthenticated.
 export async function getCallerRole(req) {
   const authHeader = req.headers.authorization;

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, Send, Paperclip, X } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { supabase } from '../lib/supabase';
+import { Turnstile } from '@marsidev/react-turnstile';
+import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { getStoredUTMs } from '../lib/utm-tracker';
 import { uploadToR2 } from '../lib/r2-upload';
 import { useNavigate } from 'react-router-dom';
@@ -43,8 +44,12 @@ interface Props {
   preselectedOpening?: JobOpening | null;
 }
 
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
+
 const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) => {
   const navigate = useNavigate();
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -158,33 +163,30 @@ const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) =
         utm_id: utms.utm_id || null,
       };
 
-      const { error: insertError } = await supabase.from('job_applications').insert([payload]);
-      if (insertError) {
-        if (insertError.code === '23505') {
-          throw new Error('Você já enviou uma candidatura para esta vaga. Aguarde nosso contato!');
-        }
-        throw new Error(insertError.message);
-      }
-
-      const webhookPayload = {
-        ...payload,
-        form_type: 'trabalhe-conosco',
-        source: 'Site Krenke - Trabalhe Conosco',
-        submitted_at: new Date().toISOString(),
-        city_full: `${city} - ${uf}`,
-        opening_title: selectedOpening?.title || null,
-        contract_types: selectedOpening?.contract_types || [],
-      };
-
-      fetch('https://n8n.krenke.com.br/webhook/trabalhe-conosco', {
+      // Server-side submission: Turnstile verification, insert and webhook
+      // dispatch all happen in /api/submit-application (service role).
+      const resp = await fetch('/api/submit-application', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(webhookPayload),
-      }).catch(() => {});
+        body: JSON.stringify({
+          captchaToken,
+          application: {
+            ...payload,
+            opening_title: selectedOpening?.title || null,
+            contract_types: selectedOpening?.contract_types || [],
+          },
+        }),
+      });
+      if (!resp.ok) {
+        const j = await resp.json().catch(() => ({} as any));
+        throw new Error(j.error || 'Erro ao enviar candidatura. Tente novamente.');
+      }
 
       navigate('/obrigado-curriculo');
-    } catch {
-      setSubmitError('Erro ao enviar candidatura. Tente novamente.');
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Erro ao enviar candidatura. Tente novamente.');
+      setCaptchaToken(null);
+      turnstileRef.current?.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -419,6 +421,15 @@ const JobApplicationForm: React.FC<Props> = ({ openings, preselectedOpening }) =
           {submitError}
         </motion.p>
       )}
+
+      {/* Turnstile invisible CAPTCHA — token verified server-side in /api/submit-application */}
+      <Turnstile
+        ref={turnstileRef}
+        siteKey={TURNSTILE_SITE_KEY}
+        onSuccess={(token) => setCaptchaToken(token)}
+        onExpire={() => { setCaptchaToken(null); turnstileRef.current?.reset(); }}
+        options={{ size: 'flexible' }}
+      />
 
       <button
         type="submit"
