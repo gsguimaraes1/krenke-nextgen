@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 const CHATWOOT_BASE_URL = 'https://chat.krenke.com.br';
-const CHATWOOT_WEBSITE_TOKEN = 'k2GmRoCSCsWrh7rggpX7wxkr';
+const CHATWOOT_WEBSITE_TOKEN = 'n5ddhwiakZVWGo7S7Acwb3kv';
 
 export const ChatwootWidget: React.FC = () => {
   useEffect(() => {
@@ -9,8 +9,8 @@ export const ChatwootWidget: React.FC = () => {
 
     (window as any).chatwootSettings = {
       position: 'right',
-      type: 'standard',
-      launcherTitle: '',
+      type: 'expanded_bubble',
+      launcherTitle: 'Fale conosco via Chat',
     };
 
     const script = document.createElement('script');
