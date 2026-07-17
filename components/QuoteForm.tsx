@@ -164,6 +164,7 @@ const QuoteForm: React.FC = () => {
       products: selectedProducts.map(id => products.find(p => p.id === id)?.name || id),
       source: 'Site Krenke - Orçamento',
       submitted_at: new Date().toISOString(),
+      page_url: window.location.href,
       ...utms
     };
 

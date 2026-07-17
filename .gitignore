@@ -64,3 +64,6 @@ n8n-skills/
 
 # Python junk (nunca deveria estar versionado)
 lib/site-packages/
+
+# Goalfy: docs/scripts locais contêm token de API — nunca versionar
+goalfy/

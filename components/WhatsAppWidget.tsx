@@ -139,6 +139,7 @@ export const WhatsAppWidget: React.FC = () => {
       message: message.trim(),
       source: 'WhatsApp Widget',
       submitted_at: new Date().toISOString(),
+      page_url: window.location.href,
       ...utms
     };
 

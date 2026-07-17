@@ -109,6 +109,7 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
                 email,
                 phone,
                 city: selectedCity.value,
+                page_url: window.location.href,
                 ...utms
             };
 
