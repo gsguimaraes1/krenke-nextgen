@@ -61,3 +61,6 @@ n8n-skills/
 
 .vercel
 .env*
+
+# Python junk (nunca deveria estar versionado)
+lib/site-packages/
