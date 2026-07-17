@@ -65,7 +65,13 @@ const PRODUCTS = [
   { id: 'toboga-especial', images: ['https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/toboga-especial/krenke-playground-TOBOGA%20ESPECIAL%20-%201.webp','https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/toboga-especial/krenke-playground-TOBOGA%20ESPECIAL%20-%202.webp','https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/toboga-especial/krenke-playground-TOBOGA%20ESPECIAL%20-%203.webp'], image: 'https://zuzdocsznwqgprjzxtbk.supabase.co/storage/v1/object/public/products/toboga-especial/krenke-playground-TOBOGA%20ESPECIAL%20-%201.webp' },
 ];
 
-const OLD_SERVICE_ROLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1emRvY3N6bndxZ3Byanp4dGJrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTAzMjY0NywiZXhwIjoyMDg0NjA4NjQ3fQ.OoCshbVhrDvNHiymao1Qcg0pQcV-G-ZQDIUXriDZ6Io';
+// Chave do projeto ANTIGO (zuzdocsznwqgprjzxtbk). Nunca commitar o valor:
+// exportar OLD_SUPABASE_SERVICE_ROLE_KEY no ambiente antes de rodar.
+const OLD_SERVICE_ROLE = process.env.OLD_SUPABASE_SERVICE_ROLE_KEY;
+if (!OLD_SERVICE_ROLE) {
+  console.error('Defina OLD_SUPABASE_SERVICE_ROLE_KEY no ambiente para rodar este script.');
+  process.exit(1);
+}
 
 function toAuthenticatedUrl(url) {
   return url.replace('/storage/v1/object/public/', '/storage/v1/object/authenticated/');
