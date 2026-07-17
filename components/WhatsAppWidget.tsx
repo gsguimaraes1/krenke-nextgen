@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Clock } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { Turnstile } from '@marsidev/react-turnstile';
+import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { getStoredUTMs } from '../lib/utm-tracker';
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
 
 const STATES = [
   { uf: 'AC', name: 'Acre' }, { uf: 'AL', name: 'Alagoas' }, { uf: 'AP', name: 'Amapá' },
@@ -32,7 +35,8 @@ export const WhatsAppWidget: React.FC = () => {
   const [otherSegment, setOtherSegment] = useState('');
   const [message, setMessage] = useState('');
   const [isOffline, setIsOffline] = useState(false);
-  const [siteSettings, setSiteSettings] = useState<any[]>([]);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const [uf, setUf] = useState('');
   const [city, setCity] = useState('');
   const [cities, setCities] = useState<string[]>([]);
@@ -45,14 +49,6 @@ export const WhatsAppWidget: React.FC = () => {
     if (v.length > 2) return v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
     return v.length ? `(${v}` : v;
   }
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      const { data } = await supabase.from('site_settings').select('*');
-      if (data) setSiteSettings(data);
-    };
-    fetchSettings();
-  }, []);
 
   useEffect(() => {
     if (!uf) { setCities([]); setCity(''); return; }
@@ -146,10 +142,13 @@ export const WhatsAppWidget: React.FC = () => {
       ...utms
     };
 
-    // 1. Save to Supabase (fire-and-forget)
-    supabase.from('leads').insert([leadData]).then(({ error }) => {
-      if (error) console.error('Supabase lead error:', error);
-    });
+    // 1. Save via server endpoint (fire-and-forget) — Turnstile verification,
+    // insert and webhook dispatch all happen in /api/submit-lead.
+    fetch('/api/submit-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ captchaToken, form_type: 'whatsapp', lead: leadData }),
+    }).catch(e => console.error('Lead submit error:', e));
 
     /* GTM evento lead_whatsapp — desativado
     const phoneRaw = phone.trim().replace(/\D/g, '');
@@ -170,42 +169,6 @@ export const WhatsAppWidget: React.FC = () => {
       lead_state: geoState,
     });
     */
-
-    // 2. Send to Webhook
-    const mode = siteSettings.find(s => s.key === 'webhook_mode')?.value || 'test';
-    const webhookUrl = mode === 'prod'
-      ? siteSettings.find(s => s.key === 'webhook_prod_url')?.value
-      : siteSettings.find(s => s.key === 'webhook_test_url')?.value;
-
-    if (webhookUrl) {
-      fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          form_type: 'whatsapp',
-          //form_id: 'wa_widget_react',
-          form_name: 'WhatsApp Widget Site Principal',
-          name: leadData.name,
-          email: leadData.email,
-          phone: leadData.phone,
-          city: geoCity,
-          state: geoState,
-          city_full: geoCity ? `${geoCity} - ${geoState}` : '',
-          client_type: leadData.client_type,
-          segment: leadData.segment,
-          message: leadData.message,
-          products: '',
-          source: 'WhatsApp Widget',
-          submitted_at: leadData.submitted_at,
-          utm_source: (leadData as any).utm_source || '',
-          utm_medium: (leadData as any).utm_medium || '',
-          utm_campaign: (leadData as any).utm_campaign || '',
-          utm_term: (leadData as any).utm_term || '',
-          utm_content: (leadData as any).utm_content || '',
-          utm_id: (leadData as any).utm_id || '',
-        })
-      }).catch(e => console.error('Webhook error:', e));
-    }
 
     let finalMessage = `Olá, me chamo ${name}.`;
     if (finalSegmentLabel) finalMessage += ` Sou do segmento de ${finalSegmentLabel}.`;
@@ -415,6 +378,15 @@ export const WhatsAppWidget: React.FC = () => {
                   className="w-full bg-slate-50 border-2 border-transparent focus:border-[#25D366] px-4 py-2.5 rounded-xl font-bold text-sm text-gray-900 outline-none transition-all resize-none placeholder:text-gray-400 custom-scrollbar"
                 ></textarea>
               </div>
+
+              {/* Turnstile invisible CAPTCHA — token verified server-side in /api/submit-lead */}
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onExpire={() => { setCaptchaToken(null); turnstileRef.current?.reset(); }}
+                options={{ size: 'flexible' }}
+              />
 
               <button
                 type="submit"

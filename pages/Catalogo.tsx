@@ -8,9 +8,12 @@ import { X, Send, Loader2, Phone, MapPin, User, Download, Mail } from 'lucide-re
 import Select from 'react-select';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { supabase } from '../lib/supabase';
 import { getStoredUTMs } from '../lib/utm-tracker';
 import { TranslatableText } from '../components/TranslatableText';
+import { Turnstile } from '@marsidev/react-turnstile';
+import type { TurnstileInstance } from '@marsidev/react-turnstile';
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
 
 
 // Configuração necessária para o PDF.js funcionar (CDN da Mozilla)
@@ -37,7 +40,8 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [utms, setUtms] = useState<any>({});
-    const [siteSettings, setSiteSettings] = useState<any[]>([]);
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const turnstileRef = React.useRef<TurnstileInstance>(null);
 
     useEffect(() => {
         setUtms(getStoredUTMs());
@@ -55,9 +59,6 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
                     };
                 });
                 setCities(formatted);
-
-                const { data: settingsData } = await supabase.from('site_settings').select('*');
-                if (settingsData) setSiteSettings(settingsData);
             } catch (err) {
                 console.error('Error fetching data:', err);
             }
@@ -108,25 +109,19 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
                 email,
                 phone,
                 city: selectedCity.value,
-                source: 'Acesso Catálogo 2026',
-                submitted_at: new Date().toISOString(),
                 ...utms
             };
 
-            const { error } = await supabase.from('leads').insert([leadData]);
-            if (error) throw error;
-
-            const mode = siteSettings.find(s => s.key === 'webhook_mode')?.value || 'test';
-            const webhookUrl = mode === 'prod'
-                ? siteSettings.find(s => s.key === 'webhook_prod_url')?.value
-                : siteSettings.find(s => s.key === 'webhook_test_url')?.value;
-
-            if (webhookUrl) {
-                fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...leadData, executionMode: mode })
-                }).catch(e => console.error('Webhook error:', e));
+            // Server-side submission: Turnstile verification, insert and webhook
+            // dispatch all happen in /api/submit-lead (service role).
+            const resp = await fetch('/api/submit-lead', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ captchaToken, form_type: 'catalogo', lead: leadData }),
+            });
+            if (!resp.ok) {
+                const j = await resp.json().catch(() => ({} as any));
+                throw new Error(j.error || 'Erro ao enviar. Tente novamente.');
             }
 
             localStorage.setItem('krenke_catalog_authorized', 'true');
@@ -238,6 +233,15 @@ const CatalogLeadForm: React.FC<{ onSuccess: () => void; pdfUrl: string }> = ({ 
                         <TranslatableText>{submitError}</TranslatableText>
                     </div>
                 )}
+
+                {/* Turnstile invisible CAPTCHA — token verified server-side in /api/submit-lead */}
+                <Turnstile
+                    ref={turnstileRef}
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onExpire={() => { setCaptchaToken(null); turnstileRef.current?.reset(); }}
+                    options={{ size: 'flexible' }}
+                />
 
                 <button
                     type="submit"
