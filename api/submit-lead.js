@@ -29,10 +29,24 @@ const GOALFY_FIELD = {
   utm_medium: 'e7961332-5835-4c04-b46b-73d3594fbd0f',
   utm_source: '6c077df9-eb40-4277-a136-b75946bc26fd',
   utm_keyword: '67ade46d-bf86-4468-bed9-4d244b7c55e2',
-  // Campo que o fluxo do Meta Ads preenche com "Facebook". Não aparece na
-  // listagem do board (pode ser lista com opções fixas) — enviado com retry:
-  // se a criação falhar, tenta de novo sem ele.
-  fonteLead: '35168640-800e-4d77-b307-9fb987254b04',
+  // Listas/selects do formulário "QL | Inb" (IDs do model do board):
+  fonteLead: '35168640-800e-4d77-b307-9fb987254b04',      // "Origem do Lead"
+  segmento: '2f882127-ab59-45c9-992a-c43ed72771b1',       // "Segmento" (list)
+  perfilCliente: 'd627b9bc-cad3-4a7e-a255-66fc9dff23fd',  // "Perfil do Cliente" (PJ/PF/PB)
+};
+
+// Valores do site → opções existentes das listas da Goalfy.
+// Valor sem mapeamento vai como veio (as listas aceitam valores novos).
+const SEGMENT_MAP = {
+  Condominio: 'Condomínio',
+  'Escola Privada': 'Escola privada',
+  Licitacao: 'Licitação',
+  Clinica: 'Hospital',
+};
+const CLIENT_TYPE_MAP = {
+  'Pessoa Física': 'PF',
+  'Pessoa Jurídica': 'PJ',
+  'Órgão Público': 'PB',
 };
 // Etiqueta "Site Novo Krenke", aplicada a todo card vindo do site.
 const GOALFY_TAG_ID = 'bdb07724-0899-437d-8cdf-f4fda7d88321';
@@ -44,11 +58,9 @@ async function createGoalfyCard(data, formType, pageUrl) {
     return;
   }
 
-  const messageParts = [];
-  if (data.client_type) messageParts.push(`Tipo de cliente: ${data.client_type}`);
-  if (data.segment) messageParts.push(`Segmento: ${data.segment}`);
-  if (data.message) messageParts.push(data.message);
   const sourceLabel = { orcamento: 'Site - Orçamento', catalogo: 'Site - Catálogo', whatsapp: 'Site - WhatsApp Widget' }[formType];
+  const messageParts = [`[${sourceLabel}]`];
+  if (data.message) messageParts.push(data.message);
 
   const push = (fields, key, value) => {
     if (value) fields.push({ value, fieldInfoId: GOALFY_FIELD[key] });
@@ -60,8 +72,10 @@ async function createGoalfyCard(data, formType, pageUrl) {
   push(baseFields, 'city', data.city);
   push(baseFields, 'state', data.state);
   push(baseFields, 'pageUrl', pageUrl);
-  push(baseFields, 'message', [`[${sourceLabel}]`, ...messageParts].join('\n'));
+  push(baseFields, 'message', messageParts.join('\n'));
   push(baseFields, 'modeloParque', data.products ? data.products.join(', ') : '');
+  push(baseFields, 'segmento', data.segment ? (SEGMENT_MAP[data.segment] || data.segment) : '');
+  push(baseFields, 'perfilCliente', data.client_type ? (CLIENT_TYPE_MAP[data.client_type] || data.client_type) : '');
   push(baseFields, 'utm_source', data.utm_source);
   push(baseFields, 'utm_medium', data.utm_medium);
   push(baseFields, 'utm_campaign', data.utm_campaign);
