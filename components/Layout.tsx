@@ -7,6 +7,7 @@ import logoMarcaBranco from '../assets/Logos/krenke-marca-playgrounds-branco.web
 import { CookieConsent } from './CookieConsent';
 import { SecurityGuard } from './SecurityGuard';
 import { ScriptInjector } from './ScriptInjector';
+import { ContactLauncher } from './ContactLauncher';
 import { ChatwootWidget } from './ChatwootWidget';
 import { supabase } from '../lib/supabase';
 import { NavItem } from '../types';
@@ -532,6 +533,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {children}
       </main>
       <ChatwootWidget />
+      <ContactLauncher />
       {location.pathname === '/' && <MapSection />}
       <Footer />
       <CookieConsent />

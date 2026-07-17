@@ -34,8 +34,10 @@ export const ChatwootWidget: React.FC = () => {
 
     (window as any).chatwootSettings = {
       position: 'right',
-      type: 'expanded_bubble',
+      type: 'standard',
       launcherTitle: 'Fale conosco via Chat',
+      // Bolha nativa oculta — a abertura é feita pelo ContactLauncher via $chatwoot.toggle('open').
+      hideMessageBubble: true,
     };
 
     if (!document.getElementById(SCRIPT_ID)) loadScript(0);
