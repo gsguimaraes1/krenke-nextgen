@@ -34,6 +34,8 @@ const GOALFY_FIELD = {
   // se a criação falhar, tenta de novo sem ele.
   fonteLead: '35168640-800e-4d77-b307-9fb987254b04',
 };
+// Etiqueta "Site Novo Krenke", aplicada a todo card vindo do site.
+const GOALFY_TAG_ID = 'bdb07724-0899-437d-8cdf-f4fda7d88321';
 
 async function createGoalfyCard(data, formType, pageUrl) {
   const token = process.env.GOALFY_TOKEN;
@@ -86,6 +88,23 @@ async function createGoalfyCard(data, formType, pageUrl) {
   if (!resp.ok) {
     const body = await resp.text().catch(() => '');
     throw new Error(`Goalfy card creation failed: ${resp.status} ${body.slice(0, 500)}`);
+  }
+
+  // Etiqueta o card criado. Falha aqui não invalida o card — só loga.
+  try {
+    const card = await resp.json();
+    if (card?.id) {
+      const tagResp = await fetch(`${GOALFY_API}/cards/${card.id}/addTag/${GOALFY_TAG_ID}`, {
+        method: 'POST',
+        headers: {
+          accept: 'application/json, text/plain, */*',
+          authorization: `Token ${token}`,
+        },
+      });
+      if (!tagResp.ok) console.warn(`Goalfy addTag failed: ${tagResp.status}`);
+    }
+  } catch (err) {
+    console.error('Goalfy addTag error:', err);
   }
 }
 
