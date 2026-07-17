@@ -450,16 +450,21 @@ const AuthPage: React.FC = () => {
 
           {/* Dot nav */}
           {LOGIN_IMAGES.length > 1 && (
-            <div className="flex gap-1.5">
+            <div className="flex">
               {LOGIN_IMAGES.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => { setImgIndex(i); setQuoteIndex(i % QUOTES.length); }}
-                  className={`h-1 rounded-full transition-all duration-300 ${
-                    i === imgIndex ? 'w-6 bg-krenke-orange' : 'w-1.5 bg-white/25 hover:bg-white/50'
-                  }`}
+                  // padding expande a área clicável; o span é o ponto visual
+                  className="group p-2.5 -my-2 focus:outline-none"
                   aria-label={`Imagem ${i + 1}`}
-                />
+                >
+                  <span
+                    className={`block h-1 rounded-full transition-all duration-300 ${
+                      i === imgIndex ? 'w-6 bg-krenke-orange' : 'w-1.5 bg-white/25 group-hover:bg-white/50'
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           )}

@@ -27,19 +27,20 @@ const LanguageSelector: React.FC<{ isMobile?: boolean }> = ({ isMobile }) => {
   return (
     <div className={`flex items-center gap-2 ${isMobile ? 'justify-center py-4 border-t border-white/10 mt-4' : ''}`}>
       {!isMobile && <span className="text-[10px] font-bold text-white/40 mr-1 uppercase">🌐</span>}
-      <div className="flex gap-2.5">
+      <div className="flex">
         {languages.map((lang) => (
           <button
             key={lang.code}
             id={`btn-lang-${lang.code}`}
             onClick={() => i18n.changeLanguage(lang.code)}
-            className={`group relative transition-all hover:scale-125 focus:outline-none ${i18n.language === lang.code ? 'scale-110 ring-2 ring-vibrant-orange rounded' : 'opacity-60 hover:opacity-100'}`}
+            // p-3 expande a área de toque para ≥44px sem mudar o tamanho da bandeira
+            className={`group relative p-3 transition-all hover:scale-125 focus:outline-none ${i18n.language === lang.code ? 'scale-110' : 'opacity-60 hover:opacity-100'}`}
             title={lang.label}
           >
             <img
               src={lang.flag}
               alt={lang.label}
-              className="w-7 h-5 object-cover rounded shadow-md border border-white/20 group-hover:border-krenke-orange language-flag"
+              className={`w-7 h-5 object-cover rounded shadow-md border border-white/20 group-hover:border-krenke-orange language-flag ${i18n.language === lang.code ? 'ring-2 ring-vibrant-orange' : ''}`}
             />
           </button>
         ))}
