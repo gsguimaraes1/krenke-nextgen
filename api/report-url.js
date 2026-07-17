@@ -10,7 +10,7 @@ const ALLOWED_USER_IDS = new Set([
 ]);
 
 const REPORTS = {
-  vendas: 'https://app.powerbi.com/view?r=eyJrIjoiMDliZWRjNTAtNzdlNS00OWJlLTlmZGUtY2NlZTMyOTJjNzgyIiwidCI6ImU1ZjY5ZGFiLTdkYWYtNGU1MS04MjdhLTEwNjkxOWE4ZjU5MCJ9',
+  vendas: 'https://app.powerbi.com/view?r=eyJrIjoiNzE3YzU5NWYtODBjOC00M2M4LWI4NTctOGMxMzBlNTQzMDdiIiwidCI6ImU1ZjY5ZGFiLTdkYWYtNGU1MS04MjdhLTEwNjkxOWE4ZjU5MCJ9',
 };
 
 export default async function handler(req, res) {
