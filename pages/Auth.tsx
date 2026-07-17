@@ -204,14 +204,17 @@ const AuthPage: React.FC = () => {
       return;
     }
 
-    if (!captchaToken) {
-      setError('Complete a verificação de segurança antes de entrar.');
-      return;
-    }
+    // TEMP: Turnstile desativado no login (captcha do Supabase também desligado).
+    // Reativar: descomentar o bloco abaixo + o <Turnstile> no JSX + restaurar o
+    // `options: { captchaToken }` no signInWithPassword.
+    // if (!captchaToken) {
+    //   setError('Complete a verificação de segurança antes de entrar.');
+    //   return;
+    // }
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken: captchaToken ?? undefined } });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       const { data: factors, error: mfaError } = await supabase.auth.mfa.listFactors();
       if (mfaError) throw mfaError;
@@ -381,14 +384,20 @@ const AuthPage: React.FC = () => {
                 </GlassInput>
               </div>
 
-              {/* Turnstile invisible CAPTCHA */}
+              {/* TEMP: Turnstile desativado — reativar descomentando este bloco.
               <Turnstile
                 ref={turnstileRef}
                 siteKey={TURNSTILE_SITE_KEY}
                 onSuccess={(token) => setCaptchaToken(token)}
                 onExpire={() => { setCaptchaToken(null); turnstileRef.current?.reset(); }}
-                options={{ size: 'flexible', theme: 'dark' }}
-              />
+                onError={(code) => {
+                  console.error('Turnstile error:', code);
+                  setCaptchaToken(null);
+                  setError('Falha na verificação de segurança. Recarregue a página e tente novamente.');
+                  turnstileRef.current?.reset();
+                }}
+                options={{ size: 'flexible', theme: 'dark', retry: 'auto', refreshExpired: 'auto' }}
+              /> */}
 
               {/* Submit */}
               <div className="animate-element animate-delay-500 pt-2">
