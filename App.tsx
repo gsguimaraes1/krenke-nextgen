@@ -24,6 +24,7 @@ const CatalogoPage = React.lazy(() => import('./pages/Catalogo'));
 const DynamicPage = React.lazy(() => import('./pages/DynamicPage'));
 const ResellerArea = React.lazy(() => import('./pages/ResellerArea'));
 const LpPage = React.lazy(() => import('./pages/Lp'));
+const LpAnimadaPage = React.lazy(() => import('./pages/LpAnimada'));
 const ObrigadoPage = React.lazy(() => import('./pages/Obrigado'));
 const CareersPage = React.lazy(() => import('./pages/Careers'));
 const ObrigadoCurriculoPage = React.lazy(() => import('./pages/ObrigadoCurriculo'));
@@ -84,6 +85,7 @@ const App: React.FC = () => {
 
             {/* Landing Page - no main layout */}
             <Route path="/lp" element={<LpPage />} />
+            <Route path="/lp-animada" element={<LpAnimadaPage />} />
 
             {/* Thank you pages - no main layout */}
             <Route path="/obrigado" element={<ObrigadoPage />} />

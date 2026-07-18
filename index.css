@@ -109,7 +109,8 @@
   html,
   body {
     max-width: 100vw;
-    overflow-x: hidden !important;
+    /* clip (não hidden): hidden cria scroll container e quebra position:sticky nos descendentes */
+    overflow-x: clip !important;
     position: relative;
     margin: 0;
     padding: 0;
@@ -146,7 +147,8 @@
 
   #root {
     width: 100%;
-    overflow-x: hidden !important;
+    /* clip (não hidden): hidden quebra position:sticky em toda a árvore */
+    overflow-x: clip !important;
   }
 
   /* Glassmorphism Classes */
@@ -181,6 +183,24 @@
   .language-flag {
     user-select: none;
     -webkit-user-drag: none;
+  }
+
+  /* LP Animada: fonte display + marquee da galeria */
+  .font-baloo {
+    font-family: 'Baloo 2', 'Nunito', sans-serif;
+  }
+  @keyframes lp-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .lp-marquee {
+    animation: lp-marquee 45s linear infinite;
+  }
+  .lp-marquee:hover {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lp-marquee { animation: none; }
   }
 
   /* Standards for Technical Tables (Admin) */
