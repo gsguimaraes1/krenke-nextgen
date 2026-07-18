@@ -109,11 +109,10 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
-- **[TEMP] Turnstile DESATIVADO no login** (`pages/Auth.tsx`, commit `c752443`, 2026-07-17):
-  gate + widget comentados com marcador `TEMP: Turnstile`; captcha do Supabase também desligado no
-  dashboard. Motivo: widget em estado de erro "Troubleshoot" em produção (site key/widget a diagnosticar —
-  clicar em "Troubleshoot" dá o código: `110100`=key inválida, `110200`=domínio). Reativar: descomentar
-  os dois blocos + restaurar `options:{captchaToken}` no `signInWithPassword`, corrigir a key, religar captcha no Supabase.
+- **Turnstile REATIVADO no login** (2026-07-18): gate + widget + `options:{captchaToken}` restaurados
+  em `pages/Auth.tsx` (o erro "Troubleshoot" sumiu — widget renderiza normal nos forms públicos).
+  **Falta (dashboard):** religar captcha no Supabase (Auth → Attack Protection → Turnstile, secret =
+  `TURNSTILE_SECRET_KEY`) — sem isso o token é enviado mas não verificado no auth.
 - **FK `profiles`→`auth.users`** mudada pra `ON DELETE CASCADE` (migration `profiles_fk_cascade_on_user_delete`,
   2026-07-17) — antes era `NO ACTION` e bloqueava deletar usuário ("Database error deleting user").
 - Não há `src/`: `App.tsx`, `index.tsx`, `pages/`, `components/`, `lib/`, `context/`, `api/` na raiz.

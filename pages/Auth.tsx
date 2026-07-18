@@ -204,17 +204,14 @@ const AuthPage: React.FC = () => {
       return;
     }
 
-    // TEMP: Turnstile desativado no login (captcha do Supabase também desligado).
-    // Reativar: descomentar o bloco abaixo + o <Turnstile> no JSX + restaurar o
-    // `options: { captchaToken }` no signInWithPassword.
-    // if (!captchaToken) {
-    //   setError('Complete a verificação de segurança antes de entrar.');
-    //   return;
-    // }
+    if (!captchaToken) {
+      setError('Complete a verificação de segurança antes de entrar.');
+      return;
+    }
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken: captchaToken ?? undefined } });
       if (error) throw error;
       const { data: factors, error: mfaError } = await supabase.auth.mfa.listFactors();
       if (mfaError) throw mfaError;
@@ -384,7 +381,6 @@ const AuthPage: React.FC = () => {
                 </GlassInput>
               </div>
 
-              {/* TEMP: Turnstile desativado — reativar descomentando este bloco.
               <Turnstile
                 ref={turnstileRef}
                 siteKey={TURNSTILE_SITE_KEY}
@@ -397,7 +393,7 @@ const AuthPage: React.FC = () => {
                   turnstileRef.current?.reset();
                 }}
                 options={{ size: 'flexible', theme: 'dark', retry: 'auto', refreshExpired: 'auto' }}
-              /> */}
+              />
 
               {/* Submit */}
               <div className="animate-element animate-delay-500 pt-2">
