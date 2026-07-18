@@ -56,6 +56,9 @@ lpkrenke.html
 .claude/
 .claude.json
 
+# Notas internas de sessão AI (auditorias/tarefas locais, não versionar)
+fable*
+
 # n8n skills cache
 n8n-skills/
 
