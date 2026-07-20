@@ -140,6 +140,38 @@ export interface CalculatorProduct {
   updated_at: string;
 }
 
+/** Item de orçamento persistido — snapshot textual, sem imagens. */
+export interface QuoteItem {
+  code: string;
+  description: string;
+  unit_price: number;
+  qty: number;
+}
+
+/**
+ * Orçamento salvo pela calculadora do revendedor (`orcamento_revendas`).
+ * Imagens do parque NÃO são persistidas — seguem sendo anexo local da sessão.
+ */
+export interface ResellerQuote {
+  id: string;
+  quote_number: string;
+  user_id: string;
+  reseller_name: string | null;
+  model_name: string | null;
+  client_name: string | null;
+  client_cnpj: string | null;
+  client_number: string | null;
+  margin: number;
+  items: QuoteItem[];
+  total_bruto: number;
+  total_ipi: number;
+  total_com_ipi: number;
+  use_full_disclaimer: boolean;
+  disclaimer_text: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface JobApplication {
   id: string;
   opening_id: string | null;

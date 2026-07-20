@@ -522,7 +522,11 @@ export const Footer: React.FC = () => {
   );
 };
 
-export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+/**
+ * `bare` remove os elementos voltados ao público (chats flutuantes, rodapé) —
+ * usado nas áreas internas logadas, como /revendedor.
+ */
+export const Layout: React.FC<{ children: React.ReactNode; bare?: boolean }> = ({ children, bare = false }) => {
   const location = useLocation();
   return (
     <div className="flex flex-col min-h-screen font-sans text-gray-900 overflow-x-hidden">
@@ -532,10 +536,14 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       <main className="flex-grow pt-20 overflow-x-hidden">
         {children}
       </main>
-      <ChatwootWidget />
-      <ContactLauncher />
-      {location.pathname === '/' && <MapSection />}
-      <Footer />
+      {!bare && (
+        <>
+          <ChatwootWidget />
+          <ContactLauncher />
+          {location.pathname === '/' && <MapSection />}
+          <Footer />
+        </>
+      )}
       <CookieConsent />
     </div>
   );

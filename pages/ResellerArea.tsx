@@ -34,11 +34,37 @@ import { uploadToR2, deleteFromR2 } from '../lib/r2-upload';
 import { useAuth } from '../context/AuthContext';
 import { ResellerFolder, ResellerFile, Profile } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { compressImage, IMAGE_CONFIGS } from '../lib/image-optimization';
+
+type ResellerTab = 'files' | 'profile' | 'calculator';
+
+// Cada aba tem sua própria URL: /revendedor/arquivos, /calculadora, /perfil
+const TAB_SLUGS: Record<ResellerTab, string> = {
+  files: 'arquivos',
+  calculator: 'calculadora',
+  profile: 'perfil',
+};
+const SLUG_TO_TAB: Record<string, ResellerTab> = {
+  arquivos: 'files',
+  calculadora: 'calculator',
+  perfil: 'profile',
+};
 
 const ResellerArea: React.FC = () => {
   const { user, profile: authProfile, refreshProfile, role, isSuperAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState<'files' | 'profile' | 'calculator'>('files');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const slug = location.pathname.replace(/^\/revendedor\/?/, '').split('/')[0];
+  const activeTab: ResellerTab = SLUG_TO_TAB[slug] ?? 'files';
+  const setActiveTab = (tab: ResellerTab) => navigate(`/revendedor/${TAB_SLUGS[tab]}`);
+
+  // /revendedor sem slug (ou slug inválido) → canoniza pra /revendedor/arquivos
+  useEffect(() => {
+    if (!SLUG_TO_TAB[slug]) navigate('/revendedor/arquivos', { replace: true });
+  }, [slug, navigate]);
+
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [folders, setFolders] = useState<ResellerFolder[]>([]);
   const [files, setFiles] = useState<ResellerFile[]>([]);
@@ -425,7 +451,7 @@ const ResellerArea: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 pt-20 pb-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">

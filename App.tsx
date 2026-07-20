@@ -125,9 +125,9 @@ const App: React.FC = () => {
             } />
 
             {/* Reseller Area Route */}
-            <Route path="/revendedor" element={
+            <Route path="/revendedor/*" element={
               <ProtectedRoute allowedRoles={['super', 'reseller']}>
-                <Layout>
+                <Layout bare>
                   <ResellerArea />
                 </Layout>
               </ProtectedRoute>

@@ -2,14 +2,16 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, FileDown, Trash2, Calculator, Package, AlertCircle,
   Plus, Edit2, Check, X, Loader2, ImagePlus, Image as ImageIcon,
-  User, FileText, ChevronDown, ChevronUp
+  User, FileText, ChevronDown, ChevronUp, History as HistoryIcon, FilePlus, Save
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
+import CreatableSelect from 'react-select/creatable';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { CalculatorProduct } from '../types';
+import { CalculatorProduct, QuoteItem, ResellerQuote } from '../types';
 
 const IPI_RATE = 0.065;
+const MAX_PARK_IMAGES = 5;
 const LOGO_URL = 'https://cdn.awsli.com.br/2185/2185627/arquivos/krenke-brinquedos-logo-branco-d__fogmt.webp';
 
 const DEFAULT_DISCLAIMER = 'Esta cotação é válida por 30 dias. Preços sujeitos a alteração sem aviso prévio. IPI conforme legislação vigente.\nKrenke Brinquedos Pedagógicos  •  www.krenke.com.br';
@@ -32,6 +34,9 @@ Guaramirim, ${today}`;
 }
 
 interface CartItem extends CalculatorProduct { qty: number }
+
+interface ModelOption { value: string; label: string }
+interface ModelGroup { label: string; options: ModelOption[] }
 
 function formatBRL(val: number): string {
   return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -76,8 +81,19 @@ const ProductCalculator: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [quoteNumber] = useState(generateQuoteNumber);
+  const [quoteNumber, setQuoteNumber] = useState(generateQuoteNumber);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+
+  // Orçamentos salvos (tabela orcamento_revendas)
+  const [savedQuotes, setSavedQuotes] = useState<ResellerQuote[]>([]);
+  const [quotesOpen, setQuotesOpen] = useState(false);
+  const [loadingQuotes, setLoadingQuotes] = useState(false);
+  const [savingQuote, setSavingQuote] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+
+  // Model name (dropdown com playgrounds do catálogo + texto livre)
+  const [modelName, setModelName] = useState('');
+  const [modelOptions, setModelOptions] = useState<ModelGroup[]>([]);
 
   // Client info
   const [clientName, setClientName] = useState('');
@@ -93,8 +109,8 @@ const ProductCalculator: React.FC = () => {
   const [useFullDisclaimer, setUseFullDisclaimer] = useState(false);
   const [disclaimerText, setDisclaimerText] = useState('');
 
-  // Park image attachment (not saved to DB)
-  const [parkImage, setParkImage] = useState<string | null>(null);
+  // Anexos de imagem do parque — SEMPRE locais à sessão, nunca vão pra tabela
+  const [parkImages, setParkImages] = useState<string[]>([]);
   const parkImageInputRef = useRef<HTMLInputElement>(null);
 
   // Admin CRUD state
@@ -122,7 +138,34 @@ const ProductCalculator: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadProducts(); }, []);
+  // Opções do dropdown de modelo: catálogo público, agrupado por categoria.
+  // Falha silenciosa — sem opções o campo continua aceitando texto livre.
+  const loadModelOptions = async () => {
+    try {
+      const { data, error: err } = await supabase
+        .from('products')
+        .select('name, category')
+        .order('name');
+      if (err) throw err;
+
+      const groups: Record<string, ModelOption[]> = {};
+      ((data || []) as { name: string | null; category: string | null }[]).forEach(p => {
+        if (!p.name) return;
+        const cat = p.category || 'Outros';
+        (groups[cat] ||= []).push({ value: p.name, label: p.name });
+      });
+
+      setModelOptions(
+        Object.entries(groups)
+          .sort(([a], [b]) => a.localeCompare(b, 'pt-BR'))
+          .map(([label, options]) => ({ label, options }))
+      );
+    } catch {
+      setModelOptions([]);
+    }
+  };
+
+  useEffect(() => { loadProducts(); loadModelOptions(); }, []);
 
   // Pre-fill disclaimer when toggled on or when profile loads
   useEffect(() => {
@@ -185,18 +228,34 @@ const ProductCalculator: React.FC = () => {
     }
   };
 
-  // ── Park image attachment ──────────────────────────
+  // ── Anexos de imagem (máx. 5, apenas locais — nunca persistidos) ──
   const handleParkImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!['image/png', 'image/jpeg'].includes(file.type)) {
-      alert('Apenas PNG ou JPG aceitos.');
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const valid = files.filter(f => ['image/png', 'image/jpeg'].includes(f.type));
+    if (valid.length < files.length) alert('Apenas PNG ou JPG aceitos — arquivos inválidos ignorados.');
+
+    const free = MAX_PARK_IMAGES - parkImages.length;
+    if (free <= 0) {
+      alert(`Limite de ${MAX_PARK_IMAGES} imagens atingido.`);
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => setParkImage(reader.result as string);
-    reader.readAsDataURL(file);
+    const toAdd = valid.slice(0, free);
+    if (valid.length > free) alert(`Só cabem mais ${free} imagem(ns) — o excedente foi ignorado.`);
+
+    Promise.all(toAdd.map(file => new Promise<string>(resolve => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(file);
+    }))).then(b64s => setParkImages(prev => [...prev, ...b64s].slice(0, MAX_PARK_IMAGES)));
+
+    // permite reanexar o mesmo arquivo depois de remover
+    if (parkImageInputRef.current) parkImageInputRef.current.value = '';
   };
+
+  const removeParkImage = (idx: number) =>
+    setParkImages(prev => prev.filter((_, i) => i !== idx));
 
   // ── PDF generation ─────────────────────────────────
   const generatePDF = async () => {
@@ -289,19 +348,20 @@ const ProductCalculator: React.FC = () => {
         clientBlockEndY = cy + 2;
       }
 
-      // ── Park image (right side, preserving aspect ratio)
+      // ── Primeira imagem no cabeçalho (as demais vão em grade no fim)
+      const [heroImage, ...extraImages] = parkImages;
       let imageEndY = 38;
-      if (parkImage) {
+      if (heroImage) {
         const maxW = 70;
         const maxH = 55;
-        const { w: natW, h: natH } = await getImageNaturalSize(parkImage);
+        const { w: natW, h: natH } = await getImageNaturalSize(heroImage);
         const ratio = natW / natH;
         let imgW = maxW;
         let imgH = imgW / ratio;
         if (imgH > maxH) { imgH = maxH; imgW = imgH * ratio; }
         const imgX = pageW - margin - maxW + (maxW - imgW) / 2;
         const imgY = 42;
-        doc.addImage(parkImage, imgX, imgY, imgW, imgH);
+        doc.addImage(heroImage, imgX, imgY, imgW, imgH);
         imageEndY = imgY + imgH + 4;
         doc.setFontSize(7);
         doc.setFont('helvetica', 'italic');
@@ -311,9 +371,9 @@ const ProductCalculator: React.FC = () => {
       }
 
       // ── Subtitle strip
-      const subtitleY = Math.max(clientBlockEndY, parkImage ? imageEndY : 40);
+      const subtitleY = Math.max(clientBlockEndY, heroImage ? imageEndY : 40);
       doc.setFillColor(240, 239, 248);
-      doc.rect(0, subtitleY - 2, parkImage ? pageW - margin - 74 : pageW, 10, 'F');
+      doc.rect(0, subtitleY - 2, heroImage ? pageW - margin - 74 : pageW, 10, 'F');
       doc.setTextColor(49, 39, 131);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
@@ -387,6 +447,38 @@ const ProductCalculator: React.FC = () => {
       doc.text(formatBRL(totalComIPI), margin + contentW - 1, y + 7.5, { align: 'right' });
       y += 17;
 
+      // ── Imagens de referência extras (grade 2 colunas)
+      if (extraImages.length > 0) {
+        if (y > 230) { doc.addPage(); y = 16; }
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(49, 39, 131);
+        doc.text('IMAGENS DE REFERÊNCIA', margin, y);
+        y += 6;
+
+        const cellW = (contentW - 6) / 2;   // 2 colunas + 6mm de gutter
+        const cellH = 48;
+        let col = 0;
+        let rowTopY = y;
+
+        for (const img of extraImages) {
+          if (col === 0 && rowTopY + cellH > 275) { doc.addPage(); rowTopY = 16; }
+
+          const { w: natW, h: natH } = await getImageNaturalSize(img);
+          const ratio = natW / natH;
+          let iw = cellW, ih = iw / ratio;
+          if (ih > cellH) { ih = cellH; iw = ih * ratio; }
+
+          const cellX = margin + col * (cellW + 6);
+          doc.addImage(img, cellX + (cellW - iw) / 2, rowTopY + (cellH - ih) / 2, iw, ih);
+
+          col++;
+          if (col === 2) { col = 0; rowTopY += cellH + 6; }
+        }
+        y = col === 0 ? rowTopY : rowTopY + cellH + 6;
+      }
+
       // ── Disclaimer
       if (y > 270) { doc.addPage(); y = 16; }
       const disclaimerLines = (useFullDisclaimer ? disclaimerText : DEFAULT_DISCLAIMER).split('\n');
@@ -416,6 +508,117 @@ const ProductCalculator: React.FC = () => {
     } finally {
       setGeneratingPDF(false);
     }
+  };
+
+  // ── Orçamentos salvos (orcamento_revendas) ─────────
+  // Nada de imagem aqui: a tabela guarda só dados do orçamento.
+  const loadSavedQuotes = async () => {
+    if (!user) return;
+    setLoadingQuotes(true);
+    try {
+      const { data, error: err } = await supabase
+        .from('orcamento_revendas')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(50);
+      if (err) throw err;
+      setSavedQuotes((data || []) as ResellerQuote[]);
+    } catch (e: any) {
+      alert('Erro ao carregar orçamentos: ' + e.message);
+    } finally {
+      setLoadingQuotes(false);
+    }
+  };
+
+  const handleSaveQuote = async () => {
+    if (!user || cart.length === 0) return;
+    setSavingQuote(true);
+    try {
+      const items: QuoteItem[] = cart.map(i => ({
+        code: i.code,
+        description: i.description,
+        unit_price: i.unit_price,
+        qty: i.qty,
+      }));
+
+      const { error: err } = await supabase
+        .from('orcamento_revendas')
+        .upsert({
+          quote_number: quoteNumber,
+          user_id: user.id,
+          reseller_name: profile?.full_name || user.email || null,
+          model_name: modelName || null,
+          client_name: clientName || null,
+          client_cnpj: clientCnpj || null,
+          client_number: clientNumber || null,
+          margin,
+          items,
+          total_bruto: totalBruto,
+          total_ipi: totalIPI,
+          total_com_ipi: totalComIPI,
+          use_full_disclaimer: useFullDisclaimer,
+          disclaimer_text: useFullDisclaimer ? disclaimerText : null,
+        }, { onConflict: 'quote_number' });
+      if (err) throw err;
+
+      setSavedAt(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+      await loadSavedQuotes();
+    } catch (e: any) {
+      alert('Erro ao salvar orçamento: ' + e.message);
+    } finally {
+      setSavingQuote(false);
+    }
+  };
+
+  /**
+   * Repõe o orçamento na calculadora. Itens são reconciliados por `code`
+   * contra a tabela atual — produto removido do catálogo é descartado, e o
+   * preço exibido passa a ser o preço atual, não o congelado.
+   */
+  const handleLoadQuote = (quote: ResellerQuote) => {
+    const byCode: Record<string, CalculatorProduct> = {};
+    products.forEach(p => { byCode[p.code] = p; });
+
+    const restored: CartItem[] = [];
+    const missing: string[] = [];
+    (quote.items || []).forEach(item => {
+      const product = byCode[item.code];
+      if (product) restored.push({ ...product, qty: item.qty });
+      else missing.push(item.code);
+    });
+
+    setQuoteNumber(quote.quote_number);
+    setModelName(quote.model_name || '');
+    setClientName(quote.client_name || '');
+    setClientCnpj(quote.client_cnpj || '');
+    setClientNumber(quote.client_number || '');
+    setMargin(Number(quote.margin) || 0);
+    setUseFullDisclaimer(quote.use_full_disclaimer);
+    if (quote.disclaimer_text) setDisclaimerText(quote.disclaimer_text);
+    setCart(restored);
+    setParkImages([]); // imagens não são persistidas — precisam ser reanexadas
+    setSavedAt(null);
+    setQuotesOpen(false);
+
+    if (missing.length > 0) {
+      alert(
+        `Orçamento carregado. ${missing.length} item(ns) não estão mais no catálogo e foram ignorados:\n` +
+        missing.join(', ')
+      );
+    }
+  };
+
+  const handleNewQuote = () => {
+    setQuoteNumber(generateQuoteNumber());
+    setCart([]);
+    setModelName('');
+    setClientName('');
+    setClientCnpj('');
+    setClientNumber('');
+    setMargin(0);
+    setParkImages([]);
+    setSavedAt(null);
+    setQuotesOpen(false);
   };
 
   // ── Admin: save edit ───────────────────────────────
@@ -482,20 +685,63 @@ const ProductCalculator: React.FC = () => {
     </div>
   );
 
-  const inputCls = 'w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#312783] transition-all';
+  const inputCls = 'w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#312783] transition-all';
+  const labelCls = 'text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block';
+
+  const modelSelectStyles = {
+    control: (base: any) => ({
+      ...base,
+      minHeight: '42px',
+      borderRadius: '0.75rem',
+      border: '1px solid #e2e8f0',
+      fontWeight: 700,
+      fontSize: '0.875rem',
+      boxShadow: 'none',
+      '&:hover': { borderColor: '#312783' },
+    }),
+    option: (base: any, state: any) => ({
+      ...base,
+      backgroundColor: state.isSelected ? '#312783' : state.isFocused ? '#f0eff8' : 'white',
+      color: state.isSelected ? 'white' : '#1e293b',
+      fontWeight: 700,
+      fontSize: '0.8125rem',
+    }),
+    groupHeading: (base: any) => ({
+      ...base,
+      color: '#312783',
+      fontWeight: 900,
+      fontSize: '0.6875rem',
+      letterSpacing: '0.05em',
+    }),
+    placeholder: (base: any) => ({ ...base, color: '#94a3b8', fontWeight: 700, fontSize: '0.875rem' }),
+    menuPortal: (base: any) => ({ ...base, zIndex: 60 }),
+  };
 
   return (
     <div className="space-y-8">
       {/* ── Top bar */}
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <div>
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+        <div className="min-w-0">
           <h2 className="text-2xl font-black text-[#312783]">Calculadora de Produtos</h2>
           <p className="text-slate-400 font-bold text-sm mt-1">
             Cotação: <span className="text-[#312783]">{quoteNumber}</span> • IPI {(IPI_RATE * 100).toFixed(1)}%
             {profile?.full_name && <span className="ml-2">• {profile.full_name}</span>}
+            {savedAt && <span className="ml-2 text-green-600">• salvo {savedAt}</span>}
           </p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          <button
+            onClick={() => { setQuotesOpen(true); loadSavedQuotes(); }}
+            className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-2xl font-bold text-sm hover:border-[#312783] hover:text-[#312783] transition-all shadow-sm"
+          >
+            <HistoryIcon size={16} /> Orçamentos
+          </button>
+          <button
+            onClick={handleNewQuote}
+            className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2.5 rounded-2xl font-bold text-sm hover:border-[#312783] hover:text-[#312783] transition-all shadow-sm"
+          >
+            <FilePlus size={16} /> Novo
+          </button>
           {isSuperAdmin && (
             <button
               onClick={() => { setAddingNew(true); setEditingId(null); }}
@@ -504,7 +750,7 @@ const ProductCalculator: React.FC = () => {
               <Plus size={16} /> Novo Produto
             </button>
           )}
-          <div className="relative flex-1 md:w-80">
+          <div className="relative flex-1 min-w-[220px] lg:w-80 lg:flex-none">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
               type="text"
@@ -517,17 +763,69 @@ const ProductCalculator: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      {/* ── Modal: orçamentos salvos */}
+      {quotesOpen && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setQuotesOpen(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-2">
+              <HistoryIcon size={18} className="text-[#312783]" />
+              <span className="font-black text-slate-700">Orçamentos salvos</span>
+              <button onClick={() => setQuotesOpen(false)} className="ml-auto p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto p-6">
+              {loadingQuotes ? (
+                <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[#312783]" size={32} /></div>
+              ) : savedQuotes.length === 0 ? (
+                <p className="text-center text-slate-400 font-bold py-16">Nenhum orçamento salvo ainda.</p>
+              ) : (
+                <div className="space-y-2">
+                  {savedQuotes.map(q => (
+                    <button
+                      key={q.id}
+                      onClick={() => handleLoadQuote(q)}
+                      className="w-full text-left flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-slate-100 px-4 py-3 hover:border-[#312783] hover:bg-slate-50 transition-all"
+                    >
+                      <span className="font-black text-[#312783] text-sm tabular-nums">{q.quote_number}</span>
+                      <span className="font-bold text-slate-700 text-sm min-w-0 flex-1 truncate">
+                        {q.model_name || q.client_name || '— sem identificação —'}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400 tabular-nums">
+                        {new Date(q.updated_at).toLocaleString('pt-BR', {
+                          day: '2-digit', month: '2-digit', year: '2-digit',
+                          hour: '2-digit', minute: '2-digit',
+                        })}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400 truncate max-w-[160px]">{q.reseller_name || '—'}</span>
+                      <span className="text-sm font-black text-slate-700 tabular-nums">{formatBRL(Number(q.total_com_ipi))}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50">
+              <p className="text-xs text-slate-400 font-bold">
+                Imagens não são armazenadas — ao carregar um orçamento, reanexe os arquivos antes de exportar o PDF.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* ── Product table */}
-        <div className="xl:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+        <div className="xl:col-span-7 xl:self-start bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
             <Package size={18} className="text-[#312783]" />
             <span className="font-black text-slate-700">Tabela de Produtos</span>
             <span className="ml-auto text-xs text-slate-400 font-bold">{filtered.length} itens</span>
           </div>
 
           {isSuperAdmin && addingNew && (
-            <div className="flex items-center gap-2 px-5 py-3 bg-blue-50 border-b border-blue-100">
+            <div className="flex items-center gap-2 px-6 py-3 bg-blue-50 border-b border-blue-100">
               <input
                 className="w-24 px-2 py-1.5 rounded-xl border border-blue-200 text-xs font-bold outline-none"
                 placeholder="Código"
@@ -556,7 +854,7 @@ const ProductCalculator: React.FC = () => {
             </div>
           )}
 
-          <div className="divide-y divide-slate-50 max-h-[580px] overflow-y-auto">
+          <div className="divide-y divide-slate-50 max-h-[75vh] overflow-y-auto">
             {filtered.length === 0 ? (
               <div className="py-20 text-center text-slate-400 font-bold">Nenhum produto encontrado.</div>
             ) : filtered.map(product => {
@@ -566,7 +864,7 @@ const ProductCalculator: React.FC = () => {
 
               if (isEditing && isSuperAdmin) {
                 return (
-                  <div key={product.id} className="flex items-center gap-2 px-5 py-2.5 bg-yellow-50">
+                  <div key={product.id} className="flex items-center gap-2 px-6 py-2.5 bg-yellow-50">
                     <input
                       className="w-24 px-2 py-1.5 rounded-xl border border-yellow-300 text-xs font-bold outline-none"
                       value={editRow.code || ''}
@@ -594,9 +892,9 @@ const ProductCalculator: React.FC = () => {
               }
 
               return (
-                <div key={product.id} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors group">
+                <div key={product.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-slate-50 transition-colors group">
                   <div className="flex-1 min-w-0">
-                    <p className="font-black text-slate-800 text-sm leading-tight truncate">{product.description}</p>
+                    <p className="font-black text-slate-800 text-sm leading-snug line-clamp-2 break-words" title={product.description}>{product.description}</p>
                     <p className="text-xs text-slate-400 font-bold mt-0.5">
                       Cód. {product.code} • {formatBRL(effectivePrice(product.unit_price))}
                     </p>
@@ -640,7 +938,7 @@ const ProductCalculator: React.FC = () => {
 
                   {qty > 0 && (
                     <div className="w-24 text-right shrink-0">
-                      <p className="text-sm font-black text-[#312783]">{formatBRL(effectivePrice(product.unit_price) * qty)}</p>
+                      <p className="text-sm font-black text-[#312783] tabular-nums">{formatBRL(effectivePrice(product.unit_price) * qty)}</p>
                     </div>
                   )}
                 </div>
@@ -650,17 +948,31 @@ const ProductCalculator: React.FC = () => {
         </div>
 
         {/* ── Right panel */}
-        <div className="space-y-5">
+        <div className="xl:col-span-5 space-y-5">
 
           {/* Client info */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
               <User size={18} className="text-[#312783]" />
               <span className="font-black text-slate-700">Dados do Cliente</span>
             </div>
-            <div className="p-5 space-y-3">
+            <div className="p-6 space-y-4">
               <div>
-                <label className="text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block">Nome do Cliente</label>
+                <label className={labelCls}>Nome do Modelo</label>
+                <CreatableSelect
+                  isClearable
+                  options={modelOptions}
+                  value={modelName ? { value: modelName, label: modelName } : null}
+                  onChange={opt => setModelName(opt?.value ?? '')}
+                  placeholder="Selecione ou digite o nome do modelo"
+                  noOptionsMessage={() => 'Digite para criar um nome personalizado'}
+                  formatCreateLabel={v => `Usar "${v}"`}
+                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                  styles={modelSelectStyles}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Nome do Cliente</label>
                 <input
                   className={inputCls}
                   placeholder="Razão social ou nome"
@@ -668,9 +980,9 @@ const ProductCalculator: React.FC = () => {
                   onChange={e => setClientName(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block">CNPJ</label>
+                  <label className={labelCls}>CNPJ</label>
                   <div className="relative">
                     <input
                       className={inputCls + (cnpjError ? ' border-red-300' : '')}
@@ -686,7 +998,7 @@ const ProductCalculator: React.FC = () => {
                   {cnpjError && <p className="text-xs text-red-500 font-bold mt-1">{cnpjError}</p>}
                 </div>
                 <div>
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-wide mb-1 block">Nº Cliente</label>
+                  <label className={labelCls}>Nº Cliente</label>
                   <input
                     className={inputCls}
                     placeholder="Ex: 10234"
@@ -704,9 +1016,9 @@ const ProductCalculator: React.FC = () => {
           </div>
 
           {/* Margin */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-5 py-4 flex items-center gap-4">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-6 py-4 flex items-center gap-4">
             <div className="flex-1">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-wide block mb-1">Margem</label>
+              <label className={labelCls}>Margem</label>
               <div className="relative">
                 <input
                   type="number"
@@ -716,7 +1028,7 @@ const ProductCalculator: React.FC = () => {
                   value={margin === 0 ? '' : margin}
                   placeholder="0"
                   onChange={e => setMargin(Math.max(0, parseFloat(e.target.value) || 0))}
-                  className="w-full pr-8 pl-3 py-2 rounded-xl border border-slate-200 text-sm font-black outline-none focus:ring-2 focus:ring-[#312783] transition-all"
+                  className="w-full pr-8 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm font-black outline-none focus:ring-2 focus:ring-[#312783] transition-all"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">%</span>
               </div>
@@ -731,43 +1043,54 @@ const ProductCalculator: React.FC = () => {
 
           {/* Cart summary */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
               <Calculator size={18} className="text-[#312783]" />
-              <span className="font-black text-slate-700">Resumo</span>
+              <div className="min-w-0">
+                <span className="font-black text-slate-700 block">Resumo</span>
+                {modelName && (
+                  <span className="text-xs font-bold text-slate-400 truncate block" title={modelName}>{modelName}</span>
+                )}
+              </div>
               {cart.length > 0 && (
-                <button onClick={() => setCart([])} className="ml-auto text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1 transition-colors">
+                <button onClick={() => setCart([])} className="ml-auto shrink-0 text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1 transition-colors">
                   <Trash2 size={12} /> Limpar
                 </button>
               )}
             </div>
-            <div className="p-5 space-y-3">
+            <div className="p-6 space-y-4">
               {cart.length === 0 ? (
                 <p className="text-slate-400 font-bold text-sm text-center py-8">Nenhum produto selecionado.</p>
               ) : (
                 <>
-                  <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                  <div className="space-y-2.5 max-h-72 overflow-y-auto pr-2 -mr-1">
                     {cart.map(item => (
-                      <div key={item.id} className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-black text-slate-700 leading-tight line-clamp-2">{item.description}</p>
-                          <p className="text-xs text-slate-400 font-bold">{item.qty}× {formatBRL(effectivePrice(item.unit_price))}</p>
+                      <div key={item.id} className="rounded-xl bg-slate-50/70 px-3 py-2.5">
+                        <p className="text-[13px] font-black text-slate-700 leading-snug break-words" title={item.description}>
+                          {item.description}
+                        </p>
+                        <div className="flex justify-between items-baseline gap-2 mt-1">
+                          <span className="text-xs text-slate-400 font-bold">
+                            {item.qty}× {formatBRL(effectivePrice(item.unit_price))}
+                          </span>
+                          <span className="text-sm font-black text-[#312783] shrink-0 tabular-nums">
+                            {formatBRL(effectivePrice(item.unit_price) * item.qty)}
+                          </span>
                         </div>
-                        <p className="text-xs font-black text-[#312783] shrink-0">{formatBRL(effectivePrice(item.unit_price) * item.qty)}</p>
                       </div>
                     ))}
                   </div>
                   <div className="border-t border-slate-100 pt-4 space-y-2.5">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-slate-500">Total Bruto</span>
-                      <span className="font-black text-slate-800">{formatBRL(totalBruto)}</span>
+                    <div className="flex justify-between items-baseline gap-3">
+                      <span className="text-sm font-bold text-slate-500 min-w-0 break-words">Total Bruto</span>
+                      <span className="font-black text-slate-800 shrink-0 tabular-nums">{formatBRL(totalBruto)}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-slate-500">IPI ({(IPI_RATE * 100).toFixed(1)}%)</span>
-                      <span className="font-bold text-slate-600">{formatBRL(totalIPI)}</span>
+                    <div className="flex justify-between items-baseline gap-3">
+                      <span className="text-sm font-bold text-slate-500 min-w-0 break-words">IPI ({(IPI_RATE * 100).toFixed(1)}%)</span>
+                      <span className="font-bold text-slate-600 shrink-0 tabular-nums">{formatBRL(totalIPI)}</span>
                     </div>
-                    <div className="bg-[#312783] rounded-2xl p-3.5 flex justify-between items-center">
-                      <span className="text-sm font-black text-white/80">Total com IPI</span>
-                      <span className="font-black text-white text-lg">{formatBRL(totalComIPI)}</span>
+                    <div className="bg-[#312783] rounded-2xl px-4 py-3.5 flex justify-between items-baseline gap-3">
+                      <span className="text-sm font-black text-white/80 min-w-0 break-words">Total com IPI</span>
+                      <span className="font-black text-white text-lg leading-none shrink-0 tabular-nums">{formatBRL(totalComIPI)}</span>
                     </div>
                   </div>
                 </>
@@ -779,7 +1102,7 @@ const ProductCalculator: React.FC = () => {
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
             <button
               onClick={() => setUseFullDisclaimer(v => !v)}
-              className="w-full px-5 py-4 flex items-center gap-2 hover:bg-slate-50 transition-colors"
+              className="w-full px-6 py-4 flex items-center gap-2 hover:bg-slate-50 transition-colors"
             >
               <FileText size={18} className="text-[#312783]" />
               <span className="font-black text-slate-700">Observações / Disclaimer</span>
@@ -789,7 +1112,7 @@ const ProductCalculator: React.FC = () => {
               {useFullDisclaimer ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
             </button>
             {useFullDisclaimer && (
-              <div className="px-5 pb-5">
+              <div className="px-6 pb-6">
                 <p className="text-xs text-slate-400 font-bold mb-2">Edite o texto que será incluído no PDF:</p>
                 <textarea
                   className="w-full text-xs font-mono border border-slate-200 rounded-2xl p-3 outline-none focus:ring-2 focus:ring-[#312783] transition-all resize-none"
@@ -800,7 +1123,7 @@ const ProductCalculator: React.FC = () => {
               </div>
             )}
             {!useFullDisclaimer && (
-              <div className="px-5 pb-4">
+              <div className="px-6 pb-4">
                 <p className="text-xs text-slate-400 font-bold italic">
                   "Esta cotação é válida por 30 dias. Preços sujeitos a alteração sem aviso prévio..."
                 </p>
@@ -808,51 +1131,83 @@ const ProductCalculator: React.FC = () => {
             )}
           </div>
 
-          {/* Park image attachment */}
+          {/* Anexos de imagem — locais à sessão, nunca persistidos */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
               <ImageIcon size={18} className="text-[#312783]" />
-              <span className="font-black text-slate-700">Imagem do Parque</span>
-              <span className="text-xs text-slate-400 font-bold ml-auto">PNG / JPG</span>
+              <span className="font-black text-slate-700">Imagens do Parque</span>
+              <span className="text-xs text-slate-400 font-bold ml-auto tabular-nums">
+                {parkImages.length}/{MAX_PARK_IMAGES}
+              </span>
             </div>
-            <div className="p-5">
-              {parkImage ? (
-                <div className="relative">
-                  <img src={parkImage} className="w-full h-36 object-cover rounded-2xl" />
-                  <button
-                    onClick={() => { setParkImage(null); if (parkImageInputRef.current) parkImageInputRef.current.value = ''; }}
-                    className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
-                  >
-                    <X size={14} />
-                  </button>
-                  <p className="text-xs text-slate-400 font-bold text-center mt-2">Imagem será incluída no PDF</p>
+            <div className="p-6 space-y-3">
+              {parkImages.length > 0 && (
+                <div className="grid grid-cols-2 gap-3">
+                  {parkImages.map((img, idx) => (
+                    <div key={idx} className="relative group">
+                      <img src={img} className="w-full h-28 object-cover rounded-2xl border border-slate-100" />
+                      {idx === 0 && (
+                        <span className="absolute bottom-2 left-2 text-[10px] font-black uppercase tracking-wide bg-[#312783] text-white px-2 py-0.5 rounded-full">
+                          Capa
+                        </span>
+                      )}
+                      <button
+                        onClick={() => removeParkImage(idx)}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-xl opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-red-600 transition-all"
+                        aria-label={`Remover imagem ${idx + 1}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center gap-2 py-8 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-[#312783] hover:bg-slate-50 transition-all">
-                  <ImagePlus size={28} className="text-slate-300" />
-                  <span className="text-sm font-bold text-slate-400">Clique para anexar imagem</span>
-                  <span className="text-xs text-slate-300 font-bold">PNG ou JPG</span>
+              )}
+
+              {parkImages.length < MAX_PARK_IMAGES && (
+                <label className="flex flex-col items-center justify-center gap-2 py-6 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-[#312783] hover:bg-slate-50 transition-all">
+                  <ImagePlus size={26} className="text-slate-300" />
+                  <span className="text-sm font-bold text-slate-400">
+                    {parkImages.length === 0 ? 'Clique para anexar imagens' : 'Adicionar mais'}
+                  </span>
+                  <span className="text-xs text-slate-300 font-bold">PNG ou JPG • múltiplas</span>
                   <input
                     ref={parkImageInputRef}
                     type="file"
+                    multiple
                     accept="image/png,image/jpeg"
                     className="hidden"
                     onChange={handleParkImage}
                   />
                 </label>
               )}
+
+              <p className="text-xs text-slate-400 font-bold">
+                A 1ª imagem vai no cabeçalho do PDF; as demais em grade ao final.
+                Anexos não são salvos junto ao orçamento.
+              </p>
             </div>
           </div>
 
-          {/* Export button */}
-          <button
-            onClick={generatePDF}
-            disabled={cart.length === 0 || generatingPDF}
-            className="w-full flex items-center justify-center gap-3 bg-krenke-orange text-white font-black py-4 rounded-2xl hover:brightness-110 transition-all shadow-lg shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <FileDown size={20} />
-            {generatingPDF ? 'Gerando PDF...' : `Exportar ${quoteNumber}.pdf`}
-          </button>
+          {/* Ações */}
+          <div className="space-y-3">
+            <button
+              onClick={handleSaveQuote}
+              disabled={cart.length === 0 || savingQuote}
+              className="w-full flex items-center justify-center gap-3 bg-[#312783] text-white font-black py-3.5 rounded-2xl hover:bg-[#3f31a1] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {savingQuote ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+              {savingQuote ? 'Salvando...' : 'Salvar Orçamento'}
+            </button>
+
+            <button
+              onClick={generatePDF}
+              disabled={cart.length === 0 || generatingPDF}
+              className="w-full flex items-center justify-center gap-3 bg-krenke-orange text-white font-black py-4 rounded-2xl hover:brightness-110 transition-all shadow-lg shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <FileDown size={20} />
+              {generatingPDF ? 'Gerando PDF...' : `Exportar ${quoteNumber}.pdf`}
+            </button>
+          </div>
         </div>
       </div>
     </div>
