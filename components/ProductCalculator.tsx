@@ -260,6 +260,10 @@ const ProductCalculator: React.FC = () => {
   // ── PDF generation ─────────────────────────────────
   const generatePDF = async () => {
     if (cart.length === 0) return;
+    if (!clientName.trim()) {
+      alert('Informe o Nome do Cliente antes de exportar o PDF.');
+      return;
+    }
     setGeneratingPDF(true);
     try {
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -532,6 +536,10 @@ const ProductCalculator: React.FC = () => {
 
   const handleSaveQuote = async () => {
     if (!user || cart.length === 0) return;
+    if (!clientName.trim()) {
+      alert('Informe o Nome do Cliente antes de salvar o orçamento.');
+      return;
+    }
     setSavingQuote(true);
     try {
       const items: QuoteItem[] = cart.map(i => ({
@@ -576,6 +584,10 @@ const ProductCalculator: React.FC = () => {
    * preço exibido passa a ser o preço atual, não o congelado.
    */
   const handleLoadQuote = (quote: ResellerQuote) => {
+    if (cart.length > 0 && quote.quote_number !== quoteNumber && !savedAt) {
+      const ok = confirm('Você tem itens no orçamento atual que ainda não foram salvos. Ao carregar outro orçamento, esses itens serão perdidos. Deseja continuar?');
+      if (!ok) return;
+    }
     const byCode: Record<string, CalculatorProduct> = {};
     products.forEach(p => { byCode[p.code] = p; });
 
@@ -609,6 +621,10 @@ const ProductCalculator: React.FC = () => {
   };
 
   const handleNewQuote = () => {
+    if (cart.length > 0 && !savedAt) {
+      const ok = confirm('Você tem itens no orçamento atual que ainda não foram salvos. Ao iniciar um novo orçamento, esses itens serão perdidos. Deseja continuar?');
+      if (!ok) return;
+    }
     setQuoteNumber(generateQuoteNumber());
     setCart([]);
     setModelName('');
@@ -786,20 +802,25 @@ const ProductCalculator: React.FC = () => {
                     <button
                       key={q.id}
                       onClick={() => handleLoadQuote(q)}
-                      className="w-full text-left flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-slate-100 px-4 py-3 hover:border-[#312783] hover:bg-slate-50 transition-all"
+                      className="w-full text-left rounded-2xl border border-slate-100 px-4 py-3 hover:border-[#312783] hover:bg-slate-50 transition-all"
                     >
-                      <span className="font-black text-[#312783] text-sm tabular-nums">{q.quote_number}</span>
-                      <span className="font-bold text-slate-700 text-sm min-w-0 flex-1 truncate">
-                        {q.model_name || q.client_name || '— sem identificação —'}
-                      </span>
-                      <span className="text-xs font-bold text-slate-400 tabular-nums">
-                        {new Date(q.updated_at).toLocaleString('pt-BR', {
-                          day: '2-digit', month: '2-digit', year: '2-digit',
-                          hour: '2-digit', minute: '2-digit',
-                        })}
-                      </span>
-                      <span className="text-xs font-bold text-slate-400 truncate max-w-[160px]">{q.reseller_name || '—'}</span>
-                      <span className="text-sm font-black text-slate-700 tabular-nums">{formatBRL(Number(q.total_com_ipi))}</span>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="font-black text-[#312783] text-sm tabular-nums shrink-0">{q.quote_number}</span>
+                        <span className="font-black text-slate-800 text-sm min-w-0 flex-1 truncate">
+                          Cliente: {q.client_name || '— sem cliente informado —'}
+                        </span>
+                        <span className="text-sm font-black text-slate-700 tabular-nums shrink-0">{formatBRL(Number(q.total_com_ipi))}</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs font-bold text-slate-400">
+                        {q.model_name && <span className="truncate max-w-[200px]">Modelo: {q.model_name}</span>}
+                        <span className="truncate max-w-[160px]">Vendedor: {q.reseller_name || '—'}</span>
+                        <span className="tabular-nums sm:ml-auto">
+                          {new Date(q.updated_at).toLocaleString('pt-BR', {
+                            day: '2-digit', month: '2-digit', year: '2-digit',
+                            hour: '2-digit', minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -972,13 +993,18 @@ const ProductCalculator: React.FC = () => {
                 />
               </div>
               <div>
-                <label className={labelCls}>Nome do Cliente</label>
+                <label className={labelCls}>Nome do Cliente <span className="text-red-500">*obrigatório</span></label>
                 <input
-                  className={inputCls}
+                  className={inputCls + (!clientName.trim() ? ' border-red-200' : '')}
                   placeholder="Razão social ou nome"
                   value={clientName}
                   onChange={e => setClientName(e.target.value)}
                 />
+                {!clientName.trim() && (
+                  <p className="text-xs text-red-400 font-bold mt-1">
+                    Preencha para poder salvar ou exportar o orçamento — é assim que ele aparece no histórico.
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -1040,6 +1066,11 @@ const ProductCalculator: React.FC = () => {
               </div>
             )}
           </div>
+          {margin === 0 && cart.length > 0 && (
+            <p className="-mt-2 text-xs font-bold text-orange-500 bg-orange-50 border border-orange-100 rounded-2xl px-4 py-2">
+              ⚠ Margem zerada — os preços exibidos são o preço de custo, sem lucro. Confira antes de salvar/exportar.
+            </p>
+          )}
 
           {/* Cart summary */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -1052,7 +1083,10 @@ const ProductCalculator: React.FC = () => {
                 )}
               </div>
               {cart.length > 0 && (
-                <button onClick={() => setCart([])} className="ml-auto shrink-0 text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1 transition-colors">
+                <button
+                  onClick={() => { if (confirm('Remover todos os itens do carrinho? Esta ação não pode ser desfeita.')) setCart([]); }}
+                  className="ml-auto shrink-0 text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1 transition-colors"
+                >
                   <Trash2 size={12} /> Limpar
                 </button>
               )}
