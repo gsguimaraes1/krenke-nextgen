@@ -156,6 +156,8 @@ const AuthPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [mfaCode, setMfaCode] = useState('');
   const [mfaChallengeId, setMfaChallengeId] = useState<string | null>(null);
+  const [mode, setMode] = useState<'login' | 'forgot'>('login');
+  const [resetSent, setResetSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imgIndex, setImgIndex] = useState(0);
   const [quoteIndex, setQuoteIndex] = useState(0);
@@ -237,6 +239,42 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    if (!supabase) {
+      setError('Sistema de autenticação não configurado.');
+      return;
+    }
+    if (!captchaToken) {
+      setError('Complete a verificação de segurança antes de continuar.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/revendedor`,
+        captchaToken: captchaToken ?? undefined,
+      });
+      if (error) throw error;
+      setResetSent(true);
+    } catch (err: any) {
+      setError(translateError(err.message));
+    } finally {
+      setCaptchaToken(null);
+      turnstileRef.current?.reset();
+      setLoading(false);
+    }
+  };
+
+  const backToLogin = () => {
+    setMode('login');
+    setResetSent(false);
+    setError(null);
+    setCaptchaToken(null);
+    turnstileRef.current?.reset();
+  };
+
   const currentImage = LOGIN_IMAGES[imgIndex];
   const currentQuote = QUOTES[quoteIndex];
 
@@ -263,6 +301,8 @@ const AuthPage: React.FC = () => {
             <p className="animate-element animate-delay-300 mt-2 text-gray-400 text-sm">
               {mfaChallengeId
                 ? 'Insira o código do seu aplicativo de autenticação.'
+                : mode === 'forgot'
+                ? 'Recupere o acesso à sua conta.'
                 : 'Acesse o sistema de gestão Krenke.'}
             </p>
           </div>
@@ -326,6 +366,81 @@ const AuthPage: React.FC = () => {
               </button>
             </form>
 
+          ) : mode === 'forgot' ? (
+            /* Forgot password form */
+            resetSent ? (
+              <div className="space-y-5">
+                <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-4 rounded-xl text-xs font-semibold flex items-start gap-2.5">
+                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shrink-0 mt-1" />
+                  <span>
+                    Se existe uma conta com <strong>{email}</strong>, enviamos um link de
+                    redefinição de senha. Verifique sua caixa de entrada (e o spam).
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={backToLogin}
+                  className="w-full text-xs text-gray-500 hover:text-gray-300 transition-colors py-2"
+                >
+                  ← Voltar para Login
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword} className="space-y-5">
+                <div className="animate-element animate-delay-300">
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                    E-mail
+                  </label>
+                  <GlassInput>
+                    <input
+                      type="email"
+                      name="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoFocus
+                      autoComplete="email"
+                      placeholder="seu@krenke.com.br"
+                      className="w-full bg-transparent text-sm text-white py-4 px-4 rounded-2xl outline-none placeholder:text-gray-600"
+                    />
+                  </GlassInput>
+                </div>
+
+                <Turnstile
+                  ref={turnstileRef}
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => { setCaptchaToken(null); turnstileRef.current?.reset(); }}
+                  onError={(code) => {
+                    console.error('Turnstile error:', code);
+                    setCaptchaToken(null);
+                    setError('Falha na verificação de segurança. Recarregue a página e tente novamente.');
+                    turnstileRef.current?.reset();
+                  }}
+                  options={{ size: 'flexible', theme: 'dark', retry: 'auto', refreshExpired: 'auto' }}
+                />
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="animate-element animate-delay-400 w-full bg-gradient-to-r from-vibrant-orange to-krenke-orange text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-orange-600/30 active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>Enviar link de redefinição<ArrowRight size={16} /></>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={backToLogin}
+                  className="w-full text-xs text-gray-500 hover:text-gray-300 transition-colors py-2"
+                >
+                  ← Voltar para Login
+                </button>
+              </form>
+            )
           ) : (
             /* Login form */
             <form onSubmit={handleAuth} className="space-y-5">
@@ -351,9 +466,18 @@ const AuthPage: React.FC = () => {
 
               {/* Password */}
               <div className="animate-element animate-delay-400">
-                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
-                  Senha
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                    Senha
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => { setMode('forgot'); setError(null); setPassword(''); setCaptchaToken(null); turnstileRef.current?.reset(); }}
+                    className="text-[11px] font-semibold text-krenke-orange/80 hover:text-krenke-orange transition-colors"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
                 <GlassInput>
                   <div className="relative">
                     <input
