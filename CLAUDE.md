@@ -81,6 +81,12 @@ Ações privilegiadas do painel rodam **server-side** com service role (bypassa 
 - **Cloudflare Turnstile** — captcha. Mesma site key (`VITE_TURNSTILE_SITE_KEY`) em login + forms
   públicos (Quote, JobApplication, WhatsApp, Catálogo). Verificação server-side em `verifyTurnstile`
   (`TURNSTILE_SECRET_KEY`). Supabase Auth usava Turnstile como provider de captcha (mesma secret).
+- **Resend (email transacional)** — entrega dos emails do Supabase Auth (convite, reset de senha)
+  via **Custom SMTP** (`smtp.resend.com:465`, user `resend`, pass = API key do Resend). Config só no
+  dashboard Supabase (Auth → SMTP Settings), **não há código** — `inviteUserByEmail`/`resetPasswordForEmail`
+  seguem iguais, só a rota de entrega mudou. Domínio `krenke.com.br` verificado no Resend (SPF/DKIM).
+  Rate limit de email subiu 2/1h → 30. **Pendente:** trocar sender pra `no-reply@krenke.com.br` e
+  traduzir/branding os templates (Auth → Emails → Templates, ainda em inglês default do Supabase).
 - **n8n** — `n8n.krenke.com.br` (webhooks legados; leads migraram pra Goalfy direto).
 - **PowerBI** — dashboards embedados em `/relatorio` e `/marketing`.
 - **Chatwoot** — `chat.krenke.com.br` (widget de chat).
@@ -109,6 +115,14 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
+- **Resend SMTP ativo** (2026-07-23): emails do Auth entregam via Resend (ver Integrações). Testado
+  ponta-a-ponta: reset de senha → Supabase → Resend (`POST /emails` 200) → inbox. Sender atual
+  `gabriel@krenke.com.br` (trocar pra `no-reply@`); templates ainda default em inglês (traduzir depois).
+- **Forgot-password no login** (2026-07-23): `pages/Auth.tsx` tem modo `forgot` (link "Esqueci minha
+  senha" → email + Turnstile → `resetPasswordForEmail`, `redirectTo: /revendedor`). Confirmação genérica
+  (não vaza existência de conta). ⚠️ recovery cai em `/revendedor` (form de troca de senha em
+  `ResellerArea.tsx`) — só `super`/`reseller` acessam; `hr`/`mkt` não teriam onde trocar. OK hoje (só
+  resellers usam). Se abrir reset pra outros papéis, criar página de recovery universal.
 - **Turnstile REATIVADO no login** (2026-07-18): gate + widget + `options:{captchaToken}` restaurados
   em `pages/Auth.tsx` (o erro "Troubleshoot" sumiu — widget renderiza normal nos forms públicos).
   **Falta (dashboard):** religar captcha no Supabase (Auth → Attack Protection → Turnstile, secret =
