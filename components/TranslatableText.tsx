@@ -23,7 +23,7 @@ export const TranslatableText: React.FC<TranslatableTextProps> = ({
   useEffect(() => {
     if (!children) return;
 
-    if (i18n.language === 'pt') {
+    if (i18n.language.startsWith('pt')) {
       setTranslatedText(children);
       return;
     }

@@ -111,6 +111,8 @@ i18n
   .init({
     resources,
     fallbackLng: 'pt',
+    supportedLngs: ['pt', 'en', 'es'],
+    load: 'languageOnly', // 'pt-BR' (htmlTag na 1a visita) colapsa em 'pt' -> evita traduzir pt->pt-BR
     interpolation: {
       escapeValue: false,
     },
@@ -125,7 +127,7 @@ i18n
  * Uses an unofficial Google Translate endpoint for dynamic content
  */
 export const translateText = async (text: string, targetLang: string) => {
-  if (!text || targetLang === 'pt') return text;
+  if (!text || targetLang.startsWith('pt')) return text;
   
   try {
     const url = `/translate_api/translate_a/single?client=gtx&sl=pt&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;

@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import { supabase } from '../lib/supabase';
 import { Page } from '../types';
 import { Layout } from '../components/Layout';
-import { Preloader } from '../components/Preloader';
 import { sanitizeHtml } from '../lib/sanitize';
 
 export const DynamicPage: React.FC = () => {
@@ -42,7 +41,7 @@ export const DynamicPage: React.FC = () => {
     fetchPage();
   }, [slug]);
 
-  if (loading) return <Preloader />;
+  if (loading) return null;
   if (error || !page) return <Navigate to="/404" replace />;
 
   return (

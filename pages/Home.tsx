@@ -8,7 +8,6 @@ import { Helmet } from 'react-helmet-async';
 import { ShowcaseCard } from '../components/ui/ShowcaseCard';
 // heroVideo removido — vídeo agora hospedado no YouTube para evitar bandwidth do Vercel
 const HERO_YOUTUBE_ID = 'C_KbvW2MjB8';
-import bannerKrenke from '../assets/banner Krenke.webp';
 import { ImageCarousel } from '../components/ImageCarousel';
 import sobreImg from '../assets/Home/Menino-Home-krenke.webp';
 import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
@@ -22,18 +21,37 @@ import { useTranslation } from 'react-i18next';
 import { TranslatableText } from '../components/TranslatableText';
 
 const HeroSection = () => {
-  const { t } = useTranslation();
+  // Vídeo do YouTube adiado: não bloqueia LCP/TBT. Só monta após load + idle.
+  const [showVideo, setShowVideo] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  useEffect(() => {
+    const start = () => {
+      const idle = (window as any).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1500));
+      idle(() => setShowVideo(true));
+    };
+    if (document.readyState === 'complete') {
+      start();
+      return;
+    }
+    window.addEventListener('load', start, { once: true });
+    return () => window.removeEventListener('load', start);
+  }, []);
+
   return (
     <div className="relative w-full h-[85vh] bg-krenke-purple overflow-hidden flex items-center justify-center">
-      {/* YouTube Video Background */}
+      {/* YouTube Video Background (adiado) */}
       <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
-        <iframe
-          className="absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-70"
-          src={`https://www.youtube.com/embed/${HERO_YOUTUBE_ID}?autoplay=1&mute=1&loop=1&playlist=${HERO_YOUTUBE_ID}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-          title="Krenke Brinquedos"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
+        {showVideo && (
+          <iframe
+            className={`absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-700 ${videoLoaded ? 'opacity-70' : 'opacity-0'}`}
+            src={`https://www.youtube-nocookie.com/embed/${HERO_YOUTUBE_ID}?autoplay=1&mute=1&loop=1&playlist=${HERO_YOUTUBE_ID}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+            title="Krenke Brinquedos"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            onLoad={() => setVideoLoaded(true)}
+          />
+        )}
       </div>
 
       {/* Overlays */}
@@ -45,33 +63,19 @@ const HeroSection = () => {
 
       {/* Content */}
       <div className="relative z-20 w-full flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-10 max-w-5xl"
-        >
+        <div className="hero-enter space-y-10 max-w-5xl">
           {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs md:text-sm font-bold tracking-[0.2em] uppercase shadow-2xl hover:bg-white/20 transition-all cursor-default"
-          >
+          <div className="hero-badge inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs md:text-sm font-bold tracking-[0.2em] uppercase shadow-2xl hover:bg-white/20 transition-all cursor-default">
             <span className="w-2.5 h-2.5 rounded-full bg-vibrant-orange animate-vibrant-pulse shadow-[0_0_10px_#FF9F0A]"></span>
             <TranslatableText>Desde 1987 • A maior fábrica de playgrounds do Brasil</TranslatableText>
-          </motion.div>
+          </div>
 
           {/* Main Heading */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter leading-[0.9] md:leading-[0.85] drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] uppercase">
             <TranslatableText>PLAYGROUNDS E</TranslatableText><br />
-            <motion.span
-              animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-              className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto]"
-            >
+            <span className="hero-gradient-text text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto]">
               <TranslatableText>PARQUES INFANTIS</TranslatableText>
-            </motion.span>
+            </span>
           </h1>
 
           {/* Description */}
@@ -100,19 +104,15 @@ const HeroSection = () => {
               <span className="group-hover:scale-110 transition-transform"><TranslatableText>Fazer Orçamento</TranslatableText></span>
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 hidden md:block"
-      >
+      <div className="hero-scroll absolute bottom-10 left-1/2 -translate-x-1/2 z-20 hidden md:block">
         <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center p-1 backdrop-blur-sm">
           <div className="w-1.5 h-3 bg-white rounded-full animate-bounce"></div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
