@@ -12,7 +12,8 @@ import {
     Users,
     User,
     LayoutTemplate,
-    Briefcase
+    Briefcase,
+    TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -45,6 +46,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
     // Adiciona menus exclusivos para Super Admin
     if (role === 'super') {
+        menuItems.push({ icon: TrendingUp, label: 'Rel. Orçamentos', path: '/pgadmin/relatorio-orcamentos', testId: 'nav-relatorio-orcamentos' });
         menuItems.push({ icon: Settings, label: 'Scripts', path: '/pgadmin/scripts', testId: 'nav-scripts' });
         menuItems.push({ icon: Settings, label: 'Configurações', path: '/pgadmin/configuracoes', testId: 'nav-configuracoes' });
         menuItems.push({ icon: Users, label: 'Usuários', path: '/pgadmin/usuarios', testId: 'nav-usuarios' });

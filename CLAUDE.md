@@ -42,6 +42,7 @@ não há mais fallback de papel no cliente (autorização real vive no RLS/servi
 | `/lp`, `/obrigado`, `/obrigado-curriculo` | público, sem Layout |
 | `/login` | público — página de auth (`pages/Auth.tsx`) |
 | `/pgadmin/*` | **painel admin** (`pages/Admin.tsx`) — `super`, `hr` |
+| `/pgadmin/relatorio-orcamentos` | dentro do painel — **só `super`** (`components/QuoteReportView.tsx`) |
 | `/revendedor` | `super`, `reseller` (`pages/ResellerArea.tsx`) |
 | `/marketing` | `super`, `mkt` |
 | `/relatorio` | `super` **+ allowlist de userIds** (PowerBI) |
@@ -69,7 +70,9 @@ Ações privilegiadas do painel rodam **server-side** com service role (bypassa 
 
 `profiles` (papéis, FK `id`→`auth.users` **ON DELETE CASCADE**), `products`, `calculator_products`,
 `leads` (461+), `posts` (blog), `app_scripts` (scripts injetados via `ScriptInjector`), `site_settings`,
-`reseller_folders`/`reseller_files` (área revendedor), `job_openings`/`job_applications` (RH).
+`reseller_folders`/`reseller_files` (área revendedor), `job_openings`/`job_applications` (RH),
+`orcamento_revendas` (log de orçamentos da calculadora do revendedor — DDL em `sql/orcamento_revendas.sql`;
+RLS: dono OU `public.is_super_admin()`; `upsert` por `quote_number`, então reeditar não gera linha nova).
 
 - **Ferramentas Supabase disponíveis via MCP** (`Supabase- Krenke Brinquedos`): `execute_sql`,
   `apply_migration`, `list_tables`, `get_advisors`, `get_logs` etc. Use pra inspecionar/alterar o banco.
@@ -115,6 +118,12 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
+- **Relatório de orçamentos** (2026-07-27): `components/QuoteReportView.tsx` em `/pgadmin/relatorio-orcamentos`
+  (nav só pra `super`, render também gated por `role === 'super'`). Lê `orcamento_revendas` client-side
+  (filtro de período server-side via `.gte('created_at')`, teto 5000 linhas), resolve autor por
+  `reseller_name` (snapshot) → `profiles.full_name/email` → id abreviado. KPIs + ranking por revendedor +
+  barras por mês + tabela + CSV (`;` e BOM pro Excel pt-BR). ⚠️ Não confundir com a aba **Leads**
+  ("Orçamentos Recebidos" = form público `/orcamento` → tabela `leads`).
 - **Resend SMTP ativo** (2026-07-23): emails do Auth entregam via Resend (ver Integrações). Testado
   ponta-a-ponta: reset de senha → Supabase → Resend (`POST /emails` 200) → inbox. Sender atual
   `gabriel@krenke.com.br` (trocar pra `no-reply@`); templates ainda default em inglês (traduzir depois).
