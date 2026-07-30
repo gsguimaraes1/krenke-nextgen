@@ -352,32 +352,10 @@ const ProductCalculator: React.FC = () => {
         clientBlockEndY = cy + 2;
       }
 
-      // ── Primeira imagem no cabeçalho (as demais vão em grade no fim)
-      const [heroImage, ...extraImages] = parkImages;
-      let imageEndY = 38;
-      if (heroImage) {
-        const maxW = 70;
-        const maxH = 55;
-        const { w: natW, h: natH } = await getImageNaturalSize(heroImage);
-        const ratio = natW / natH;
-        let imgW = maxW;
-        let imgH = imgW / ratio;
-        if (imgH > maxH) { imgH = maxH; imgW = imgH * ratio; }
-        const imgX = pageW - margin - maxW + (maxW - imgW) / 2;
-        const imgY = 42;
-        doc.addImage(heroImage, imgX, imgY, imgW, imgH);
-        imageEndY = imgY + imgH + 4;
-        doc.setFontSize(7);
-        doc.setFont('helvetica', 'italic');
-        doc.setTextColor(140, 140, 140);
-        doc.text('Imagem de referência do parque', imgX + imgW / 2, imageEndY, { align: 'center' });
-        imageEndY += 4;
-      }
-
       // ── Subtitle strip
-      const subtitleY = Math.max(clientBlockEndY, heroImage ? imageEndY : 40);
+      const subtitleY = clientBlockEndY;
       doc.setFillColor(240, 239, 248);
-      doc.rect(0, subtitleY - 2, heroImage ? pageW - margin - 74 : pageW, 10, 'F');
+      doc.rect(0, subtitleY - 2, pageW, 10, 'F');
       doc.setTextColor(49, 39, 131);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
@@ -451,8 +429,21 @@ const ProductCalculator: React.FC = () => {
       doc.text(formatBRL(totalComIPI), margin + contentW - 1, y + 7.5, { align: 'right' });
       y += 17;
 
-      // ── Imagens de referência extras (grade 2 colunas)
-      if (extraImages.length > 0) {
+      // ── Disclaimer
+      if (y > 270) { doc.addPage(); y = 16; }
+      const disclaimerLines = (useFullDisclaimer ? disclaimerText : DEFAULT_DISCLAIMER).split('\n');
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica', useFullDisclaimer ? 'normal' : 'italic');
+      doc.setTextColor(useFullDisclaimer ? 80 : 160, useFullDisclaimer ? 80 : 160, useFullDisclaimer ? 80 : 160);
+      for (const line of disclaimerLines) {
+        if (y > 278) { doc.addPage(); y = 16; }
+        doc.text(line, margin, y);
+        y += 4;
+      }
+
+      // ── Imagens de referência (todas juntas, sempre no fim da última página)
+      if (parkImages.length > 0) {
+        y += 4;
         if (y > 230) { doc.addPage(); y = 16; }
 
         doc.setFontSize(9);
@@ -466,7 +457,7 @@ const ProductCalculator: React.FC = () => {
         let col = 0;
         let rowTopY = y;
 
-        for (const img of extraImages) {
+        for (const img of parkImages) {
           if (col === 0 && rowTopY + cellH > 275) { doc.addPage(); rowTopY = 16; }
 
           const { w: natW, h: natH } = await getImageNaturalSize(img);
@@ -480,19 +471,6 @@ const ProductCalculator: React.FC = () => {
           col++;
           if (col === 2) { col = 0; rowTopY += cellH + 6; }
         }
-        y = col === 0 ? rowTopY : rowTopY + cellH + 6;
-      }
-
-      // ── Disclaimer
-      if (y > 270) { doc.addPage(); y = 16; }
-      const disclaimerLines = (useFullDisclaimer ? disclaimerText : DEFAULT_DISCLAIMER).split('\n');
-      doc.setFontSize(6.5);
-      doc.setFont('helvetica', useFullDisclaimer ? 'normal' : 'italic');
-      doc.setTextColor(useFullDisclaimer ? 80 : 160, useFullDisclaimer ? 80 : 160, useFullDisclaimer ? 80 : 160);
-      for (const line of disclaimerLines) {
-        if (y > 278) { doc.addPage(); y = 16; }
-        doc.text(line, margin, y);
-        y += 4;
       }
 
       // ── Page footers
@@ -1216,7 +1194,7 @@ const ProductCalculator: React.FC = () => {
               )}
 
               <p className="text-xs text-slate-400 font-bold">
-                A 1ª imagem vai no cabeçalho do PDF; as demais em grade ao final.
+                Todas as imagens vão juntas, em grade, no fim do PDF.
                 Anexos não são salvos junto ao orçamento.
               </p>
             </div>
