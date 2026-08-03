@@ -72,7 +72,9 @@ Ações privilegiadas do painel rodam **server-side** com service role (bypassa 
 `leads` (461+), `posts` (blog), `app_scripts` (scripts injetados via `ScriptInjector`), `site_settings`,
 `reseller_folders`/`reseller_files` (área revendedor), `job_openings`/`job_applications` (RH),
 `orcamento_revendas` (log de orçamentos da calculadora do revendedor — DDL em `sql/orcamento_revendas.sql`;
-RLS: dono OU `public.is_super_admin()`; `upsert` por `quote_number`, então reeditar não gera linha nova).
+RLS: dono OU `public.is_super_admin()`; `upsert` por `quote_number`, então reeditar não gera linha nova),
+`associated_resellers` (lista manual de revendas p/ campo "Revendedor Associado" da calculadora — DDL em
+`sql/associated_resellers.sql`; select livre p/ autenticado, insert só allowlist fixa + `super`, update/delete só `super`).
 
 - **Ferramentas Supabase disponíveis via MCP** (`Supabase- Krenke Brinquedos`): `execute_sql`,
   `apply_migration`, `list_tables`, `get_advisors`, `get_logs` etc. Use pra inspecionar/alterar o banco.
@@ -118,6 +120,16 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
+- **Revendedor Associado na calculadora** (2026-08-03): `components/ProductCalculator.tsx` tem campo
+  "Revendedor Associado" (dropdown com pesquisa, `associated_resellers`). Cadastro de nova revenda
+  (nome manual, texto livre — sem criar usuário) restrito a allowlist fixa hardcoded no componente
+  (`ASSOCIATED_RESELLER_MANAGERS`) + `super`: `ff315d16-e719-485e-8d2f-20df219666c5`,
+  `1757670c-5ab0-4642-82b3-9acdbfa14701`, `40bfce8e-fe27-44e2-bda3-cf6273fc6fea`,
+  `d19952b5-151c-4943-bf74-1a07b199ba75`. Mesmo padrão de allowlist do `/relatorio`. **Pendente:**
+  associar login de revendedor à revenda da lista (por ora é só nome solto, snapshot em
+  `orcamento_revendas.associated_reseller_name`). ⚠️ Migration `sql/associated_resellers.sql` não
+  foi aplicada pelo Claude — MCP Supabase conectado nesta sessão aponta pra outro projeto
+  (KinderCRM, não Krenke Brinquedos). Rodar manualmente no projeto certo (`rkimlgpwshntyzaoqxpb`).
 - **Relatório de orçamentos** (2026-07-27): `components/QuoteReportView.tsx` em `/pgadmin/relatorio-orcamentos`
   (nav só pra `super`, render também gated por `role === 'super'`). Lê `orcamento_revendas` client-side
   (filtro de período server-side via `.gte('created_at')`, teto 5000 linhas), resolve autor por

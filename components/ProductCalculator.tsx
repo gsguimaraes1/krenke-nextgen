@@ -14,6 +14,16 @@ const IPI_RATE = 0.065;
 const MAX_PARK_IMAGES = 5;
 const LOGO_URL = 'https://cdn.awsli.com.br/2185/2185627/arquivos/krenke-brinquedos-logo-branco-d__fogmt.webp';
 
+// Allowlist fixa p/ cadastrar novas revendas no dropdown "Revendedor Associado"
+// (nome manual por enquanto — até automatizar associação revenda <-> login).
+// Mesmo padrão hardcoded de api/report-url.js / App.tsx (/relatorio).
+const ASSOCIATED_RESELLER_MANAGERS = new Set([
+  'ff315d16-e719-485e-8d2f-20df219666c5',
+  '1757670c-5ab0-4642-82b3-9acdbfa14701',
+  '40bfce8e-fe27-44e2-bda3-cf6273fc6fea',
+  'd19952b5-151c-4943-bf74-1a07b199ba75',
+]);
+
 const DEFAULT_DISCLAIMER = 'Esta cotação é válida por 30 dias. Preços sujeitos a alteração sem aviso prévio. IPI conforme legislação vigente.\nKrenke Brinquedos Pedagógicos  •  www.krenke.com.br';
 
 function buildFullDisclaimer(name: string, phone: string, email: string): string {
@@ -95,6 +105,11 @@ const ProductCalculator: React.FC = () => {
   const [modelName, setModelName] = useState('');
   const [modelOptions, setModelOptions] = useState<ModelGroup[]>([]);
 
+  // Revendedor associado (dropdown com pesquisa; cadastro restrito à allowlist)
+  const [associatedReseller, setAssociatedReseller] = useState('');
+  const [associatedResellerOptions, setAssociatedResellerOptions] = useState<ModelOption[]>([]);
+  const [creatingReseller, setCreatingReseller] = useState(false);
+
   // Client info
   const [clientName, setClientName] = useState('');
   const [clientCnpj, setClientCnpj] = useState('');
@@ -165,7 +180,48 @@ const ProductCalculator: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadProducts(); loadModelOptions(); }, []);
+  // Opções do dropdown "Revendedor Associado". Falha silenciosa — sem
+  // opções o dropdown fica vazio (não bloqueia o resto da calculadora).
+  const loadAssociatedResellers = async () => {
+    try {
+      const { data, error: err } = await supabase
+        .from('associated_resellers')
+        .select('name')
+        .order('name');
+      if (err) throw err;
+      setAssociatedResellerOptions(
+        ((data || []) as { name: string }[]).map(r => ({ value: r.name, label: r.name }))
+      );
+    } catch {
+      setAssociatedResellerOptions([]);
+    }
+  };
+
+  const canRegisterResellers = isSuperAdmin || (!!user && ASSOCIATED_RESELLER_MANAGERS.has(user.id));
+
+  const handleCreateAssociatedReseller = async (inputValue: string) => {
+    const name = inputValue.trim();
+    if (!name || !user) return;
+    setCreatingReseller(true);
+    try {
+      const { data, error: err } = await supabase
+        .from('associated_resellers')
+        .insert({ name, created_by: user.id })
+        .select('name')
+        .single();
+      if (err) throw err;
+      setAssociatedResellerOptions(prev =>
+        [...prev, { value: data.name, label: data.name }].sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'))
+      );
+      setAssociatedReseller(data.name);
+    } catch (e: any) {
+      alert('Erro ao cadastrar revenda: ' + e.message);
+    } finally {
+      setCreatingReseller(false);
+    }
+  };
+
+  useEffect(() => { loadProducts(); loadModelOptions(); loadAssociatedResellers(); }, []);
 
   // Pre-fill disclaimer when toggled on or when profile loads
   useEffect(() => {
@@ -533,6 +589,7 @@ const ProductCalculator: React.FC = () => {
           quote_number: quoteNumber,
           user_id: user.id,
           reseller_name: profile?.full_name || user.email || null,
+          associated_reseller_name: associatedReseller || null,
           model_name: modelName || null,
           client_name: clientName || null,
           client_cnpj: clientCnpj || null,
@@ -578,6 +635,7 @@ const ProductCalculator: React.FC = () => {
     });
 
     setQuoteNumber(quote.quote_number);
+    setAssociatedReseller(quote.associated_reseller_name || '');
     setModelName(quote.model_name || '');
     setClientName(quote.client_name || '');
     setClientCnpj(quote.client_cnpj || '');
@@ -605,6 +663,7 @@ const ProductCalculator: React.FC = () => {
     }
     setQuoteNumber(generateQuoteNumber());
     setCart([]);
+    setAssociatedReseller('');
     setModelName('');
     setClientName('');
     setClientCnpj('');
@@ -956,6 +1015,24 @@ const ProductCalculator: React.FC = () => {
               <span className="font-black text-slate-700">Dados do Cliente</span>
             </div>
             <div className="p-6 space-y-4">
+              <div>
+                <label className={labelCls}>Revendedor Associado</label>
+                <CreatableSelect
+                  isClearable
+                  isLoading={creatingReseller}
+                  isDisabled={creatingReseller}
+                  options={associatedResellerOptions}
+                  value={associatedReseller ? { value: associatedReseller, label: associatedReseller } : null}
+                  onChange={opt => setAssociatedReseller(opt?.value ?? '')}
+                  onCreateOption={handleCreateAssociatedReseller}
+                  isValidNewOption={input => canRegisterResellers && input.trim().length > 0}
+                  placeholder="Selecione a revenda"
+                  noOptionsMessage={() => canRegisterResellers ? 'Digite para cadastrar uma nova revenda' : 'Nenhuma revenda cadastrada'}
+                  formatCreateLabel={v => `Cadastrar "${v}"`}
+                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                  styles={modelSelectStyles}
+                />
+              </div>
               <div>
                 <label className={labelCls}>Nome do Modelo</label>
                 <CreatableSelect

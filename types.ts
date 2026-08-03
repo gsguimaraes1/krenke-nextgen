@@ -157,6 +157,7 @@ export interface ResellerQuote {
   quote_number: string;
   user_id: string;
   reseller_name: string | null;
+  associated_reseller_name: string | null;
   model_name: string | null;
   client_name: string | null;
   client_cnpj: string | null;
