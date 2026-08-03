@@ -43,7 +43,7 @@ não há mais fallback de papel no cliente (autorização real vive no RLS/servi
 | `/login` | público — página de auth (`pages/Auth.tsx`) |
 | `/pgadmin/*` | **painel admin** (`pages/Admin.tsx`) — `super`, `hr` |
 | `/pgadmin/relatorio-orcamentos` | dentro do painel — **só `super`** (`components/QuoteReportView.tsx`) |
-| `/revendedor` | `super`, `reseller` (`pages/ResellerArea.tsx`) |
+| `/revendedor` | `super`, `reseller` (`reseller-area/pages/ResellerArea.tsx`) |
 | `/marketing` | `super`, `mkt` |
 | `/relatorio` | `super` **+ allowlist de userIds** (PowerBI) |
 
@@ -120,7 +120,16 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
-- **Revendedor Associado na calculadora** (2026-08-03): `components/ProductCalculator.tsx` tem campo
+- **Pasta `reseller-area/`** (2026-08-03): tudo que é exclusivo da área do revendedor (`pages/ResellerArea.tsx`,
+  `components/ProductCalculator.tsx`) foi movido pra `reseller-area/pages/` e `reseller-area/components/`
+  — preparo pra um dia virar app separado (+ app mobile React Native). Import em `App.tsx` aponta pra lá.
+  Ficou de fora (compartilhado com o resto do site, não dá pra isolar sem duplicar): `lib/r2-upload.ts`
+  (usado também por `JobApplicationForm.tsx`), `lib/supabase.ts`, `context/AuthContext.tsx`, tipos em
+  `types.ts` (`ResellerFolder`/`ResellerFile`/`ResellerQuote`/`CalculatorProduct`), `components/QuoteReportView.tsx`
+  (visão do **admin** sobre os orçamentos, não faz parte da experiência do revendedor) e os endpoints
+  `api/r2-sync.js`/`api/upload-to-r2.js`/`api/r2-ops.js` (Vercel só roteia serverless functions que estão
+  direto em `api/` na raiz — não dá pra mover pra dentro de `reseller-area/` sem quebrar o deploy).
+- **Revendedor Associado na calculadora** (2026-08-03): `reseller-area/components/ProductCalculator.tsx` tem campo
   "Revendedor Associado" (dropdown com pesquisa, `associated_resellers`). Cadastro de nova revenda
   (nome manual, texto livre — sem criar usuário) restrito a allowlist fixa hardcoded no componente
   (`ASSOCIATED_RESELLER_MANAGERS`) + `super`: `ff315d16-e719-485e-8d2f-20df219666c5`,
@@ -142,7 +151,7 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 - **Forgot-password no login** (2026-07-23): `pages/Auth.tsx` tem modo `forgot` (link "Esqueci minha
   senha" → email + Turnstile → `resetPasswordForEmail`, `redirectTo: /revendedor`). Confirmação genérica
   (não vaza existência de conta). ⚠️ recovery cai em `/revendedor` (form de troca de senha em
-  `ResellerArea.tsx`) — só `super`/`reseller` acessam; `hr`/`mkt` não teriam onde trocar. OK hoje (só
+  `reseller-area/pages/ResellerArea.tsx`) — só `super`/`reseller` acessam; `hr`/`mkt` não teriam onde trocar. OK hoje (só
   resellers usam). Se abrir reset pra outros papéis, criar página de recovery universal.
 - **Turnstile REATIVADO no login** (2026-07-18): gate + widget + `options:{captchaToken}` restaurados
   em `pages/Auth.tsx` (o erro "Troubleshoot" sumiu — widget renderiza normal nos forms públicos).
@@ -151,4 +160,6 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 - **FK `profiles`→`auth.users`** mudada pra `ON DELETE CASCADE` (migration `profiles_fk_cascade_on_user_delete`,
   2026-07-17) — antes era `NO ACTION` e bloqueava deletar usuário ("Database error deleting user").
 - Não há `src/`: `App.tsx`, `index.tsx`, `pages/`, `components/`, `lib/`, `context/`, `api/` na raiz.
+- `reseller-area/` (raiz, com `pages/` e `components/` próprios) = tudo exclusivo da área do revendedor,
+  isolado de propósito pra facilitar extração futura pra app separado. Ver gotcha acima.
 - `lib/site-packages/` = lixo de pip commitado (ver `fable.md` R1); ignorar.

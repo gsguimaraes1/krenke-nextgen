@@ -6,9 +6,9 @@ import {
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import CreatableSelect from 'react-select/creatable';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
-import { CalculatorProduct, QuoteItem, ResellerQuote } from '../types';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
+import { CalculatorProduct, QuoteItem, ResellerQuote } from '../../types';
 
 const IPI_RATE = 0.065;
 const MAX_PARK_IMAGES = 5;

@@ -29,13 +29,13 @@ import {
   EyeOff
 } from 'lucide-react';
 import ProductCalculator from '../components/ProductCalculator';
-import { supabase } from '../lib/supabase';
-import { uploadToR2, deleteFromR2 } from '../lib/r2-upload';
-import { useAuth } from '../context/AuthContext';
-import { ResellerFolder, ResellerFile, Profile } from '../types';
+import { supabase } from '../../lib/supabase';
+import { uploadToR2, deleteFromR2 } from '../../lib/r2-upload';
+import { useAuth } from '../../context/AuthContext';
+import { ResellerFolder, ResellerFile, Profile } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { compressImage, IMAGE_CONFIGS } from '../lib/image-optimization';
+import { compressImage, IMAGE_CONFIGS } from '../../lib/image-optimization';
 
 type ResellerTab = 'files' | 'profile' | 'calculator';
 

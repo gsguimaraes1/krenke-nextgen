@@ -22,7 +22,7 @@ const DownloadsPage = React.lazy(() => import('./pages/Downloads'));
 const AuthPage = React.lazy(() => import('./pages/Auth'));
 const CatalogoPage = React.lazy(() => import('./pages/Catalogo'));
 const DynamicPage = React.lazy(() => import('./pages/DynamicPage'));
-const ResellerArea = React.lazy(() => import('./pages/ResellerArea'));
+const ResellerArea = React.lazy(() => import('./reseller-area/pages/ResellerArea'));
 const LpPage = React.lazy(() => import('./pages/Lp'));
 const LpAnimadaPage = React.lazy(() => import('./pages/LpAnimada'));
 const ObrigadoPage = React.lazy(() => import('./pages/Obrigado'));
