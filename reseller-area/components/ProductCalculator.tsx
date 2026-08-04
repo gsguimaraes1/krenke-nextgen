@@ -11,6 +11,8 @@ import { useAuth } from '../../context/AuthContext';
 import { CalculatorProduct, QuoteItem, ResellerQuote } from '../../types';
 
 const IPI_RATE = 0.065;
+const AVISTA_DISCOUNT_RATE = 0.05;
+const MAX_MARGIN = 90; // acima disso a fórmula margem-sobre-venda diverge (1 - margin/100 → 0)
 const MAX_PARK_IMAGES = 5;
 const LOGO_URL = 'https://cdn.awsli.com.br/2185/2185627/arquivos/krenke-brinquedos-logo-branco-d__fogmt.webp';
 
@@ -119,6 +121,10 @@ const ProductCalculator: React.FC = () => {
 
   // Margin
   const [margin, setMargin] = useState(0);
+
+  // Forma de pagamento: à vista concede 5% de desconto (sobre o total bruto,
+  // antes do IPI); Entrada + 28 dias mantém preço cheio. Ambos têm IPI.
+  const [paymentTerm, setPaymentTerm] = useState<'avista' | 'entrada'>('entrada');
 
   // Disclaimer
   const [useFullDisclaimer, setUseFullDisclaimer] = useState(false);
@@ -257,12 +263,18 @@ const ProductCalculator: React.FC = () => {
     }
   };
 
-  const marginMult = 1 + margin / 100;
+  // Margem sobre o preço de venda (não markup sobre o custo): margem 20%
+  // sobre custo R$100 → venda R$125 (lucro R$25 = 20% de R$125, bate com o
+  // que foi digitado). Fórmula: venda = custo / (1 - margem/100).
+  const marginMult = margin > 0 ? 1 / (1 - Math.min(margin, MAX_MARGIN) / 100) : 1;
   const effectivePrice = (p: number) => p * marginMult;
 
   const totalBruto = useMemo(() => cart.reduce((s, i) => s + effectivePrice(i.unit_price) * i.qty, 0), [cart, margin]);
   const totalIPI = totalBruto * IPI_RATE;
-  const totalComIPI = totalBruto + totalIPI;
+  // À vista: 5% de desconto sobre o total bruto (não incide sobre o IPI).
+  // Entrada + 28 dias: sem desconto. Os dois pagam IPI integral.
+  const avistaDiscount = paymentTerm === 'avista' ? totalBruto * AVISTA_DISCOUNT_RATE : 0;
+  const totalComIPI = totalBruto - avistaDiscount + totalIPI;
 
   // ── CNPJ lookup ────────────────────────────────────
   const lookupCnpj = async (raw: string) => {
@@ -468,6 +480,16 @@ const ProductCalculator: React.FC = () => {
       doc.text(formatBRL(totalBruto), margin + contentW, y, { align: 'right' });
       y += 7;
 
+      if (avistaDiscount > 0) {
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(80, 80, 80);
+        doc.text(`Desconto à vista (${(AVISTA_DISCOUNT_RATE * 100).toFixed(0)}%):`, margin + contentW - 40, y, { align: 'right' });
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 130, 60);
+        doc.text(`−${formatBRL(avistaDiscount)}`, margin + contentW, y, { align: 'right' });
+        y += 7;
+      }
+
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(80, 80, 80);
       doc.text(`IPI (${(IPI_RATE * 100).toFixed(1)}%):`, margin + contentW - 40, y, { align: 'right' });
@@ -481,7 +503,10 @@ const ProductCalculator: React.FC = () => {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text('Total com IPI:', margin + contentW - 40, y + 7.5, { align: 'right' });
+      doc.text(
+        paymentTerm === 'avista' ? 'Total à Vista:' : 'Total Ent.+28d:',
+        margin + contentW - 40, y + 7.5, { align: 'right' }
+      );
       doc.text(formatBRL(totalComIPI), margin + contentW - 1, y + 7.5, { align: 'right' });
       y += 17;
 
@@ -595,6 +620,7 @@ const ProductCalculator: React.FC = () => {
           client_cnpj: clientCnpj || null,
           client_number: clientNumber || null,
           margin,
+          payment_term: paymentTerm,
           items,
           total_bruto: totalBruto,
           total_ipi: totalIPI,
@@ -641,6 +667,7 @@ const ProductCalculator: React.FC = () => {
     setClientCnpj(quote.client_cnpj || '');
     setClientNumber(quote.client_number || '');
     setMargin(Number(quote.margin) || 0);
+    setPaymentTerm(quote.payment_term === 'avista' ? 'avista' : 'entrada');
     setUseFullDisclaimer(quote.use_full_disclaimer);
     if (quote.disclaimer_text) setDisclaimerText(quote.disclaimer_text);
     setCart(restored);
@@ -669,6 +696,7 @@ const ProductCalculator: React.FC = () => {
     setClientCnpj('');
     setClientNumber('');
     setMargin(0);
+    setPaymentTerm('entrada');
     setParkImages([]);
     setSavedAt(null);
     setQuotesOpen(false);
@@ -1104,11 +1132,11 @@ const ProductCalculator: React.FC = () => {
                 <input
                   type="number"
                   min={0}
-                  max={200}
+                  max={MAX_MARGIN}
                   step={0.5}
                   value={margin === 0 ? '' : margin}
                   placeholder="0"
-                  onChange={e => setMargin(Math.max(0, parseFloat(e.target.value) || 0))}
+                  onChange={e => setMargin(Math.min(MAX_MARGIN, Math.max(0, parseFloat(e.target.value) || 0)))}
                   className="w-full pr-8 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm font-black outline-none focus:ring-2 focus:ring-[#312783] transition-all"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">%</span>
@@ -1126,6 +1154,37 @@ const ProductCalculator: React.FC = () => {
               ⚠ Margem zerada — os preços exibidos são o preço de custo, sem lucro. Confira antes de salvar/exportar.
             </p>
           )}
+
+          {/* Forma de pagamento */}
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-6 py-4">
+            <label className={labelCls}>Forma de Pagamento</label>
+            <div className="grid grid-cols-2 gap-3 mt-1">
+              <button
+                type="button"
+                onClick={() => setPaymentTerm('avista')}
+                className={`rounded-xl px-3 py-2.5 text-sm font-black transition-all border-2 ${
+                  paymentTerm === 'avista'
+                    ? 'bg-[#312783] border-[#312783] text-white'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-[#312783] hover:text-[#312783]'
+                }`}
+              >
+                À Vista
+                <span className="block text-[10px] font-bold uppercase tracking-wide opacity-80">−5% + IPI</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentTerm('entrada')}
+                className={`rounded-xl px-3 py-2.5 text-sm font-black transition-all border-2 ${
+                  paymentTerm === 'entrada'
+                    ? 'bg-[#312783] border-[#312783] text-white'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-[#312783] hover:text-[#312783]'
+                }`}
+              >
+                Ent. + 28 Dias
+                <span className="block text-[10px] font-bold uppercase tracking-wide opacity-80">valor cheio + IPI</span>
+              </button>
+            </div>
+          </div>
 
           {/* Cart summary */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -1173,6 +1232,12 @@ const ProductCalculator: React.FC = () => {
                       <span className="text-sm font-bold text-slate-500 min-w-0 break-words">Total Bruto</span>
                       <span className="font-black text-slate-800 shrink-0 tabular-nums">{formatBRL(totalBruto)}</span>
                     </div>
+                    {avistaDiscount > 0 && (
+                      <div className="flex justify-between items-baseline gap-3">
+                        <span className="text-sm font-bold text-green-600 min-w-0 break-words">Desconto à vista ({(AVISTA_DISCOUNT_RATE * 100).toFixed(0)}%)</span>
+                        <span className="font-bold text-green-600 shrink-0 tabular-nums">−{formatBRL(avistaDiscount)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-baseline gap-3">
                       <span className="text-sm font-bold text-slate-500 min-w-0 break-words">IPI ({(IPI_RATE * 100).toFixed(1)}%)</span>
                       <span className="font-bold text-slate-600 shrink-0 tabular-nums">{formatBRL(totalIPI)}</span>

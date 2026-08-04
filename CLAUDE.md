@@ -120,6 +120,15 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
+- **Margem + forma de pagamento na calculadora** (2026-08-04): `reseller-area/components/ProductCalculator.tsx`
+  tinha bug — campo "Margem" calculava markup sobre custo (`preço × (1+margem/100)`) em vez de margem sobre
+  o preço de venda. Corrigido pra `preço = custo / (1 - margem/100)` (`MAX_MARGIN = 90` trava o input pra
+  fórmula não divergir). Também entraram 2 botões de forma de pagamento (`paymentTerm`): **À Vista** (5% de
+  desconto sobre o total bruto, calculado antes/sem incidir sobre o IPI — IPI continua cheio pros dois) e
+  **Entrada + 28 Dias** (valor cheio + IPI, comportamento antigo, é o default). Refletido no resumo, no PDF
+  e persistido em `orcamento_revendas.payment_term` (nova coluna, migration `sql/orcamento_revendas_payment_term.sql`).
+  ⚠️ Migration não foi aplicada pelo Claude — mesmo motivo do gotcha abaixo (MCP Supabase desta sessão aponta
+  pra outro projeto, KinderCRM). Rodar manualmente no projeto certo (`rkimlgpwshntyzaoqxpb`).
 - **Pasta `reseller-area/`** (2026-08-03): tudo que é exclusivo da área do revendedor (`pages/ResellerArea.tsx`,
   `components/ProductCalculator.tsx`) foi movido pra `reseller-area/pages/` e `reseller-area/components/`
   — preparo pra um dia virar app separado (+ app mobile React Native). Import em `App.tsx` aponta pra lá.

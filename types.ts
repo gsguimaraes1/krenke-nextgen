@@ -163,6 +163,7 @@ export interface ResellerQuote {
   client_cnpj: string | null;
   client_number: string | null;
   margin: number;
+  payment_term: 'avista' | 'entrada' | null;
   items: QuoteItem[];
   total_bruto: number;
   total_ipi: number;
