@@ -2,9 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { BarChart3, LogOut, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import QuoteReportView from '../components/QuoteReportView';
 
+// 'powerbi' busca a URL embedada via api/report-url (allowlist server-side).
+// 'orcamentos' renderiza QuoteReportView direto — dados vêm do Supabase
+// client-side (mesmo componente usado em /pgadmin/relatorio-orcamentos).
 const REPORTS = [
-  { key: 'vendas', label: 'Relatório de Vendas' },
+  { key: 'vendas', label: 'Relatório de Vendas', type: 'powerbi' as const },
+  { key: 'orcamentos', label: 'Relatório de Orçamentos', type: 'orcamentos' as const },
 ];
 
 const RelatorioPage: React.FC = () => {
@@ -14,7 +19,16 @@ const RelatorioPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const activeType = REPORTS.find(r => r.key === activeReport)?.type;
+
   useEffect(() => {
+    if (activeType !== 'powerbi') {
+      setLoading(false);
+      setUrl(null);
+      setError(null);
+      return;
+    }
+
     let cancelled = false;
 
     const fetchUrl = async () => {
@@ -50,7 +64,7 @@ const RelatorioPage: React.FC = () => {
 
     fetchUrl();
     return () => { cancelled = true; };
-  }, [activeReport]);
+  }, [activeReport, activeType]);
 
   return (
     <div className="min-h-screen bg-[#0F0C29] flex flex-col">
@@ -84,28 +98,36 @@ const RelatorioPage: React.FC = () => {
         </button>
       </header>
 
-      <main className="flex-grow relative">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 border-4 border-krenke-orange border-t-transparent rounded-full animate-spin"></div>
+      <main className="flex-grow relative overflow-y-auto">
+        {activeType === 'orcamentos' ? (
+          <div className="min-h-full bg-gray-50 p-6 md:p-10">
+            <QuoteReportView />
           </div>
-        )}
+        ) : (
+          <>
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-krenke-orange border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
 
-        {!loading && error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/70">
-            <AlertTriangle size={32} className="text-red-400" />
-            <p className="font-bold">{error}</p>
-          </div>
-        )}
+            {!loading && error && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/70">
+                <AlertTriangle size={32} className="text-red-400" />
+                <p className="font-bold">{error}</p>
+              </div>
+            )}
 
-        {!loading && !error && url && (
-          <iframe
-            key={activeReport}
-            title={REPORTS.find((r) => r.key === activeReport)?.label || 'Relatório'}
-            src={url}
-            className="w-full h-full absolute inset-0 border-0"
-            allowFullScreen
-          />
+            {!loading && !error && url && (
+              <iframe
+                key={activeReport}
+                title={REPORTS.find((r) => r.key === activeReport)?.label || 'Relatório'}
+                src={url}
+                className="w-full h-full absolute inset-0 border-0"
+                allowFullScreen
+              />
+            )}
+          </>
         )}
       </main>
     </div>

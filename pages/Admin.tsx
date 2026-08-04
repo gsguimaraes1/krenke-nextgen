@@ -5,6 +5,7 @@ import { Product, AppScript, Page, NavItem, Profile, JobOpening, JobApplication 
 import AdminLayout from '../components/AdminLayout';
 import RichTextEditor from '../components/RichTextEditor';
 import ProductSpecsManager from '../components/ProductSpecsManager';
+import QuoteReportView from '../components/QuoteReportView';
 import { useAuth } from '../context/AuthContext';
 import { compressImage, IMAGE_CONFIGS } from '../lib/image-optimization';
 import {
@@ -1419,6 +1420,7 @@ const AdminPage: React.FC = () => {
     const location = useLocation();
     const activeView = useMemo(() => {
         const path = location.pathname;
+        if (path.includes('/relatorio-orcamentos')) return 'relatorio-orcamentos';
         if (path.includes('/produtos')) return 'produtos';
         if (path.includes('/paginas')) return 'paginas';
         if (path.includes('/blog')) return 'blog';
@@ -2226,6 +2228,24 @@ const AdminPage: React.FC = () => {
                     )}
                     {activeView === 'usuarios' && (
                         <UsersView users={profiles} onUpdateRole={updateUserRole} onCreateUser={handleCreateUser} onResendInvite={handleResendInvite} onDeleteUser={handleDeleteUser} />
+                    )}
+                    {/*
+                      Relatório de orçamentos da calculadora do revendedor. Restrito a `super`:
+                      o RLS de `orcamento_revendas` só libera todas as linhas pra esse papel —
+                      outro papel veria apenas os próprios orçamentos e leria o relatório errado.
+                    */}
+                    {activeView === 'relatorio-orcamentos' && (
+                        role === 'super' ? (
+                            <QuoteReportView />
+                        ) : (
+                            <div className="bg-white p-10 rounded-2xl border shadow-sm text-center">
+                                <ShieldCheck size={56} className="text-gray-300 mx-auto mb-4" />
+                                <h2 className="text-xl font-black text-krenke-blue mb-2">Acesso restrito</h2>
+                                <p className="text-sm text-gray-500 font-medium">
+                                    O relatório de orçamentos está disponível apenas para Super Admin.
+                                </p>
+                            </div>
+                        )
                     )}
                     {activeView === 'scripts' && (
                         <ScriptsView

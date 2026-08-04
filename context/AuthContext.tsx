@@ -11,6 +11,10 @@ interface AuthContextType {
     profile: any | null;
     isSuperAdmin: boolean;
     loading: boolean;
+    // true entre o clique no link de redefinição de senha (evento PASSWORD_RECOVERY do Supabase)
+    // e a troca efetiva da senha — usado pra forçar o usuário na tela de "nova senha".
+    passwordRecovery: boolean;
+    clearPasswordRecovery: () => void;
     signOut: () => Promise<void>;
     refreshProfile: () => Promise<void>;
 }
@@ -23,6 +27,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [role, setRole] = useState<UserRole | null>(null);
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [passwordRecovery, setPasswordRecovery] = useState(false);
+    const clearPasswordRecovery = () => setPasswordRecovery(false);
 
     const fetchProfile = async (userId: string) => {
         if (!supabase) return null;
@@ -90,7 +96,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            // Link de "esqueci minha senha": Supabase troca o token da URL por uma sessão
+            // válida e dispara esse evento — sem isso o usuário só "loga" e nunca é levado
+            // pra trocar a senha.
+            if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true);
             handleAuthStateChange(session);
         });
 
@@ -105,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(null);
         setRole(null);
         setProfile(null);
+        setPasswordRecovery(false);
         window.location.href = '/login';
     };
 
@@ -116,6 +127,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             profile,
             isSuperAdmin: role === 'super',
             loading,
+            passwordRecovery,
+            clearPasswordRecovery,
             signOut,
             refreshProfile
         }}>

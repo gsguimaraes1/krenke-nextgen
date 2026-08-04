@@ -9,6 +9,12 @@ import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string;
 
+// Lockout local de login — defesa-em-profundidade na UI contra brute force de senha.
+// (A proteção real vive no servidor: Turnstile verificado no Supabase + rate limit do Auth.)
+const LOGIN_GUARD_KEY = 'krenke_login_guard';
+const MAX_ATTEMPTS = 5; // falhas antes do 1º bloqueio
+const BASE_LOCK_MS = 30_000; // 30s no 1º bloqueio, dobra a cada novo (30s → 1min → 2min…)
+
 // ── Images ─────────────────────────────────────────────────────────────────
 const imageModules = import.meta.glob('../assets/login/*.webp', { eager: true }) as Record<
   string,
@@ -53,8 +59,9 @@ function GlassInput({ children }: { children: React.ReactNode }) {
 // ── Login spark button ─────────────────────────────────────────────────────
 type BtnStatus = 'idle' | 'saving' | 'saved';
 
-function LoginButton({ loading }: { loading: boolean }) {
+function LoginButton({ loading, locked = false, secondsLeft = 0 }: { loading: boolean; locked?: boolean; secondsLeft?: number }) {
   const [btnStatus, setBtnStatus] = useState<BtnStatus>('idle');
+  const disabled = loading || locked;
 
   useEffect(() => {
     if (loading && btnStatus === 'idle') setBtnStatus('saving');
@@ -69,7 +76,7 @@ function LoginButton({ loading }: { loading: boolean }) {
       <motion.button
         id="btn-entrar"
         type="submit"
-        disabled={loading}
+        disabled={disabled}
         aria-label="Entrar no Sistema"
         animate={btnStatus}
         variants={{
@@ -77,13 +84,13 @@ function LoginButton({ loading }: { loading: boolean }) {
           saving: { scale: 1 },
           saved:  { scale: [1, 1.05, 1], transition: { duration: 0.25 } },
         }}
-        whileHover={!loading ? { scale: 1.02 } : {}}
-        whileTap={!loading ? { scale: 0.97 } : {}}
+        whileHover={!disabled ? { scale: 1.02 } : {}}
+        whileTap={!disabled ? { scale: 0.97 } : {}}
         className="group relative grid w-full overflow-hidden rounded-2xl px-6 py-4 btn-white-border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60"
         style={{ minHeight: 56 }}
       >
         {/* Spark ring — idle only */}
-        {!loading && (
+        {!disabled && (
           <span>
             <span className="spark mask-gradient absolute inset-0 h-full w-full animate-flip overflow-hidden rounded-2xl [mask:linear-gradient(black,_transparent_50%)] before:absolute before:aspect-square before:w-[200%] before:rotate-[-90deg] before:animate-rotate before:bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(243,146,0,0.9)_360deg)] before:content-[''] before:[inset:0_auto_auto_50%] before:[translate:-50%_-15%]" />
           </span>
@@ -108,9 +115,9 @@ function LoginButton({ loading }: { loading: boolean }) {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18 }}
           >
-            {loading ? 'Entrando…' : 'Entrar no Sistema'}
+            {locked ? `Bloqueado · ${secondsLeft}s` : loading ? 'Entrando…' : 'Entrar no Sistema'}
           </motion.span>
-          {!loading && (
+          {!disabled && (
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
           )}
         </span>
@@ -164,6 +171,36 @@ const AuthPage: React.FC = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
 
+  // ── Lockout local contra brute force ──────────────────────────────────────
+  const [attempts, setAttempts] = useState(0);
+  const [lockUntil, setLockUntil] = useState<number | null>(null);
+  const [nowTs, setNowTs] = useState(() => Date.now());
+
+  const isLocked = lockUntil != null && nowTs < lockUntil;
+  const secondsLeft = isLocked ? Math.ceil((lockUntil! - nowTs) / 1000) : 0;
+
+  const persistGuard = (a: number, l: number | null) => {
+    try { localStorage.setItem(LOGIN_GUARD_KEY, JSON.stringify({ attempts: a, lockUntil: l })); } catch { /* storage indisponível */ }
+  };
+
+  const resetGuard = () => {
+    setAttempts(0);
+    setLockUntil(null);
+    try { localStorage.removeItem(LOGIN_GUARD_KEY); } catch { /* noop */ }
+  };
+
+  const registerFailure = () => {
+    const next = attempts + 1;
+    let lock = lockUntil;
+    if (next >= MAX_ATTEMPTS) {
+      const overflow = next - MAX_ATTEMPTS; // 0, 1, 2… → 30s, 1min, 2min…
+      lock = Date.now() + BASE_LOCK_MS * Math.pow(2, overflow);
+    }
+    setAttempts(next);
+    setLockUntil(lock);
+    persistGuard(next, lock);
+  };
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -172,6 +209,25 @@ const AuthPage: React.FC = () => {
       if (result.data.session) navigate('/pgadmin', { replace: true });
     });
   }, [navigate]);
+
+  // Restaura estado do lockout (persiste entre reloads — reload não zera o bloqueio)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LOGIN_GUARD_KEY);
+      if (!raw) return;
+      const g = JSON.parse(raw) as { attempts?: number; lockUntil?: number | null };
+      if (typeof g.attempts === 'number') setAttempts(g.attempts);
+      if (g.lockUntil && g.lockUntil > Date.now()) setLockUntil(g.lockUntil);
+      else if (g.lockUntil) persistGuard(g.attempts ?? 0, null);
+    } catch { /* json inválido */ }
+  }, []);
+
+  // Tick do contador enquanto bloqueado
+  useEffect(() => {
+    if (!lockUntil) return;
+    const id = setInterval(() => setNowTs(Date.now()), 500);
+    return () => clearInterval(id);
+  }, [lockUntil]);
 
   useEffect(() => {
     if (LOGIN_IMAGES.length === 0) return;
@@ -206,6 +262,11 @@ const AuthPage: React.FC = () => {
       return;
     }
 
+    if (isLocked) {
+      setError(`Muitas tentativas malsucedidas. Aguarde ${secondsLeft}s antes de tentar novamente.`);
+      return;
+    }
+
     if (!captchaToken) {
       setError('Complete a verificação de segurança antes de entrar.');
       return;
@@ -215,6 +276,7 @@ const AuthPage: React.FC = () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken: captchaToken ?? undefined } });
       if (error) throw error;
+      resetGuard(); // credenciais corretas → zera o contador de falhas
       const { data: factors, error: mfaError } = await supabase.auth.mfa.listFactors();
       if (mfaError) throw mfaError;
       const totpFactor = factors.all.find(
@@ -231,6 +293,9 @@ const AuthPage: React.FC = () => {
         navigate('/pgadmin');
       }
     } catch (err: any) {
+      const msg = (err?.message || '').toLowerCase();
+      // Só conta como tentativa de senha malsucedida; erro de rede não penaliza o usuário.
+      if (!msg.includes('network') && !msg.includes('fetch')) registerFailure();
       setError(translateError(err.message));
       setCaptchaToken(null);
       turnstileRef.current?.reset();
@@ -519,9 +584,18 @@ const AuthPage: React.FC = () => {
                 options={{ size: 'flexible', theme: 'dark', retry: 'auto', refreshExpired: 'auto' }}
               />
 
+              {/* Aviso de tentativas restantes (antes do bloqueio) */}
+              {!isLocked && attempts > 0 && attempts < MAX_ATTEMPTS && (
+                <p className="text-center text-[11px] font-semibold text-amber-400/90">
+                  {MAX_ATTEMPTS - attempts === 1
+                    ? 'Última tentativa antes do bloqueio temporário.'
+                    : `${MAX_ATTEMPTS - attempts} tentativas restantes antes do bloqueio.`}
+                </p>
+              )}
+
               {/* Submit */}
               <div className="animate-element animate-delay-500 pt-2">
-                <LoginButton loading={loading} />
+                <LoginButton loading={loading} locked={isLocked} secondsLeft={secondsLeft} />
               </div>
 
               {/* Bottom tag */}

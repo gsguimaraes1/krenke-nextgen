@@ -42,7 +42,8 @@ não há mais fallback de papel no cliente (autorização real vive no RLS/servi
 | `/lp`, `/obrigado`, `/obrigado-curriculo` | público, sem Layout |
 | `/login` | público — página de auth (`pages/Auth.tsx`) |
 | `/pgadmin/*` | **painel admin** (`pages/Admin.tsx`) — `super`, `hr` |
-| `/revendedor` | `super`, `reseller` (`pages/ResellerArea.tsx`) |
+| `/pgadmin/relatorio-orcamentos` | dentro do painel — **só `super`** (`components/QuoteReportView.tsx`) |
+| `/revendedor` | `super`, `reseller` (`reseller-area/pages/ResellerArea.tsx`) |
 | `/marketing` | `super`, `mkt` |
 | `/relatorio` | `super` **+ allowlist de userIds** (PowerBI) |
 
@@ -69,7 +70,11 @@ Ações privilegiadas do painel rodam **server-side** com service role (bypassa 
 
 `profiles` (papéis, FK `id`→`auth.users` **ON DELETE CASCADE**), `products`, `calculator_products`,
 `leads` (461+), `posts` (blog), `app_scripts` (scripts injetados via `ScriptInjector`), `site_settings`,
-`reseller_folders`/`reseller_files` (área revendedor), `job_openings`/`job_applications` (RH).
+`reseller_folders`/`reseller_files` (área revendedor), `job_openings`/`job_applications` (RH),
+`orcamento_revendas` (log de orçamentos da calculadora do revendedor — DDL em `sql/orcamento_revendas.sql`;
+RLS: dono OU `public.is_super_admin()`; `upsert` por `quote_number`, então reeditar não gera linha nova),
+`associated_resellers` (lista manual de revendas p/ campo "Revendedor Associado" da calculadora — DDL em
+`sql/associated_resellers.sql`; select livre p/ autenticado, insert só allowlist fixa + `super`, update/delete só `super`).
 
 - **Ferramentas Supabase disponíveis via MCP** (`Supabase- Krenke Brinquedos`): `execute_sql`,
   `apply_migration`, `list_tables`, `get_advisors`, `get_logs` etc. Use pra inspecionar/alterar o banco.
@@ -115,13 +120,47 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
+- **Margem + forma de pagamento na calculadora** (2026-08-04): `reseller-area/components/ProductCalculator.tsx`
+  tinha bug — campo "Margem" calculava markup sobre custo (`preço × (1+margem/100)`) em vez de margem sobre
+  o preço de venda. Corrigido pra `preço = custo / (1 - margem/100)` (`MAX_MARGIN = 90` trava o input pra
+  fórmula não divergir). Também entraram 2 botões de forma de pagamento (`paymentTerm`): **À Vista** (5% de
+  desconto sobre o total bruto, calculado antes/sem incidir sobre o IPI — IPI continua cheio pros dois) e
+  **Entrada + 28 Dias** (valor cheio + IPI, comportamento antigo, é o default). Refletido no resumo, no PDF
+  e persistido em `orcamento_revendas.payment_term` (nova coluna, migration `sql/orcamento_revendas_payment_term.sql`).
+  ⚠️ Migration não foi aplicada pelo Claude — mesmo motivo do gotcha abaixo (MCP Supabase desta sessão aponta
+  pra outro projeto, KinderCRM). Rodar manualmente no projeto certo (`rkimlgpwshntyzaoqxpb`).
+- **Pasta `reseller-area/`** (2026-08-03): tudo que é exclusivo da área do revendedor (`pages/ResellerArea.tsx`,
+  `components/ProductCalculator.tsx`) foi movido pra `reseller-area/pages/` e `reseller-area/components/`
+  — preparo pra um dia virar app separado (+ app mobile React Native). Import em `App.tsx` aponta pra lá.
+  Ficou de fora (compartilhado com o resto do site, não dá pra isolar sem duplicar): `lib/r2-upload.ts`
+  (usado também por `JobApplicationForm.tsx`), `lib/supabase.ts`, `context/AuthContext.tsx`, tipos em
+  `types.ts` (`ResellerFolder`/`ResellerFile`/`ResellerQuote`/`CalculatorProduct`), `components/QuoteReportView.tsx`
+  (visão do **admin** sobre os orçamentos, não faz parte da experiência do revendedor) e os endpoints
+  `api/r2-sync.js`/`api/upload-to-r2.js`/`api/r2-ops.js` (Vercel só roteia serverless functions que estão
+  direto em `api/` na raiz — não dá pra mover pra dentro de `reseller-area/` sem quebrar o deploy).
+- **Revendedor Associado na calculadora** (2026-08-03): `reseller-area/components/ProductCalculator.tsx` tem campo
+  "Revendedor Associado" (dropdown com pesquisa, `associated_resellers`). Cadastro de nova revenda
+  (nome manual, texto livre — sem criar usuário) restrito a allowlist fixa hardcoded no componente
+  (`ASSOCIATED_RESELLER_MANAGERS`) + `super`: `ff315d16-e719-485e-8d2f-20df219666c5`,
+  `1757670c-5ab0-4642-82b3-9acdbfa14701`, `40bfce8e-fe27-44e2-bda3-cf6273fc6fea`,
+  `d19952b5-151c-4943-bf74-1a07b199ba75`. Mesmo padrão de allowlist do `/relatorio`. **Pendente:**
+  associar login de revendedor à revenda da lista (por ora é só nome solto, snapshot em
+  `orcamento_revendas.associated_reseller_name`). ⚠️ Migration `sql/associated_resellers.sql` não
+  foi aplicada pelo Claude — MCP Supabase conectado nesta sessão aponta pra outro projeto
+  (KinderCRM, não Krenke Brinquedos). Rodar manualmente no projeto certo (`rkimlgpwshntyzaoqxpb`).
+- **Relatório de orçamentos** (2026-07-27): `components/QuoteReportView.tsx` em `/pgadmin/relatorio-orcamentos`
+  (nav só pra `super`, render também gated por `role === 'super'`). Lê `orcamento_revendas` client-side
+  (filtro de período server-side via `.gte('created_at')`, teto 5000 linhas), resolve autor por
+  `reseller_name` (snapshot) → `profiles.full_name/email` → id abreviado. KPIs + ranking por revendedor +
+  barras por mês + tabela + CSV (`;` e BOM pro Excel pt-BR). ⚠️ Não confundir com a aba **Leads**
+  ("Orçamentos Recebidos" = form público `/orcamento` → tabela `leads`).
 - **Resend SMTP ativo** (2026-07-23): emails do Auth entregam via Resend (ver Integrações). Testado
   ponta-a-ponta: reset de senha → Supabase → Resend (`POST /emails` 200) → inbox. Sender atual
   `gabriel@krenke.com.br` (trocar pra `no-reply@`); templates ainda default em inglês (traduzir depois).
 - **Forgot-password no login** (2026-07-23): `pages/Auth.tsx` tem modo `forgot` (link "Esqueci minha
   senha" → email + Turnstile → `resetPasswordForEmail`, `redirectTo: /revendedor`). Confirmação genérica
   (não vaza existência de conta). ⚠️ recovery cai em `/revendedor` (form de troca de senha em
-  `ResellerArea.tsx`) — só `super`/`reseller` acessam; `hr`/`mkt` não teriam onde trocar. OK hoje (só
+  `reseller-area/pages/ResellerArea.tsx`) — só `super`/`reseller` acessam; `hr`/`mkt` não teriam onde trocar. OK hoje (só
   resellers usam). Se abrir reset pra outros papéis, criar página de recovery universal.
 - **Turnstile REATIVADO no login** (2026-07-18): gate + widget + `options:{captchaToken}` restaurados
   em `pages/Auth.tsx` (o erro "Troubleshoot" sumiu — widget renderiza normal nos forms públicos).
@@ -130,4 +169,6 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 - **FK `profiles`→`auth.users`** mudada pra `ON DELETE CASCADE` (migration `profiles_fk_cascade_on_user_delete`,
   2026-07-17) — antes era `NO ACTION` e bloqueava deletar usuário ("Database error deleting user").
 - Não há `src/`: `App.tsx`, `index.tsx`, `pages/`, `components/`, `lib/`, `context/`, `api/` na raiz.
+- `reseller-area/` (raiz, com `pages/` e `components/` próprios) = tudo exclusivo da área do revendedor,
+  isolado de propósito pra facilitar extração futura pra app separado. Ver gotcha acima.
 - `lib/site-packages/` = lixo de pip commitado (ver `fable.md` R1); ignorar.
