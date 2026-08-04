@@ -52,7 +52,7 @@ const SLUG_TO_TAB: Record<string, ResellerTab> = {
 };
 
 const ResellerArea: React.FC = () => {
-  const { user, profile: authProfile, refreshProfile, role, isSuperAdmin } = useAuth();
+  const { user, profile: authProfile, refreshProfile, role, isSuperAdmin, passwordRecovery, clearPasswordRecovery } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -64,6 +64,14 @@ const ResellerArea: React.FC = () => {
   useEffect(() => {
     if (!SLUG_TO_TAB[slug]) navigate('/revendedor/arquivos', { replace: true });
   }, [slug, navigate]);
+
+  // Veio de um link de "esqueci minha senha" → trava na aba Perfil até trocar a senha,
+  // em vez de deixar a pessoa cair direto nos arquivos sem perceber que devia redefinir.
+  useEffect(() => {
+    if (passwordRecovery && slug !== TAB_SLUGS.profile) {
+      navigate('/revendedor/perfil', { replace: true });
+    }
+  }, [passwordRecovery, slug, navigate]);
 
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [folders, setFolders] = useState<ResellerFolder[]>([]);
@@ -464,17 +472,29 @@ const ResellerArea: React.FC = () => {
           </div>
         </div>
 
+        {/* Aviso: sessão veio de link de redefinição de senha */}
+        {passwordRecovery && (
+          <div className="mb-8 flex items-center gap-3 rounded-2xl border-2 border-krenke-orange bg-krenke-orange/10 px-6 py-4 text-krenke-orange font-bold">
+            <Lock size={20} className="shrink-0" />
+            Defina sua nova senha abaixo para continuar.
+          </div>
+        )}
+
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 mb-12 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm w-fit">
-          <button 
+          <button
             onClick={() => setActiveTab('files')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'files' ? 'bg-[#312783] text-white shadow-lg' : 'text-slate-400 hover:text-[#312783] hover:bg-slate-50'}`}
+            disabled={passwordRecovery}
+            title={passwordRecovery ? 'Defina sua nova senha para continuar' : undefined}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'files' ? 'bg-[#312783] text-white shadow-lg' : 'text-slate-400 hover:text-[#312783] hover:bg-slate-50'} disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-400`}
           >
             <HardDrive size={20} /> Arquivos
           </button>
           <button
             onClick={() => setActiveTab('calculator')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'calculator' ? 'bg-[#312783] text-white shadow-lg' : 'text-slate-400 hover:text-[#312783] hover:bg-slate-50'}`}
+            disabled={passwordRecovery}
+            title={passwordRecovery ? 'Defina sua nova senha para continuar' : undefined}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'calculator' ? 'bg-[#312783] text-white shadow-lg' : 'text-slate-400 hover:text-[#312783] hover:bg-slate-50'} disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-400`}
           >
             <Calculator size={20} /> Calculadora
           </button>
@@ -758,6 +778,8 @@ const ResellerArea: React.FC = () => {
                 onSave={handleSaveProfile}
                 onProfileChange={updates => setCurrentUserProfile(prev => ({ ...prev, ...updates }))}
                 onImageUpload={handleAvatarUpload}
+                forceRecovery={passwordRecovery}
+                onPasswordChanged={clearPasswordRecovery}
               />
             </motion.div>
           )}
@@ -937,13 +959,17 @@ const ProfileView = ({
   onSave,
   saving,
   onProfileChange,
-  onImageUpload
+  onImageUpload,
+  forceRecovery = false,
+  onPasswordChanged
 }: {
   profile: Partial<Profile>,
   onSave: () => void,
   saving: boolean,
   onProfileChange: (updates: Partial<Profile>) => void,
-  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  forceRecovery?: boolean,
+  onPasswordChanged?: () => void
 }) => {
   const [newPassword, setNewPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
@@ -951,6 +977,7 @@ const ProfileView = ({
   const [showConfirm, setShowConfirm] = React.useState(false);
   const [pwSaving, setPwSaving] = React.useState(false);
   const [pwMsg, setPwMsg] = React.useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const { signOut } = useAuth();
 
   const handleChangePassword = async () => {
     if (!newPassword || newPassword.length < 6) {
@@ -964,13 +991,16 @@ const ProfileView = ({
     setPwSaving(true);
     setPwMsg(null);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setPwSaving(false);
     if (error) {
+      setPwSaving(false);
       setPwMsg({ type: 'err', text: error.message });
     } else {
-      setPwMsg({ type: 'ok', text: 'Senha alterada com sucesso!' });
       setNewPassword('');
       setConfirmPassword('');
+      onPasswordChanged?.();
+      setPwMsg({ type: 'ok', text: 'Senha alterada com sucesso! Faça login novamente com a nova senha…' });
+      // Senha trocada invalida a sessão atual por segurança — força novo login.
+      setTimeout(() => { void signOut(); }, 1800);
     }
   };
 
@@ -1061,7 +1091,7 @@ const ProfileView = ({
                   <Lock size={22} className="text-[#312783]" />
               </div>
               <div>
-                  <h2 className="text-xl font-black text-slate-900">Alterar Senha</h2>
+                  <h2 className="text-xl font-black text-slate-900">{forceRecovery ? 'Defina sua nova senha' : 'Alterar Senha'}</h2>
                   <p className="text-sm text-slate-400">Mínimo 6 caracteres</p>
               </div>
           </div>
@@ -1070,6 +1100,7 @@ const ProfileView = ({
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Nova Senha</label>
                   <div className="relative">
                       <input
+                          autoFocus={forceRecovery}
                           type={showNew ? 'text' : 'password'}
                           className="w-full p-4 pr-12 bg-slate-50 border-2 border-transparent focus:border-krenke-orange rounded-2xl font-bold text-slate-900 transition-all outline-none"
                           value={newPassword}
