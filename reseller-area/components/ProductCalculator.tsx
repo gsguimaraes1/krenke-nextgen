@@ -126,6 +126,9 @@ const ProductCalculator: React.FC = () => {
   // antes do IPI); Entrada + 28 dias mantém preço cheio. Ambos têm IPI.
   const [paymentTerm, setPaymentTerm] = useState<'avista' | 'entrada'>('entrada');
 
+  // Oculta preços unitários (tabela, carrinho e PDF) — mostra só os totais.
+  const [hideUnitPrices, setHideUnitPrices] = useState(false);
+
   // Disclaimer
   const [useFullDisclaimer, setUseFullDisclaimer] = useState(false);
   const [disclaimerText, setDisclaimerText] = useState('');
@@ -440,8 +443,10 @@ const ProductCalculator: React.FC = () => {
       doc.text('CÓD.', margin + 2, y + 5.5);
       doc.text('DESCRIÇÃO', margin + 22, y + 5.5);
       doc.text('QTD', margin + contentW - 66, y + 5.5, { align: 'right' });
-      doc.text('VL. UNIT.', margin + contentW - 40, y + 5.5, { align: 'right' });
-      doc.text('SUBTOTAL', margin + contentW, y + 5.5, { align: 'right' });
+      if (!hideUnitPrices) {
+        doc.text('VL. UNIT.', margin + contentW - 40, y + 5.5, { align: 'right' });
+        doc.text('SUBTOTAL', margin + contentW, y + 5.5, { align: 'right' });
+      }
       y += 8;
 
       doc.setFont('helvetica', 'normal');
@@ -457,8 +462,10 @@ const ProductCalculator: React.FC = () => {
         const desc = item.description.length > 60 ? item.description.substring(0, 57) + '...' : item.description;
         doc.text(desc, margin + 22, y + 5);
         doc.text(String(item.qty), margin + contentW - 66, y + 5, { align: 'right' });
-        doc.text(formatBRL(ep), margin + contentW - 40, y + 5, { align: 'right' });
-        doc.text(formatBRL(ep * item.qty), margin + contentW, y + 5, { align: 'right' });
+        if (!hideUnitPrices) {
+          doc.text(formatBRL(ep), margin + contentW - 40, y + 5, { align: 'right' });
+          doc.text(formatBRL(ep * item.qty), margin + contentW, y + 5, { align: 'right' });
+        }
         y += 7.5;
       });
 
@@ -982,7 +989,7 @@ const ProductCalculator: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-black text-slate-800 text-sm leading-snug line-clamp-2 break-words" title={product.description}>{product.description}</p>
                     <p className="text-xs text-slate-400 font-bold mt-0.5">
-                      Cód. {product.code} • {formatBRL(effectivePrice(product.unit_price))}
+                      Cód. {product.code}{!hideUnitPrices && ` • ${formatBRL(effectivePrice(product.unit_price))}`}
                     </p>
                   </div>
 
@@ -1022,7 +1029,7 @@ const ProductCalculator: React.FC = () => {
                     >+</button>
                   </div>
 
-                  {qty > 0 && (
+                  {qty > 0 && !hideUnitPrices && (
                     <div className="w-24 text-right shrink-0">
                       <p className="text-sm font-black text-[#312783] tabular-nums">{formatBRL(effectivePrice(product.unit_price) * qty)}</p>
                     </div>
@@ -1188,14 +1195,23 @@ const ProductCalculator: React.FC = () => {
 
           {/* Cart summary */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
-              <Calculator size={18} className="text-[#312783]" />
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+              <Calculator size={18} className="text-[#312783] shrink-0" />
               <div className="min-w-0">
                 <span className="font-black text-slate-700 block">Resumo</span>
                 {modelName && (
                   <span className="text-xs font-bold text-slate-400 truncate block" title={modelName}>{modelName}</span>
                 )}
               </div>
+              <label className="ml-auto shrink-0 flex items-center gap-1.5 text-xs font-bold text-slate-500 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={hideUnitPrices}
+                  onChange={e => setHideUnitPrices(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-slate-300 accent-[#312783]"
+                />
+                Ocultar valores
+              </label>
               {cart.length > 0 && (
                 <button
                   onClick={() => { if (confirm('Remover todos os itens do carrinho? Esta ação não pode ser desfeita.')) setCart([]); }}
@@ -1218,11 +1234,13 @@ const ProductCalculator: React.FC = () => {
                         </p>
                         <div className="flex justify-between items-baseline gap-2 mt-1">
                           <span className="text-xs text-slate-400 font-bold">
-                            {item.qty}× {formatBRL(effectivePrice(item.unit_price))}
+                            {hideUnitPrices ? `${item.qty} un.` : `${item.qty}× ${formatBRL(effectivePrice(item.unit_price))}`}
                           </span>
-                          <span className="text-sm font-black text-[#312783] shrink-0 tabular-nums">
-                            {formatBRL(effectivePrice(item.unit_price) * item.qty)}
-                          </span>
+                          {!hideUnitPrices && (
+                            <span className="text-sm font-black text-[#312783] shrink-0 tabular-nums">
+                              {formatBRL(effectivePrice(item.unit_price) * item.qty)}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}
