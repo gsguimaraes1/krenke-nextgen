@@ -647,24 +647,59 @@ const ProductCalculator: React.FC = () => {
   };
 
   /**
-   * Repõe o orçamento na calculadora. Itens são reconciliados por `code`
-   * contra a tabela atual — produto removido do catálogo é descartado, e o
-   * preço exibido passa a ser o preço atual, não o congelado.
+   * Repõe o orçamento na calculadora. Itens são reconciliados contra a
+   * tabela atual — produto removido do catálogo é descartado, e o preço
+   * exibido passa a ser o preço atual, não o congelado.
+   *
+   * O catálogo tem códigos duplicados entre variantes (ex.: "200565" é usado
+   * por 4 telhados diferentes — roto chinês, roto sextavado, roto redondo,
+   * redondo cone). Reconciliar só por `code` pega sempre a última variante
+   * daquele código (ordem alfabética da query), trocando silenciosamente o
+   * item pro produto errado ao reabrir o orçamento — ex.: telhado roto
+   * redondo virando "roto sextavado" porque S vem depois na ordenação.
+   * Por isso o match prioriza `code` + `description` exata; só cai pro
+   * código sozinho quando ele é inequívoco (um único produto com esse
+   * código) — caso contrário mantém os dados congelados do item salvo em
+   * vez de arriscar resolver pro produto errado.
    */
   const handleLoadQuote = (quote: ResellerQuote) => {
     if (cart.length > 0 && quote.quote_number !== quoteNumber && !savedAt) {
       const ok = confirm('Você tem itens no orçamento atual que ainda não foram salvos. Ao carregar outro orçamento, esses itens serão perdidos. Deseja continuar?');
       if (!ok) return;
     }
-    const byCode: Record<string, CalculatorProduct> = {};
-    products.forEach(p => { byCode[p.code] = p; });
+    const byCode: Record<string, CalculatorProduct[]> = {};
+    products.forEach(p => { (byCode[p.code] ||= []).push(p); });
 
     const restored: CartItem[] = [];
     const missing: string[] = [];
+    const ambiguous: string[] = [];
     (quote.items || []).forEach(item => {
-      const product = byCode[item.code];
-      if (product) restored.push({ ...product, qty: item.qty });
-      else missing.push(item.code);
+      const candidates = byCode[item.code];
+      if (!candidates || candidates.length === 0) {
+        missing.push(item.code);
+        return;
+      }
+      const exact = candidates.find(p => p.description === item.description);
+      if (exact) {
+        restored.push({ ...exact, qty: item.qty });
+      } else if (candidates.length === 1) {
+        restored.push({ ...candidates[0], qty: item.qty });
+      } else {
+        // Código ambíguo e a descrição salva não bate com nenhuma variante
+        // atual — mantém o item como estava no orçamento (preço congelado)
+        // em vez de adivinhar qual das variantes é a certa.
+        ambiguous.push(item.description);
+        restored.push({
+          id: `frozen-${item.code}-${restored.length}`,
+          code: item.code,
+          description: item.description,
+          unit_price: item.unit_price,
+          active: true,
+          created_at: '',
+          updated_at: '',
+          qty: item.qty,
+        });
+      }
     });
 
     setQuoteNumber(quote.quote_number);
@@ -686,6 +721,12 @@ const ProductCalculator: React.FC = () => {
       alert(
         `Orçamento carregado. ${missing.length} item(ns) não estão mais no catálogo e foram ignorados:\n` +
         missing.join(', ')
+      );
+    }
+    if (ambiguous.length > 0) {
+      alert(
+        `Orçamento carregado. ${ambiguous.length} item(ns) têm código duplicado no catálogo — mantido o preço salvo no orçamento em vez do preço atual:\n` +
+        ambiguous.join(', ')
       );
     }
   };
