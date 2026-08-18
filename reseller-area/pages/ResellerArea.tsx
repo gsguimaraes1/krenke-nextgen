@@ -26,9 +26,11 @@ import {
   Calculator,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  Map
 } from 'lucide-react';
 import ProductCalculator from '../components/ProductCalculator';
+import RevendasMap from '../components/RevendasMap';
 import { supabase } from '../../lib/supabase';
 import { uploadToR2, deleteFromR2 } from '../../lib/r2-upload';
 import { useAuth } from '../../context/AuthContext';
@@ -37,17 +39,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { compressImage, IMAGE_CONFIGS } from '../../lib/image-optimization';
 
-type ResellerTab = 'files' | 'profile' | 'calculator';
+type ResellerTab = 'files' | 'profile' | 'calculator' | 'map';
 
-// Cada aba tem sua própria URL: /revendedor/arquivos, /calculadora, /perfil
+// Cada aba tem sua própria URL: /revendedor/arquivos, /calculadora, /mapa, /perfil
 const TAB_SLUGS: Record<ResellerTab, string> = {
   files: 'arquivos',
   calculator: 'calculadora',
+  map: 'mapa',
   profile: 'perfil',
 };
 const SLUG_TO_TAB: Record<string, ResellerTab> = {
   arquivos: 'files',
   calculadora: 'calculator',
+  mapa: 'map',
   perfil: 'profile',
 };
 
@@ -499,6 +503,14 @@ const ResellerArea: React.FC = () => {
             <Calculator size={20} /> Calculadora
           </button>
           <button
+            onClick={() => setActiveTab('map')}
+            disabled={passwordRecovery}
+            title={passwordRecovery ? 'Defina sua nova senha para continuar' : undefined}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'map' ? 'bg-[#312783] text-white shadow-lg' : 'text-slate-400 hover:text-[#312783] hover:bg-slate-50'} disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-slate-400`}
+          >
+            <Map size={20} /> Mapa
+          </button>
+          <button
             onClick={() => setActiveTab('profile')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'profile' ? 'bg-[#312783] text-white shadow-lg' : 'text-slate-400 hover:text-[#312783] hover:bg-slate-50'}`}
           >
@@ -764,6 +776,15 @@ const ResellerArea: React.FC = () => {
               exit={{ opacity: 0, y: -10 }}
             >
               <ProductCalculator />
+            </motion.div>
+          ) : activeTab === 'map' ? (
+            <motion.div
+              key="map-tab"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <RevendasMap />
             </motion.div>
           ) : (
             <motion.div
