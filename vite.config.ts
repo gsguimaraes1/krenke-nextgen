@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
       server: {
-        port: 3000,
+        port: 7000,
         host: '0.0.0.0',
         proxy: {
           '/translate_api': {
@@ -42,6 +42,7 @@ export default defineConfig(({ mode }) => {
             manualChunks: {
               'vendor-react': ['react', 'react-dom', 'react-router-dom'],
               'vendor-motion': ['framer-motion'],
+              'vendor-gsap': ['gsap', 'gsap/ScrollTrigger', 'gsap/SplitText', '@gsap/react'],
               'vendor-lucide': ['lucide-react'],
               'vendor-supabase': ['@supabase/supabase-js']
             }

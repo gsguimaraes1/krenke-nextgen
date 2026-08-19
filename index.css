@@ -114,7 +114,10 @@
     position: relative;
     margin: 0;
     padding: 0;
-    scroll-behavior: smooth;
+    /* `scroll-behavior: smooth` global foi removido: ele briga com o scrub/pin do
+       ScrollTrigger (a posição animada pelo browser atrasa em relação à leitura
+       do GSAP, gerando tranco). Os poucos scrollIntoView do site já pedem
+       `behavior: 'smooth'` explicitamente e seguem suaves. */
     top: 0 !important;
   }
 }
@@ -177,6 +180,16 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Carrosséis horizontais (vitrine da Home, galeria do modal de produto):
+     esconde a barra sem perder o scroll por toque/trackpad. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 
   /* Prevent text selection on flags */

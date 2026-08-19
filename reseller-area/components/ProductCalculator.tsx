@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, FileDown, Trash2, Calculator, Package, AlertCircle,
   Plus, Edit2, Check, X, Loader2, ImagePlus, Image as ImageIcon,
-  User, FileText, ChevronDown, ChevronUp, History as HistoryIcon, FilePlus, Save
+  User, FileText, ChevronDown, ChevronUp, History as HistoryIcon, FilePlus, Save,
+  Download,
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import CreatableSelect from 'react-select/creatable';
@@ -600,6 +601,63 @@ const ProductCalculator: React.FC = () => {
     }
   };
 
+  /**
+   * CSV com 1 linha por item de cada orçamento salvo — mesmo padrão do
+   * relatório admin (BOM + ';' pra abrir certo, acentuado, no Excel pt-BR).
+   * Uma linha por item (não por orçamento) pra já vir pronto pra somar/filtrar
+   * na planilha sem precisar abrir cada PDF.
+   */
+  const exportSavedQuotesCsv = () => {
+    const head = [
+      'Nº Orçamento', 'Data', 'Cliente', 'CNPJ/CPF', 'Nº Cliente', 'Modelo',
+      'Revendedor Associado', 'Forma de Pagamento', 'Margem (%)',
+      'Código do Produto', 'Descrição do Produto', 'Qtd', 'Preço Unit.', 'Subtotal Item',
+      'Total do Orçamento (c/ IPI)',
+    ];
+    const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const num2 = (v: number) => v.toFixed(2).replace('.', ',');
+    const paymentLabel = (p: string | null) => p === 'avista' ? 'À Vista' : 'Entrada + 28 Dias';
+
+    const rows: string[] = [];
+    savedQuotes.forEach(q => {
+      const date = new Date(q.updated_at).toLocaleString('pt-BR');
+      const base = [
+        q.quote_number,
+        date,
+        q.client_name || '',
+        q.client_cnpj || '',
+        q.client_number || '',
+        q.model_name || '',
+        q.associated_reseller_name || '',
+        paymentLabel(q.payment_term),
+        num2(Number(q.margin) || 0),
+      ];
+      const items = q.items && q.items.length > 0 ? q.items : [null];
+      items.forEach(item => {
+        rows.push([
+          ...base,
+          item?.code || '',
+          item?.description || '(sem itens)',
+          item ? item.qty : '',
+          item ? num2(Number(item.unit_price) || 0) : '',
+          item ? num2((Number(item.unit_price) || 0) * (Number(item.qty) || 0)) : '',
+          num2(Number(q.total_com_ipi) || 0),
+        ].map(esc).join(';'));
+      });
+    });
+
+    // BOM + ';' → abre certo no Excel pt-BR
+    const blob = new Blob(['﻿' + [head.map(esc).join(';'), ...rows].join('\r\n')], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orcamentos-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSaveQuote = async () => {
     if (!user || cart.length === 0) return;
     if (!clientName.trim()) {
@@ -899,7 +957,14 @@ const ProductCalculator: React.FC = () => {
             <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-2">
               <HistoryIcon size={18} className="text-[#312783]" />
               <span className="font-black text-slate-700">Orçamentos salvos</span>
-              <button onClick={() => setQuotesOpen(false)} className="ml-auto p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 transition-colors">
+              <button
+                onClick={exportSavedQuotesCsv}
+                disabled={savedQuotes.length === 0}
+                className="ml-auto flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-xl font-bold text-xs hover:border-[#312783] hover:text-[#312783] disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition-all"
+              >
+                <Download size={14} /> Exportar CSV
+              </button>
+              <button onClick={() => setQuotesOpen(false)} className="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 transition-colors">
                 <X size={18} />
               </button>
             </div>

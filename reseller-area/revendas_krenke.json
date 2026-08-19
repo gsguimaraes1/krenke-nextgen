@@ -1,0 +1,2122 @@
+{
+  "total_revendas": 285,
+  "por_estado": [
+    {
+      "UF": "SP",
+      "ESTADO": "SAO PAULO",
+      "count": 80
+    },
+    {
+      "UF": "SC",
+      "ESTADO": "SANTA CATARINA",
+      "count": 25
+    },
+    {
+      "UF": "PR",
+      "ESTADO": "PARANA",
+      "count": 24
+    },
+    {
+      "UF": "MG",
+      "ESTADO": "MINAS GERAIS",
+      "count": 22
+    },
+    {
+      "UF": "BA",
+      "ESTADO": "BAHIA",
+      "count": 18
+    },
+    {
+      "UF": "CE",
+      "ESTADO": "CEARA",
+      "count": 17
+    },
+    {
+      "UF": "GO",
+      "ESTADO": "GOIAS",
+      "count": 17
+    },
+    {
+      "UF": "DF",
+      "ESTADO": "DISTRITO FEDERAL",
+      "count": 10
+    },
+    {
+      "UF": "AL",
+      "ESTADO": "ALAGOAS",
+      "count": 8
+    },
+    {
+      "UF": "RJ",
+      "ESTADO": "RIO DE JANEIRO",
+      "count": 7
+    },
+    {
+      "UF": "MA",
+      "ESTADO": "MARANHAO",
+      "count": 7
+    },
+    {
+      "UF": "PE",
+      "ESTADO": "PERNAMBUCO",
+      "count": 6
+    },
+    {
+      "UF": "RN",
+      "ESTADO": "RIO GRANDE DO NORTE",
+      "count": 6
+    },
+    {
+      "UF": "RS",
+      "ESTADO": "RIO GRANDE DO SUL",
+      "count": 6
+    },
+    {
+      "UF": "PA",
+      "ESTADO": "PARA",
+      "count": 5
+    },
+    {
+      "UF": "AP",
+      "ESTADO": "AMAPA",
+      "count": 4
+    },
+    {
+      "UF": "MT",
+      "ESTADO": "MATO GROSSO",
+      "count": 4
+    },
+    {
+      "UF": "ES",
+      "ESTADO": "ESPIRITO SANTO",
+      "count": 4
+    },
+    {
+      "UF": "PB",
+      "ESTADO": "PARAIBA",
+      "count": 4
+    },
+    {
+      "UF": "AM",
+      "ESTADO": "AMAZONAS",
+      "count": 3
+    },
+    {
+      "UF": "TO",
+      "ESTADO": "TOCANTINS",
+      "count": 3
+    },
+    {
+      "UF": "PI",
+      "ESTADO": "PIAUI",
+      "count": 2
+    },
+    {
+      "UF": "SE",
+      "ESTADO": "SERGIPE",
+      "count": 2
+    },
+    {
+      "UF": "MS",
+      "ESTADO": "MATO GROSSO DO SUL",
+      "count": 1
+    }
+  ],
+  "revendas": [
+    {
+      "nome": "BILO BRINQUEDOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAXIAS DO SUL",
+      "uf": "RS",
+      "ibge": "4305108"
+    },
+    {
+      "nome": "BIGPLAY BRINQUEDOS E EQUIPAMENTOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CORNELIO PROCOPIO",
+      "uf": "PR",
+      "ibge": "4106407"
+    },
+    {
+      "nome": "ECO PLAYGROUND COMERCIAL LTDA.",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SANTANA DE PARNAIBA",
+      "uf": "SP",
+      "ibge": "3547304"
+    },
+    {
+      "nome": "KINDERPLAY LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "JARAGUA DO SUL",
+      "uf": "SC",
+      "ibge": "4208906"
+    },
+    {
+      "nome": "PACE BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SALVADOR",
+      "uf": "BA",
+      "ibge": "2927408"
+    },
+    {
+      "nome": "CIA EDUCATIVA LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO JOSE DO RIO PRETO",
+      "uf": "SP",
+      "ibge": "3549805"
+    },
+    {
+      "nome": "DEMADEIRA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CUIABA",
+      "uf": "MT",
+      "ibge": "5103403"
+    },
+    {
+      "nome": "GUILHERME LOPES DO AMARAL",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "JUQUITIBA",
+      "uf": "SP",
+      "ibge": "3526209"
+    },
+    {
+      "nome": "MUNDO GIRAFA BRINQUEDOS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "G.L. MANIA PARQUE DE DIVERSOES LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CAMPINAS",
+      "uf": "SP",
+      "ibge": "3509502"
+    },
+    {
+      "nome": "LAB KIDS BRINQUEDOS E ACESSORIOS LTDA EPP",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ARARAQUARA",
+      "uf": "SP",
+      "ibge": "3503208"
+    },
+    {
+      "nome": "FILIAL CAMPINA GRANDE DO SUL 2",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CAMPINA GRANDE DO SUL",
+      "uf": "PR",
+      "ibge": "4104006"
+    },
+    {
+      "nome": "REP BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "RIO DE JANEIRO",
+      "uf": "RJ",
+      "ibge": "3304557"
+    },
+    {
+      "nome": "BIG MIX COMERCIO E SERVICOS DE BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "INDAIATUBA",
+      "uf": "SP",
+      "ibge": "3520509"
+    },
+    {
+      "nome": "REI DOS CAPACHOS COMERCIO E INDUSTRIA DE TAPETES LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "BRASILIA",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "GRUPO PIMPAO",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "PROPLANE INDUSTRIA E COMERCIO LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "PIRACANJUBA",
+      "uf": "GO",
+      "ibge": "5217104"
+    },
+    {
+      "nome": "DANIEL QUEIROS REPRESENTACOES COMERCIAL E SERVICOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "OSASCO",
+      "uf": "SP",
+      "ibge": "3534401"
+    },
+    {
+      "nome": "GEP - SOLUCOES INTELIGENTES LTDA - ME",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "SICUPIRA EUCALIPTOS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "LAURO DE FREITAS",
+      "uf": "BA",
+      "ibge": "2919207"
+    },
+    {
+      "nome": "MOBILE STORE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "E CAMPELLO JUNIOR",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "RIO DE JANEIRO",
+      "uf": "RJ",
+      "ibge": "3304557"
+    },
+    {
+      "nome": "L M BRINQUEDOS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "TERESINA",
+      "uf": "PI",
+      "ibge": "2211001"
+    },
+    {
+      "nome": "ESTACAO DA ALEGRIA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "BRINQBEL",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FRANCISCO BELTRAO",
+      "uf": "PR",
+      "ibge": "4108403"
+    },
+    {
+      "nome": "TOP BRINKE",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SANTA ROSA",
+      "uf": "RS",
+      "ibge": "4317202"
+    },
+    {
+      "nome": "NOGUEIRA PLAY ENTRETENIMENTO EIRELI",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "FERRISA PLAYGROUNDS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "PAULO R.R.ZORZI - BRINQUEDOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "PLAYART COMERCIAL E SERVIÇOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "VESPASIANO",
+      "uf": "MG",
+      "ibge": "3171204"
+    },
+    {
+      "nome": "ARQUITETURA DE PLAYGROUNDS RB LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "AIRON COMERCIAL",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SUZANO",
+      "uf": "SP",
+      "ibge": "3552502"
+    },
+    {
+      "nome": "PLAY PLUS COMERCIO DE BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "ABRA DECKS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "RIO DE JANEIRO",
+      "uf": "RJ",
+      "ibge": "3304557"
+    },
+    {
+      "nome": "BRINQUEDOS CRIATIVOS WH LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "JARAGUA DO SUL",
+      "uf": "SC",
+      "ibge": "4208906"
+    },
+    {
+      "nome": "GRAMA SINTETICA GOIANIA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "S.O ZIOBER E CIA EQUIP.METALURGICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MARINGA",
+      "uf": "PR",
+      "ibge": "4115200"
+    },
+    {
+      "nome": "BIM BIM BRINQUEDOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELO HORIZONTE",
+      "uf": "MG",
+      "ibge": "3106200"
+    },
+    {
+      "nome": "ATACADAO PARAISO",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "PARAISO DO TOCANTINS",
+      "uf": "TO",
+      "ibge": "1716109"
+    },
+    {
+      "nome": "PLAYART COMERCIAL E SERVIÇOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "JARAGUA DO SUL",
+      "uf": "SC",
+      "ibge": "4208906"
+    },
+    {
+      "nome": "FLASH PRESTACAO DE SERVICOS E COMERCIO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "GUARULHOS",
+      "uf": "SP",
+      "ibge": "3518800"
+    },
+    {
+      "nome": "ZIOBER BRASIL LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MARINGA",
+      "uf": "PR",
+      "ibge": "4115200"
+    },
+    {
+      "nome": "MIRANDA PLAY",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "JARAGUA DO SUL",
+      "uf": "SC",
+      "ibge": "4208906"
+    },
+    {
+      "nome": "VCONCEPT",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "FORTALEZA",
+      "uf": "CE",
+      "ibge": "2304400"
+    },
+    {
+      "nome": "CEARA CADEIRAS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAUCAIA",
+      "uf": "CE",
+      "ibge": "2303709"
+    },
+    {
+      "nome": "POLO FIT INDUSTRIA E COM DE EQUIPAMENTOS PARA GINASTICA LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "APARECIDA DE GOIANIA",
+      "uf": "GO",
+      "ibge": "5201405"
+    },
+    {
+      "nome": "SM PARKS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAUCAIA",
+      "uf": "CE",
+      "ibge": "2303709"
+    },
+    {
+      "nome": "DEIVISON CARMO DE ALMEIDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CUIABA",
+      "uf": "MT",
+      "ibge": "5103403"
+    },
+    {
+      "nome": "NN PLAYGROUNDS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "NILSO APARECIDO DOS SANTOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO JOSE DO RIO PRETO",
+      "uf": "SP",
+      "ibge": "3549805"
+    },
+    {
+      "nome": "GETULIO ANTONIO DOS SANTOS BRINQUEDO",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "JAU",
+      "uf": "SP",
+      "ibge": "3525300"
+    },
+    {
+      "nome": "CONSTRUMED NEGOCIOS E SERVICOS EIRELI",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MACAPA",
+      "uf": "AP",
+      "ibge": "1600303"
+    },
+    {
+      "nome": "GOIAS PLAYGROUNDS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "EKODECK",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CONTAGEM",
+      "uf": "MG",
+      "ibge": "3118601"
+    },
+    {
+      "nome": "CAPACHOS CENTRO OESTE",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "NUCLEO BANDEIRANTE",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "MULTKAP COMERCIO DE ARTIGOS DE BORRACHA EIRELI",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "NUCLEO BANDEIRANTE",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "TIZANGA VERTICAIS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BAURU",
+      "uf": "SP",
+      "ibge": "3506003"
+    },
+    {
+      "nome": "ECOPEX INDUSTRIA E COMERCIO LTDA.",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SANTANA DE PARNAIBA",
+      "uf": "SP",
+      "ibge": "3547304"
+    },
+    {
+      "nome": "BLUE WAVE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "BRINK E D + COMERCIAL DE BRINQUEDOS EIRELI",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "HORTOLANDIA",
+      "uf": "SP",
+      "ibge": "3519071"
+    },
+    {
+      "nome": "MARIMATI PLAYGROUND",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "OSASCO",
+      "uf": "SP",
+      "ibge": "3534401"
+    },
+    {
+      "nome": "CASINHA DE BRINCAR",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "ITAPEMA",
+      "uf": "SC",
+      "ibge": "4208302"
+    },
+    {
+      "nome": "CRIARTPLAY",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "PEDAGO BRINQUEDOS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "JARAGUA DO SUL",
+      "uf": "SC",
+      "ibge": "4208906"
+    },
+    {
+      "nome": "SOLVE DISTRIBUIDORA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ITUMBIARA",
+      "uf": "GO",
+      "ibge": "5211503"
+    },
+    {
+      "nome": "SK COMERCIO DE LIVROS E BRINQUEDOS PEDAGOGICOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "ARI",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CASCAVEL",
+      "uf": "PR",
+      "ibge": "4104808"
+    },
+    {
+      "nome": "LUDICO BRINQUEDOS INTELIGENTES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "LAURO DE FREITAS",
+      "uf": "BA",
+      "ibge": "2919207"
+    },
+    {
+      "nome": "ARQUITETURA KIDS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "INDAIATUBA",
+      "uf": "SP",
+      "ibge": "3520509"
+    },
+    {
+      "nome": "FIBRAS E METAIS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "BABY TOY & CIA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GUARAMIRIM",
+      "uf": "SC",
+      "ibge": "4206504"
+    },
+    {
+      "nome": "PARANOA ESPORTES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "PARANOA",
+      "uf": "DF",
+      "ibge": NaN
+    },
+    {
+      "nome": "VALEFLEX",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO JOSE DOS CAMPOS",
+      "uf": "SP",
+      "ibge": "3549904"
+    },
+    {
+      "nome": "POWER BRINDES PROMOCIONAIS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "STAR PRODUTOS E COMERCIO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELO HORIZONTE",
+      "uf": "MG",
+      "ibge": "3106200"
+    },
+    {
+      "nome": "BRIENZ",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "BRASILIA",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "COMPANHIA DA PRAIA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FLORIANOPOLIS",
+      "uf": "SC",
+      "ibge": "4205407"
+    },
+    {
+      "nome": "PLENA PROJETOS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SIMOES FILHO",
+      "uf": "BA",
+      "ibge": "2930709"
+    },
+    {
+      "nome": "DELLA INDUSTRIA E COMERCIO",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "AGRONOMICA",
+      "uf": "SC",
+      "ibge": "4200309"
+    },
+    {
+      "nome": "PLAY CENTER",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELEM",
+      "uf": "PA",
+      "ibge": "1501402"
+    },
+    {
+      "nome": "DESTAK TECNOLOGIA E EDIFICACOES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BRASILIA",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "JOGAR ESPORTES E PROJETOS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "BRINCAR ENTRETENIMENTO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "MAGA ISA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "GOMES CAMACHO REPRESENTACAO COMERCIAL",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO JOSE DO RIO PRETO",
+      "uf": "SP",
+      "ibge": "3549805"
+    },
+    {
+      "nome": "BALL PARK",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ANAPOLIS",
+      "uf": "GO",
+      "ibge": "5201108"
+    },
+    {
+      "nome": "ALPHAPLAY BRINQUEDOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO BERNARDO DO CAMPO",
+      "uf": "SP",
+      "ibge": "3548708"
+    },
+    {
+      "nome": "JOSE LUIZ ANDREGHETE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAMPINAS",
+      "uf": "SP",
+      "ibge": "3509502"
+    },
+    {
+      "nome": "ANA LAURA DAS GRAÇAS GOMES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "JOAO MONLEVADE",
+      "uf": "MG",
+      "ibge": "3136207"
+    },
+    {
+      "nome": "WC COMERCIO E SERVICOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "NATAL",
+      "uf": "RN",
+      "ibge": "2408102"
+    },
+    {
+      "nome": "SEMEAR CONSTRUCOES",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MACAPA",
+      "uf": "AP",
+      "ibge": "1600303"
+    },
+    {
+      "nome": "PINOQUIO BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MONTES CLAROS",
+      "uf": "MG",
+      "ibge": "3143302"
+    },
+    {
+      "nome": "PLAYMOB",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO JOSE DO RIO PRETO",
+      "uf": "SP",
+      "ibge": "3549805"
+    },
+    {
+      "nome": "GRUPO INFINITY",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "NITEROI",
+      "uf": "RJ",
+      "ibge": "3303302"
+    },
+    {
+      "nome": "BAHIA EMPREENDIMENTOS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "LAURO DE FREITAS",
+      "uf": "BA",
+      "ibge": "2919207"
+    },
+    {
+      "nome": "REGIS PLAYGROUNDS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "AGRONOMICA",
+      "uf": "SC",
+      "ibge": "4200309"
+    },
+    {
+      "nome": "CECI DECOR",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "PARAISO DO TOCANTINS",
+      "uf": "TO",
+      "ibge": "1716109"
+    },
+    {
+      "nome": " IUDY MAKINO ESPECIALISTA EM PISOS EMBORRACHADOS ME",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "S O S PARQUES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "BRINQ & PLAY",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "FORTALEZA",
+      "uf": "CE",
+      "ibge": "2304400"
+    },
+    {
+      "nome": "B & A STORE",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "TEOFILO OTONI",
+      "uf": "MG",
+      "ibge": "3168606"
+    },
+    {
+      "nome": "MOBILUS - PLAYGROUND & MOBILIARIO URBANO",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "BARUERI",
+      "uf": "SP",
+      "ibge": "3505708"
+    },
+    {
+      "nome": "DECKZAN",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FLORIANOPOLIS",
+      "uf": "SC",
+      "ibge": "4205407"
+    },
+    {
+      "nome": "MUNDO DOS PARQUES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "POMERODE",
+      "uf": "SC",
+      "ibge": "4213203"
+    },
+    {
+      "nome": "COMERCIAL PAES LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "VISCONDE DO RIO BRANCO",
+      "uf": "MG",
+      "ibge": "3172004"
+    },
+    {
+      "nome": "PLAYGROUNDS NOGUEIRA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "GOLD-HORSE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO CARLOS",
+      "uf": "SP",
+      "ibge": "3548906"
+    },
+    {
+      "nome": "AQUASTAR",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "PALHOCA",
+      "uf": "SC",
+      "ibge": "4211900"
+    },
+    {
+      "nome": "PULE BRINK COMERCIO DE BRINQUEDOS E PLAYGROUNDS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELO HORIZONTE",
+      "uf": "MG",
+      "ibge": "3106200"
+    },
+    {
+      "nome": "CONTEKO",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CONTAGEM",
+      "uf": "MG",
+      "ibge": "3118601"
+    },
+    {
+      "nome": "MKPLAY BRASIL",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "RIO DE JANEIRO",
+      "uf": "RJ",
+      "ibge": "3304557"
+    },
+    {
+      "nome": "MYLLA TOYS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "KL COMERCIO E SERVICOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "NATAL",
+      "uf": "RN",
+      "ibge": "2408102"
+    },
+    {
+      "nome": "MHPLAY COMERCIO E SERVICOS DE EQUIP PARA RECREACAO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "COTIA",
+      "uf": "SP",
+      "ibge": "3513009"
+    },
+    {
+      "nome": "SP PLAYGROUND E EQUIPAMENTOS RECREATIVOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "AC COMERCIO",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MACEIO",
+      "uf": "AL",
+      "ibge": "2704302"
+    },
+    {
+      "nome": "FANTASTICA BRINQUEDOS E PLAY GROUND",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "PONTA GROSSA",
+      "uf": "PR",
+      "ibge": "4119905"
+    },
+    {
+      "nome": "TEDA DISTRIBUIDORA LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "ORLEANS",
+      "uf": "SC",
+      "ibge": "4211702"
+    },
+    {
+      "nome": "AVANTTI",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELEM",
+      "uf": "PA",
+      "ibge": "1501402"
+    },
+    {
+      "nome": "BRINQUEDOS DE PARQUE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "ECOPARQUES BRINQUEDOS E EQUIPAMENTOS DE LAZER LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "LONDRINA",
+      "uf": "PR",
+      "ibge": "4113700"
+    },
+    {
+      "nome": "INFINITUMM",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "ROGERIO FERREIRA FARIAS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SALTO",
+      "uf": "SP",
+      "ibge": "3545209"
+    },
+    {
+      "nome": "SET COMPANY",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "MEGA BRINQUEDOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "PAIS E FILHOS MATERIAIS DE CONSTRUCAO LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "COLOMBO",
+      "uf": "PR",
+      "ibge": "4105805"
+    },
+    {
+      "nome": "GINDRO VENDAS E SERVICOS ME",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "MICRO MASTER COMPUTADORES",
+      "segmento": "LOJA MULTIMARCAS",
+      "cidade": "TAUBATE",
+      "uf": "SP",
+      "ibge": "3554102"
+    },
+    {
+      "nome": "EUKA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAUCAIA",
+      "uf": "CE",
+      "ibge": "2303709"
+    },
+    {
+      "nome": "MACMOLD - INDUSTRIA E COMERCIO DE ARTEFATOS PLASTICOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MAIRIPORA",
+      "uf": "SP",
+      "ibge": "3528502"
+    },
+    {
+      "nome": "SUPER SONIC",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "DRACENA",
+      "uf": "SP",
+      "ibge": "3514403"
+    },
+    {
+      "nome": "OTIMIZA SOLUCOES EM AMBIENTES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MANAUS",
+      "uf": "AM",
+      "ibge": "1302603"
+    },
+    {
+      "nome": "CECI OFFICE",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "PARAISO DO TOCANTINS",
+      "uf": "TO",
+      "ibge": "1716109"
+    },
+    {
+      "nome": "DIVERZA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAMPO GRANDE",
+      "uf": "MS",
+      "ibge": "5002704"
+    },
+    {
+      "nome": "AMARU, CONSTRUINDO AMBIENTES COM SUSTENTABILIDADE",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MARECHAL DEODORO",
+      "uf": "AL",
+      "ibge": "2704708"
+    },
+    {
+      "nome": "TREVO PISCINAS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "BRACO DO NORTE",
+      "uf": "SC",
+      "ibge": "4202800"
+    },
+    {
+      "nome": "38.096.024 WESLEY SALES DOS SANTOS ASSUNCAO",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BRASILIA",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "BABYLAND BRINQUEDOS E MERCADORIAS EM GERAL LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "J R R INDUSTRIA E COMERCIO DE BRINQUEDOS EDUCATIVOS E PLAYGROUNDS LTDA",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "BRINQI",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "TOPBRINKE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "PASSO FUNDO",
+      "uf": "RS",
+      "ibge": "4314100"
+    },
+    {
+      "nome": "BRINK PELL",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BRASILIA",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "PAPELARIA SAO JOSE",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CICERO DANTAS",
+      "uf": "BA",
+      "ibge": "2907806"
+    },
+    {
+      "nome": "JMS PLAYGROUND",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "COTIA",
+      "uf": "SP",
+      "ibge": "3513009"
+    },
+    {
+      "nome": "AMANCIO E GAMA RUSTICWOOD LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MORENO",
+      "uf": "PE",
+      "ibge": "2609402"
+    },
+    {
+      "nome": "BRINKELANDIA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MORENO",
+      "uf": "PE",
+      "ibge": "2609402"
+    },
+    {
+      "nome": "PHS LIVROS,BRINQUEDOS, OUTROS ARTIGOS E",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "MASTER BRINK BRINQUEDOS EDUCATIVOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "LIMPPER",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO LUIS",
+      "uf": "MA",
+      "ibge": "2111300"
+    },
+    {
+      "nome": "GENESIS PARK LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GUARACIABA DO NORTE",
+      "uf": "CE",
+      "ibge": "2305001"
+    },
+    {
+      "nome": "MINAS BRASIL PLAYGROUNDS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELO HORIZONTE",
+      "uf": "MG",
+      "ibge": "3106200"
+    },
+    {
+      "nome": "COMPARE PARQUES",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "PONTUAL MOVEIS PARA ESCRITORIO",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "JOAO PESSOA",
+      "uf": "PB",
+      "ibge": "2507507"
+    },
+    {
+      "nome": "GERACAO MAIS CRIATIVA LTDA",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "GRILLO INDUSTRIA E COMERCIO LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MONTES CLAROS",
+      "uf": "MG",
+      "ibge": "3143302"
+    },
+    {
+      "nome": "53.185.563 TANILE RAMOS PARENTE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "FEIRA DE SANTANA",
+      "uf": "BA",
+      "ibge": "2910800"
+    },
+    {
+      "nome": "ART BRINQ ATELIE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "KRENKE NORDESTE PYALGROUNDS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CARUARU",
+      "uf": "PE",
+      "ibge": "2604106"
+    },
+    {
+      "nome": "ARQDECK PROJETOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "RIO DE JANEIRO",
+      "uf": "RJ",
+      "ibge": "3304557"
+    },
+    {
+      "nome": "JUMP MANIA BRASIL",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO BERNARDO DO CAMPO",
+      "uf": "SP",
+      "ibge": "3548708"
+    },
+    {
+      "nome": "G.S. INDUSTRIA E COMERCIO DE ARTEFATOS DE BORRACHA LTDA",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "JARAGUA DO SUL",
+      "uf": "SC",
+      "ibge": "4208906"
+    },
+    {
+      "nome": "SERRALHERIA UNIPARQUES LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "SIERDOVSKI TECNOLOGIA LTDA",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "GUARAPUAVA",
+      "uf": "PR",
+      "ibge": "4109401"
+    },
+    {
+      "nome": "CWB MADEIRA PLASTICA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "GUANAMBI",
+      "uf": "BA",
+      "ibge": "2911709"
+    },
+    {
+      "nome": "AQUARELA COMERCIO E SERVICOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELO HORIZONTE",
+      "uf": "MG",
+      "ibge": "3106200"
+    },
+    {
+      "nome": "39.249.190 JULIANA CAPILHEIRA RODRIGUES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SANTANA DO LIVRAMENTO",
+      "uf": "RS",
+      "ibge": "4317103"
+    },
+    {
+      "nome": "GRASS SOLUTION GRAMADOS ESPORTIVOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "FEIRA DE SANTANA",
+      "uf": "BA",
+      "ibge": "2910800"
+    },
+    {
+      "nome": "EVOGRASS GRAMADOS SINTETICOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "FEIRA DE SANTANA",
+      "uf": "BA",
+      "ibge": "2910800"
+    },
+    {
+      "nome": "WL ENGENHARIA LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO JOSE DA LAJE",
+      "uf": "AL",
+      "ibge": "2708303"
+    },
+    {
+      "nome": "RITA DE OLIVEIRA SABINO 07786157905",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "PALHOCA",
+      "uf": "SC",
+      "ibge": "4211900"
+    },
+    {
+      "nome": "RECRIAR SOLUCOES EDUCACIONAIS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELEM",
+      "uf": "PA",
+      "ibge": "1501402"
+    },
+    {
+      "nome": "MULTIPLA DISTRIBUIDORA E SERVICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "TERESINA",
+      "uf": "PI",
+      "ibge": "2211001"
+    },
+    {
+      "nome": "CHRISTINA FARIAS BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "SULPARKS KIDS E PETS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "GUARAMIRIM",
+      "uf": "SC",
+      "ibge": "4206504"
+    },
+    {
+      "nome": "HABITAT PLAYGROUND COMERCIO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "VILA VELHA",
+      "uf": "ES",
+      "ibge": "3205200"
+    },
+    {
+      "nome": "51.827.803 CARLOS LOURENCO GOMES",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "JOYCEBRINK COMERCIO DE BRINQUEDO E SERVICOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ERECHIM",
+      "uf": "RS",
+      "ibge": "4307005"
+    },
+    {
+      "nome": "S. M. ALMEIDA REPRESENTACOES E COMERCIO VAREJISTA LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "BELEM",
+      "uf": "PA",
+      "ibge": "1501402"
+    },
+    {
+      "nome": "FRIP BRINQUEDOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "MARCELO ANTÔNIO MACHADO DOS SANTOS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FORTALEZA",
+      "uf": "CE",
+      "ibge": "2304400"
+    },
+    {
+      "nome": "MARCELA BARBOSA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "LAVRAS",
+      "uf": "MG",
+      "ibge": "3138203"
+    },
+    {
+      "nome": "FUTURE PRODUTOS E SERVICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FORTALEZA",
+      "uf": "CE",
+      "ibge": "2304400"
+    },
+    {
+      "nome": " FUTURE PRODUTOS E SERVICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FORTALEZA",
+      "uf": "CE",
+      "ibge": "2304400"
+    },
+    {
+      "nome": "ROTOBIM PARQUES LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BELO HORIZONTE",
+      "uf": "MG",
+      "ibge": "3106200"
+    },
+    {
+      "nome": "PLASTIDECOR COMERCIO LTDA",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "SAO LUIS",
+      "uf": "MA",
+      "ibge": "2111300"
+    },
+    {
+      "nome": "JC ECOMMERCE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BRASILIA",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "55.004.837 LUCAS PIRES DA SILVA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SANTO ANTONIO DO DESCOBERTO",
+      "uf": "GO",
+      "ibge": "5219753"
+    },
+    {
+      "nome": "AGHATA COMERCIO DE PLAYGROUND E ARTIGOS RECREATIVOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CUIABA",
+      "uf": "MT",
+      "ibge": "5103403"
+    },
+    {
+      "nome": "ALL BRASIL MIX LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "IMPERATRIZ",
+      "uf": "MA",
+      "ibge": "2105302"
+    },
+    {
+      "nome": "BALLUM COMERCIO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SERRA",
+      "uf": "ES",
+      "ibge": "3205002"
+    },
+    {
+      "nome": "7.913.001 ANDREIA APARECIDA DA SILVA PRADO",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "JARAGUA DO SUL",
+      "uf": "SC",
+      "ibge": "4208906"
+    },
+    {
+      "nome": "SUPER COMERCIO E LOCACOES LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "OURO BRANCO",
+      "uf": "MG",
+      "ibge": "3145901"
+    },
+    {
+      "nome": "MT COMERCIO DE CONSTRUCAO LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MARECHAL DEODORO",
+      "uf": "AL",
+      "ibge": "2704708"
+    },
+    {
+      "nome": "MORAES SILVA FABRICACAO E MONTAGEM INDUSTRIAL LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "APARECIDA DE GOIANIA",
+      "uf": "GO",
+      "ibge": "5201405"
+    },
+    {
+      "nome": "ROTOCYCLE INDUSTRIA E COMERCIO DE PLASTICO LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "NOVA ALIANCA",
+      "uf": "SP",
+      "ibge": "3532801"
+    },
+    {
+      "nome": "ERE LAB CRIAÇÃO E DESENVOLVIMENTO DE EQUIPAMENTOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "PLANET KIDS",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FEIRA DE SANTANA",
+      "uf": "BA",
+      "ibge": "2910800"
+    },
+    {
+      "nome": "JUCA PLAYGROUNDS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "TUBARAO",
+      "uf": "SC",
+      "ibge": "4218707"
+    },
+    {
+      "nome": "MKL GRAMADOS E MADEIRA PLASTICA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "RIBEIRAO PRETO",
+      "uf": "SP",
+      "ibge": "3543402"
+    },
+    {
+      "nome": "BRINKPLAY BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "CLEAN AMAZONAS LTDA",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "MANAUS",
+      "uf": "AM",
+      "ibge": "1302603"
+    },
+    {
+      "nome": "RUGS AMBIENTES E SOLUCOES LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SERIDO",
+      "uf": "PB",
+      "ibge": "2515401"
+    },
+    {
+      "nome": "AGAPE PLAYGROUNDS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "TECH PARK BRINQUEDOS LTDA",
+      "segmento": "LOJA MULTIMARCAS",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "FREITAS, MESQUITA LTDA",
+      "segmento": "ATACADISTA/DISTRIBUIDOR",
+      "cidade": "PALMARES",
+      "uf": "PE",
+      "ibge": "2610004"
+    },
+    {
+      "nome": "MENDONCA BORRACHAS - ENGEMOV",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MARACANAU",
+      "uf": "CE",
+      "ibge": "2307650"
+    },
+    {
+      "nome": "VAREJAO DO TAPECEIRO LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO LUIS",
+      "uf": "MA",
+      "ibge": "2111300"
+    },
+    {
+      "nome": "LEMBRA DE MIM COMERCIAL LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "ITAPEVA",
+      "uf": "MG",
+      "ibge": "3133600"
+    },
+    {
+      "nome": "ART PLAY",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "ABMAC COMERCIO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "UBERLANDIA",
+      "uf": "MG",
+      "ibge": "3170206"
+    },
+    {
+      "nome": "51.100.776 RODRIGO LOURENZI ANTUNES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "SOFIA BRINK TECNOLOGIA MOVEIS E SERVICOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BADY BASSITT",
+      "uf": "SP",
+      "ibge": "3504602"
+    },
+    {
+      "nome": "ECOLIX  COMERCIO E SERVICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "NATAL",
+      "uf": "RN",
+      "ibge": "2408102"
+    },
+    {
+      "nome": "FLAVIO DE SOUZA LADEIA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO JOSE DO RIO PRETO",
+      "uf": "SP",
+      "ibge": "3549805"
+    },
+    {
+      "nome": "3 MOVEIS E MADEIRA PLASTICA LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "RIBEIRA DO POMBAL",
+      "uf": "BA",
+      "ibge": "2926608"
+    },
+    {
+      "nome": "KRENKE ALAGOAS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MACEIO",
+      "uf": "AL",
+      "ibge": "2704302"
+    },
+    {
+      "nome": "RAPOSO SPORTS INDUSTRIA E COMERCIO DE ARTIGOS ESPORTIVOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAMPINA GRANDE",
+      "uf": "PB",
+      "ibge": "2504009"
+    },
+    {
+      "nome": "ANDRE SANDRO RABELO RODRIGUES",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "BARREIRAS",
+      "uf": "BA",
+      "ibge": "2903201"
+    },
+    {
+      "nome": "LIDERANCA COMERCIAL LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "BRASILIA",
+      "uf": "DF",
+      "ibge": "5300108"
+    },
+    {
+      "nome": "LIVI BRINQUEDOS E ACESSORIOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "BRINCASAFE PLAYGROUNDS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "VILA VELHA",
+      "uf": "ES",
+      "ibge": "3205200"
+    },
+    {
+      "nome": "AFONSINHO MADEIRAS E MATERIAIS DE CONSTRUCAO LTD",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "POCOS DE CALDAS",
+      "uf": "MG",
+      "ibge": "3151800"
+    },
+    {
+      "nome": "PINOQUIO SOLUCOES LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MONTES CLAROS",
+      "uf": "MG",
+      "ibge": "3143302"
+    },
+    {
+      "nome": "PLASGOMES BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ARAQUARI",
+      "uf": "SC",
+      "ibge": "4201307"
+    },
+    {
+      "nome": "D N P COMERCIO E ACESSORIOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "UBERABA",
+      "uf": "MG",
+      "ibge": "3170107"
+    },
+    {
+      "nome": "MIX PARQUES EVENTOS E LAZER LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "INDAIATUBA",
+      "uf": "SP",
+      "ibge": "3520509"
+    },
+    {
+      "nome": "SHALLON COMERCIAL LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "UBERABA",
+      "uf": "MG",
+      "ibge": "3170107"
+    },
+    {
+      "nome": "CASA  CLEAN LTDA",
+      "segmento": "LOJA EXCLUSIVA",
+      "cidade": "ALTO HORIZONTE",
+      "uf": "GO",
+      "ibge": "5200555"
+    },
+    {
+      "nome": "FARIAS BRINQUEDOS E SERVICOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "JUNDIAI",
+      "uf": "SP",
+      "ibge": "3525904"
+    },
+    {
+      "nome": "KSF ELETRONICOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CUIABA",
+      "uf": "MT",
+      "ibge": "5103403"
+    },
+    {
+      "nome": "MAXIMA DISTRIBUIDORA EDUCACIONAL LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "FUNPLAY DS BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "S & C INTEGRADOS, COMERCIO E SERVICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "NITEROI",
+      "uf": "RJ",
+      "ibge": "3303302"
+    },
+    {
+      "nome": "FENIX INDUSTRIA E COMERCIO DE REBOQUES E KIDPLAY LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAUCAIA",
+      "uf": "CE",
+      "ibge": "2303709"
+    },
+    {
+      "nome": "CWB MADEIRA PLASTICA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "GUANAMBI",
+      "uf": "BA",
+      "ibge": "2911709"
+    },
+    {
+      "nome": "CLUBE DE COMPRAS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "PAULO AFONSO",
+      "uf": "BA",
+      "ibge": "2924009"
+    },
+    {
+      "nome": "KINGDOM PLAY LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "GOIANIA",
+      "uf": "GO",
+      "ibge": "5208707"
+    },
+    {
+      "nome": "GRUPO ARISE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "F J PLAY COMERCIO DE EQUIPAMENTOS E RECREAÇÃO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ERECHIM",
+      "uf": "RS",
+      "ibge": "4307005"
+    },
+    {
+      "nome": "FABRICA DOS SONHOS MOVEIS CORPORATIVOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MACEIO",
+      "uf": "AL",
+      "ibge": "2704302"
+    },
+    {
+      "nome": "SELD LAVANDERIA EXPRESS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MACAPA",
+      "uf": "AP",
+      "ibge": "1600303"
+    },
+    {
+      "nome": "MKL GRAMADOS E MADEIRA PLASTICA LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "RIBEIRAO PRETO",
+      "uf": "SP",
+      "ibge": "3543402"
+    },
+    {
+      "nome": "NORDESTE PLAYGROUNDS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "CARUARU",
+      "uf": "PE",
+      "ibge": "2604106"
+    },
+    {
+      "nome": "TRATTAR MADEIRAS MÓVEIS E DECORAÇÕES LTDA EPP",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "LAGES",
+      "uf": "SC",
+      "ibge": "4209300"
+    },
+    {
+      "nome": "JULIO CESAR GASPARINI JUNIOR LTDA.",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CEDRAL",
+      "uf": "SP",
+      "ibge": "3511300"
+    },
+    {
+      "nome": "NEW QUALITTY COMERCIAL LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FORTALEZA",
+      "uf": "CE",
+      "ibge": "2304400"
+    },
+    {
+      "nome": "LITORANEA INDUSTRIA E COMERCIO DE TECNOLOGIA E ERGONOMIA LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAUCAIA",
+      "uf": "CE",
+      "ibge": "2303709"
+    },
+    {
+      "nome": "MF COMERCIO EMPREENDIMENTOS E SERVIÇOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ARACAJU",
+      "uf": "SE",
+      "ibge": "2800308"
+    },
+    {
+      "nome": "JOUET INDUSTRIA E COMERCIO DE BRINQUEDOS EIRELI",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "AREIA BRANCA",
+      "uf": "RN",
+      "ibge": "2401107"
+    },
+    {
+      "nome": "LACAVA TIMMERS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO PAULO",
+      "uf": "SP",
+      "ibge": "3550308"
+    },
+    {
+      "nome": "TRONCOPLAY",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ITAPEVI",
+      "uf": "SP",
+      "ibge": "3522505"
+    },
+    {
+      "nome": "PARQUEVARAL IND. COM. DE ART DE METAL LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "RASILGRASS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CURITIBA",
+      "uf": "PR",
+      "ibge": "4106902"
+    },
+    {
+      "nome": "FB PLAYGROUNDS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "PESCARIA BRAVA",
+      "uf": "SC",
+      "ibge": "4212650"
+    },
+    {
+      "nome": "BRINK PARK",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MACEIO",
+      "uf": "AL",
+      "ibge": "2704302"
+    },
+    {
+      "nome": "CLEBER PEDROSO DA COSTA ¿ ME",
+      "segmento": "LOJA EXCLUSIVA",
+      "cidade": "RIBEIRAO GRANDE",
+      "uf": "SP",
+      "ibge": "3543253"
+    },
+    {
+      "nome": "MARCO AURELIO DA S CONCEICAO",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MARECHAL DEODORO",
+      "uf": "AL",
+      "ibge": "2704708"
+    },
+    {
+      "nome": "G ATLANTICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "BELEM",
+      "uf": "PA",
+      "ibge": "1501402"
+    },
+    {
+      "nome": "PEDRO VICTOR C DE ALBUQUERQUE LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "AQUIRAZ",
+      "uf": "CE",
+      "ibge": "2301000"
+    },
+    {
+      "nome": "TH AERVIÇOS URBANISTICOS E TRANSPORTES LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "LINHARES",
+      "uf": "ES",
+      "ibge": "3203205"
+    },
+    {
+      "nome": "MZ INDUSTRIA COMERCIO E SERVIÇOS EIRELI - ME",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "PALHOCA",
+      "uf": "SC",
+      "ibge": "4211900"
+    },
+    {
+      "nome": "FLORIPA EMPREENDIMENTOS E SERVICOS NORTE RIO GRANDENSE LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "AREIA BRANCA",
+      "uf": "RN",
+      "ibge": "2401107"
+    },
+    {
+      "nome": "PLAYFER",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "IPERO",
+      "uf": "SP",
+      "ibge": "3521002"
+    },
+    {
+      "nome": "RAFAEL AUGUSTO NICHIO",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO JOSE DO RIO PRETO",
+      "uf": "SP",
+      "ibge": "3549805"
+    },
+    {
+      "nome": "ZET@ INDUSTRIA E COMÉRCIO DE EQUIPAMENTOS PARA RECREAÇÃO LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO JOSE",
+      "uf": "SC",
+      "ibge": "4216602"
+    },
+    {
+      "nome": "OLIMAQ COM. E SERVICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "MACAPA",
+      "uf": "AP",
+      "ibge": "1600303"
+    },
+    {
+      "nome": "MOBILEPLAY COMERCIAL LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "JACAREI",
+      "uf": "SP",
+      "ibge": "3524402"
+    },
+    {
+      "nome": "2P PRIME - LOCACOES, EMPREENDIMENTOS E PRODUCOES LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "PARNAMIRIM",
+      "uf": "RN",
+      "ibge": "2403251"
+    },
+    {
+      "nome": "VENDRAME PARQUE",
+      "segmento": "LOJA EXCLUSIVA",
+      "cidade": "NHANDEARA",
+      "uf": "SP",
+      "ibge": "3532603"
+    },
+    {
+      "nome": "ZIPPER INDUSTRIA E COMERCIO DE BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "CAUCAIA",
+      "uf": "CE",
+      "ibge": "2303709"
+    },
+    {
+      "nome": "DENISE DOS SANTOS SOARES",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FEIRA DE SANTANA",
+      "uf": "BA",
+      "ibge": "2910800"
+    },
+    {
+      "nome": "WTA - WOODS TOYS ADVENTURE",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "SAO CAETANO DO SUL",
+      "uf": "SP",
+      "ibge": "3548807"
+    },
+    {
+      "nome": "JODERITO BARBOSA DE SOUSA LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "VITORIA DA CONQUISTA",
+      "uf": "BA",
+      "ibge": "2933307"
+    },
+    {
+      "nome": "JORDÃO BRUNO DE CARVALHO PEREIRA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "JOAO PESSOA",
+      "uf": "PB",
+      "ibge": "2507507"
+    },
+    {
+      "nome": "MULTI MENDONÇA COMERCIO DE PISOS E PLAYGROUND LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "FORTALEZA",
+      "uf": "CE",
+      "ibge": "2304400"
+    },
+    {
+      "nome": "R F INOVA PLAY LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "OLHO D'AGUA DAS CUNHAS",
+      "uf": "MA",
+      "ibge": "2107407"
+    },
+    {
+      "nome": "PORT MACHINE - BRINQUEDOS E PLAYGROUND LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ARARAQUARA",
+      "uf": "SP",
+      "ibge": "3503208"
+    },
+    {
+      "nome": "AG COMERCIO DE BRINQUEDOS E PLAYGROUNDS LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "ARACAJU",
+      "uf": "SE",
+      "ibge": "2800308"
+    },
+    {
+      "nome": "PLAYPOINT COMERCIO DE BRINQUEDOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FEIRA DE SANTANA",
+      "uf": "BA",
+      "ibge": "2910800"
+    },
+    {
+      "nome": "NEW QUALITTY COMERCIAL LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "FORTALEZA",
+      "uf": "CE",
+      "ibge": "2304400"
+    },
+    {
+      "nome": "KRENKE VALE DO SAO FRANCISCO LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "LAGOA GRANDE",
+      "uf": "PE",
+      "ibge": "2608750"
+    },
+    {
+      "nome": "COMERCIAL DINIZ",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "SAO LUIS",
+      "uf": "MA",
+      "ibge": "2111300"
+    },
+    {
+      "nome": "CONCRETA SERVICOS LTDA",
+      "segmento": "REVENDEDOR MISTO",
+      "cidade": "VIANA",
+      "uf": "MA",
+      "ibge": "2112803"
+    },
+    {
+      "nome": "MV QUIOSQUES LTDA",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "VALINHOS",
+      "uf": "SP",
+      "ibge": "3556206"
+    },
+    {
+      "nome": "PLAYGREEN PISOS E BRINQUEDOS",
+      "segmento": "REVENDEDOR PRIVADO",
+      "cidade": "MANAUS",
+      "uf": "AM",
+      "ibge": "1302603"
+    }
+  ]
+}
