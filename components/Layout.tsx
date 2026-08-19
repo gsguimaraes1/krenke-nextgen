@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Phone, Mail, MapPin, Facebook, Instagram, Youtube, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { gsap, ScrollTrigger, useGSAP } from '../lib/gsap';
+import { ScrollProgress } from './ui/ScrollProgress';
 import logoBranco from '../assets/Logos/krenke-brinquedos-logo-branco.webp';
 import logoMarcaBranco from '../assets/Logos/krenke-marca-playgrounds-branco.webp';
 import { CookieConsent } from './CookieConsent';
@@ -528,12 +530,40 @@ export const Footer: React.FC = () => {
  */
 export const Layout: React.FC<{ children: React.ReactNode; bare?: boolean }> = ({ children, bare = false }) => {
   const location = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      const main = mainRef.current;
+      if (!main) return;
+
+      // Só opacidade: `transform`/`filter` no <main> criariam containing block e
+      // quebrariam todo `position: fixed` das páginas (modal de produto, carrinho).
+      const tween = gsap.fromTo(
+        main,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.45, ease: 'power2.out', clearProps: 'opacity' }
+      );
+
+      // A rota nova muda a altura do documento — sem refresh, os ScrollTriggers
+      // da página anterior ficam com as posições antigas.
+      const refresh = window.setTimeout(() => ScrollTrigger.refresh(), 400);
+
+      return () => {
+        window.clearTimeout(refresh);
+        tween.kill();
+      };
+    },
+    { dependencies: [location.pathname], revertOnUpdate: true }
+  );
+
   return (
     <div className="flex flex-col min-h-screen font-sans text-gray-900 overflow-x-hidden">
       <SecurityGuard />
       <ScriptInjector />
+      <ScrollProgress />
       <Navbar />
-      <main className="flex-grow pt-20 overflow-x-hidden">
+      <main ref={mainRef} className="flex-grow pt-20 overflow-x-hidden">
         {children}
       </main>
       {!bare && (

@@ -106,8 +106,14 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 ## Segurança
 
 - Headers em `vercel.json`: HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy.
-- **CSP em `Content-Security-Policy-Report-Only`** (ainda não bloqueia — só reporta). Allowlist já
-  inclui `challenges.cloudflare.com`, Supabase, GTM, PowerBI, n8n, Chatwoot, unpkg.
+- **CSP enforcada** (2026-08-05, era `Content-Security-Policy-Report-Only`): allowlist já
+  inclui `challenges.cloudflare.com`, Supabase, GTM, PowerBI, n8n, Chatwoot, unpkg. Sem endpoint
+  `report-to`/`report-uri` configurado — se algo quebrar (script/iframe bloqueado), checar console
+  do navegador por página violada e ajustar allowlist em `vercel.json`.
+- `X-XSS-Protection: 1; mode=block` adicionado (2026-08-05) — header legado, mas recomendado
+  por auditoria de pentest.
+- `Server: Vercel` exposto no header de resposta — não corrigível (Vercel não permite suprimir/
+  ofuscar, é setado pela plataforma antes do `vercel.json` entrar em jogo).
 - Auditoria completa de segurança/UX: **`fable.md`** (itens: R2 endpoints sem auth, sinks
   `dangerouslySetInnerHTML`, RLS a confirmar, `SecurityGuard` hostil). Consultar antes de mexer em segurança.
 

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, FileDown, Trash2, Calculator, Package, AlertCircle,
   Plus, Edit2, Check, X, Loader2, ImagePlus, Image as ImageIcon,
-  User, FileText, ChevronDown, ChevronUp, History as HistoryIcon, FilePlus, Save
+  User, FileText, ChevronDown, ChevronUp, History as HistoryIcon, FilePlus, Save,
+  Download,
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import CreatableSelect from 'react-select/creatable';
@@ -125,6 +126,9 @@ const ProductCalculator: React.FC = () => {
   // Forma de pagamento: à vista concede 5% de desconto (sobre o total bruto,
   // antes do IPI); Entrada + 28 dias mantém preço cheio. Ambos têm IPI.
   const [paymentTerm, setPaymentTerm] = useState<'avista' | 'entrada'>('entrada');
+
+  // Oculta preços unitários (tabela, carrinho e PDF) — mostra só os totais.
+  const [hideUnitPrices, setHideUnitPrices] = useState(false);
 
   // Disclaimer
   const [useFullDisclaimer, setUseFullDisclaimer] = useState(false);
@@ -440,8 +444,10 @@ const ProductCalculator: React.FC = () => {
       doc.text('CÓD.', margin + 2, y + 5.5);
       doc.text('DESCRIÇÃO', margin + 22, y + 5.5);
       doc.text('QTD', margin + contentW - 66, y + 5.5, { align: 'right' });
-      doc.text('VL. UNIT.', margin + contentW - 40, y + 5.5, { align: 'right' });
-      doc.text('SUBTOTAL', margin + contentW, y + 5.5, { align: 'right' });
+      if (!hideUnitPrices) {
+        doc.text('VL. UNIT.', margin + contentW - 40, y + 5.5, { align: 'right' });
+        doc.text('SUBTOTAL', margin + contentW, y + 5.5, { align: 'right' });
+      }
       y += 8;
 
       doc.setFont('helvetica', 'normal');
@@ -457,8 +463,10 @@ const ProductCalculator: React.FC = () => {
         const desc = item.description.length > 60 ? item.description.substring(0, 57) + '...' : item.description;
         doc.text(desc, margin + 22, y + 5);
         doc.text(String(item.qty), margin + contentW - 66, y + 5, { align: 'right' });
-        doc.text(formatBRL(ep), margin + contentW - 40, y + 5, { align: 'right' });
-        doc.text(formatBRL(ep * item.qty), margin + contentW, y + 5, { align: 'right' });
+        if (!hideUnitPrices) {
+          doc.text(formatBRL(ep), margin + contentW - 40, y + 5, { align: 'right' });
+          doc.text(formatBRL(ep * item.qty), margin + contentW, y + 5, { align: 'right' });
+        }
         y += 7.5;
       });
 
@@ -593,6 +601,63 @@ const ProductCalculator: React.FC = () => {
     }
   };
 
+  /**
+   * CSV com 1 linha por item de cada orçamento salvo — mesmo padrão do
+   * relatório admin (BOM + ';' pra abrir certo, acentuado, no Excel pt-BR).
+   * Uma linha por item (não por orçamento) pra já vir pronto pra somar/filtrar
+   * na planilha sem precisar abrir cada PDF.
+   */
+  const exportSavedQuotesCsv = () => {
+    const head = [
+      'Nº Orçamento', 'Data', 'Cliente', 'CNPJ/CPF', 'Nº Cliente', 'Modelo',
+      'Revendedor Associado', 'Forma de Pagamento', 'Margem (%)',
+      'Código do Produto', 'Descrição do Produto', 'Qtd', 'Preço Unit.', 'Subtotal Item',
+      'Total do Orçamento (c/ IPI)',
+    ];
+    const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const num2 = (v: number) => v.toFixed(2).replace('.', ',');
+    const paymentLabel = (p: string | null) => p === 'avista' ? 'À Vista' : 'Entrada + 28 Dias';
+
+    const rows: string[] = [];
+    savedQuotes.forEach(q => {
+      const date = new Date(q.updated_at).toLocaleString('pt-BR');
+      const base = [
+        q.quote_number,
+        date,
+        q.client_name || '',
+        q.client_cnpj || '',
+        q.client_number || '',
+        q.model_name || '',
+        q.associated_reseller_name || '',
+        paymentLabel(q.payment_term),
+        num2(Number(q.margin) || 0),
+      ];
+      const items = q.items && q.items.length > 0 ? q.items : [null];
+      items.forEach(item => {
+        rows.push([
+          ...base,
+          item?.code || '',
+          item?.description || '(sem itens)',
+          item ? item.qty : '',
+          item ? num2(Number(item.unit_price) || 0) : '',
+          item ? num2((Number(item.unit_price) || 0) * (Number(item.qty) || 0)) : '',
+          num2(Number(q.total_com_ipi) || 0),
+        ].map(esc).join(';'));
+      });
+    });
+
+    // BOM + ';' → abre certo no Excel pt-BR
+    const blob = new Blob(['﻿' + [head.map(esc).join(';'), ...rows].join('\r\n')], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orcamentos-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSaveQuote = async () => {
     if (!user || cart.length === 0) return;
     if (!clientName.trim()) {
@@ -640,24 +705,59 @@ const ProductCalculator: React.FC = () => {
   };
 
   /**
-   * Repõe o orçamento na calculadora. Itens são reconciliados por `code`
-   * contra a tabela atual — produto removido do catálogo é descartado, e o
-   * preço exibido passa a ser o preço atual, não o congelado.
+   * Repõe o orçamento na calculadora. Itens são reconciliados contra a
+   * tabela atual — produto removido do catálogo é descartado, e o preço
+   * exibido passa a ser o preço atual, não o congelado.
+   *
+   * O catálogo tem códigos duplicados entre variantes (ex.: "200565" é usado
+   * por 4 telhados diferentes — roto chinês, roto sextavado, roto redondo,
+   * redondo cone). Reconciliar só por `code` pega sempre a última variante
+   * daquele código (ordem alfabética da query), trocando silenciosamente o
+   * item pro produto errado ao reabrir o orçamento — ex.: telhado roto
+   * redondo virando "roto sextavado" porque S vem depois na ordenação.
+   * Por isso o match prioriza `code` + `description` exata; só cai pro
+   * código sozinho quando ele é inequívoco (um único produto com esse
+   * código) — caso contrário mantém os dados congelados do item salvo em
+   * vez de arriscar resolver pro produto errado.
    */
   const handleLoadQuote = (quote: ResellerQuote) => {
     if (cart.length > 0 && quote.quote_number !== quoteNumber && !savedAt) {
       const ok = confirm('Você tem itens no orçamento atual que ainda não foram salvos. Ao carregar outro orçamento, esses itens serão perdidos. Deseja continuar?');
       if (!ok) return;
     }
-    const byCode: Record<string, CalculatorProduct> = {};
-    products.forEach(p => { byCode[p.code] = p; });
+    const byCode: Record<string, CalculatorProduct[]> = {};
+    products.forEach(p => { (byCode[p.code] ||= []).push(p); });
 
     const restored: CartItem[] = [];
     const missing: string[] = [];
+    const ambiguous: string[] = [];
     (quote.items || []).forEach(item => {
-      const product = byCode[item.code];
-      if (product) restored.push({ ...product, qty: item.qty });
-      else missing.push(item.code);
+      const candidates = byCode[item.code];
+      if (!candidates || candidates.length === 0) {
+        missing.push(item.code);
+        return;
+      }
+      const exact = candidates.find(p => p.description === item.description);
+      if (exact) {
+        restored.push({ ...exact, qty: item.qty });
+      } else if (candidates.length === 1) {
+        restored.push({ ...candidates[0], qty: item.qty });
+      } else {
+        // Código ambíguo e a descrição salva não bate com nenhuma variante
+        // atual — mantém o item como estava no orçamento (preço congelado)
+        // em vez de adivinhar qual das variantes é a certa.
+        ambiguous.push(item.description);
+        restored.push({
+          id: `frozen-${item.code}-${restored.length}`,
+          code: item.code,
+          description: item.description,
+          unit_price: item.unit_price,
+          active: true,
+          created_at: '',
+          updated_at: '',
+          qty: item.qty,
+        });
+      }
     });
 
     setQuoteNumber(quote.quote_number);
@@ -679,6 +779,12 @@ const ProductCalculator: React.FC = () => {
       alert(
         `Orçamento carregado. ${missing.length} item(ns) não estão mais no catálogo e foram ignorados:\n` +
         missing.join(', ')
+      );
+    }
+    if (ambiguous.length > 0) {
+      alert(
+        `Orçamento carregado. ${ambiguous.length} item(ns) têm código duplicado no catálogo — mantido o preço salvo no orçamento em vez do preço atual:\n` +
+        ambiguous.join(', ')
       );
     }
   };
@@ -851,7 +957,14 @@ const ProductCalculator: React.FC = () => {
             <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-2">
               <HistoryIcon size={18} className="text-[#312783]" />
               <span className="font-black text-slate-700">Orçamentos salvos</span>
-              <button onClick={() => setQuotesOpen(false)} className="ml-auto p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 transition-colors">
+              <button
+                onClick={exportSavedQuotesCsv}
+                disabled={savedQuotes.length === 0}
+                className="ml-auto flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-xl font-bold text-xs hover:border-[#312783] hover:text-[#312783] disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition-all"
+              >
+                <Download size={14} /> Exportar CSV
+              </button>
+              <button onClick={() => setQuotesOpen(false)} className="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 transition-colors">
                 <X size={18} />
               </button>
             </div>
@@ -982,7 +1095,7 @@ const ProductCalculator: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-black text-slate-800 text-sm leading-snug line-clamp-2 break-words" title={product.description}>{product.description}</p>
                     <p className="text-xs text-slate-400 font-bold mt-0.5">
-                      Cód. {product.code} • {formatBRL(effectivePrice(product.unit_price))}
+                      Cód. {product.code}{!hideUnitPrices && ` • ${formatBRL(effectivePrice(product.unit_price))}`}
                     </p>
                   </div>
 
@@ -1022,7 +1135,7 @@ const ProductCalculator: React.FC = () => {
                     >+</button>
                   </div>
 
-                  {qty > 0 && (
+                  {qty > 0 && !hideUnitPrices && (
                     <div className="w-24 text-right shrink-0">
                       <p className="text-sm font-black text-[#312783] tabular-nums">{formatBRL(effectivePrice(product.unit_price) * qty)}</p>
                     </div>
@@ -1188,14 +1301,23 @@ const ProductCalculator: React.FC = () => {
 
           {/* Cart summary */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
-              <Calculator size={18} className="text-[#312783]" />
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+              <Calculator size={18} className="text-[#312783] shrink-0" />
               <div className="min-w-0">
                 <span className="font-black text-slate-700 block">Resumo</span>
                 {modelName && (
                   <span className="text-xs font-bold text-slate-400 truncate block" title={modelName}>{modelName}</span>
                 )}
               </div>
+              <label className="ml-auto shrink-0 flex items-center gap-1.5 text-xs font-bold text-slate-500 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={hideUnitPrices}
+                  onChange={e => setHideUnitPrices(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-slate-300 accent-[#312783]"
+                />
+                Ocultar valores
+              </label>
               {cart.length > 0 && (
                 <button
                   onClick={() => { if (confirm('Remover todos os itens do carrinho? Esta ação não pode ser desfeita.')) setCart([]); }}
@@ -1218,11 +1340,13 @@ const ProductCalculator: React.FC = () => {
                         </p>
                         <div className="flex justify-between items-baseline gap-2 mt-1">
                           <span className="text-xs text-slate-400 font-bold">
-                            {item.qty}× {formatBRL(effectivePrice(item.unit_price))}
+                            {hideUnitPrices ? `${item.qty} un.` : `${item.qty}× ${formatBRL(effectivePrice(item.unit_price))}`}
                           </span>
-                          <span className="text-sm font-black text-[#312783] shrink-0 tabular-nums">
-                            {formatBRL(effectivePrice(item.unit_price) * item.qty)}
-                          </span>
+                          {!hideUnitPrices && (
+                            <span className="text-sm font-black text-[#312783] shrink-0 tabular-nums">
+                              {formatBRL(effectivePrice(item.unit_price) * item.qty)}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}

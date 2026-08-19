@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, Search, X, Plus, ShoppingCart, ChevronDown, ChevronUp, ArrowRight, Trash2 } from 'lucide-react';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
@@ -8,6 +8,8 @@ import { supabase } from '../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import { TranslatableText } from '../components/TranslatableText';
 import { sanitizeHtml } from '../lib/sanitize';
+import { gsap, ScrollTrigger, useGSAP, MQ } from '../lib/gsap';
+import { Parallax } from '../components/ui/Parallax';
 
 // High-performance image discovery via Vite Glob Import
 const allAssets = import.meta.glob('../assets/**/*', { eager: true, query: '?url', import: 'default' });
@@ -380,6 +382,66 @@ export const ProductsPage: React.FC = () => {
     });
   }, [products, activeCategory, search]);
 
+  const heroRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLElement>(null);
+
+  // Hero: reanima a cada troca de categoria, já que o título muda junto.
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add(MQ.motion, () => {
+        const tl = gsap
+          .timeline({ defaults: { ease: 'expo.out' } })
+          .from('[data-hero-tag]', { y: -24, opacity: 0, duration: 0.8 }, 0)
+          .from('[data-hero-title]', { yPercent: 115, opacity: 0, duration: 1.1 }, 0.1)
+          .from('[data-hero-rule]', { scaleX: 0, transformOrigin: 'left center', duration: 0.9 }, 0.5);
+
+        return () => tl.kill();
+      });
+
+      return () => mm.revert();
+    },
+    { dependencies: [activeCategory], revertOnUpdate: true, scope: heroRef }
+  );
+
+  // Grid: entra em lotes conforme rola. `batch` agrupa os cards que cruzam a
+  // viewport no mesmo intervalo, então a cascata sai coerente em vez de cada
+  // card disparar por conta própria.
+  useGSAP(
+    () => {
+      const grid = gridRef.current;
+      if (!grid) return;
+
+      const cards = gsap.utils.toArray<HTMLElement>('[data-product-card]', grid);
+      if (!cards.length) return;
+
+      const mm = gsap.matchMedia();
+
+      mm.add(MQ.motion, () => {
+        gsap.set(cards, { opacity: 0, y: 40 });
+
+        const batch = ScrollTrigger.batch(cards, {
+          start: 'top 90%',
+          onEnter: (targets) =>
+            gsap.to(targets, {
+              opacity: 1,
+              y: 0,
+              duration: 0.7,
+              stagger: 0.08,
+              ease: 'power3.out',
+              overwrite: true,
+            }),
+        });
+
+        return () => batch.forEach(trigger => trigger.kill());
+      });
+
+      return () => mm.revert();
+    },
+    { dependencies: [filteredProducts.length, loading], revertOnUpdate: true, scope: gridRef }
+  );
+
   return (
     <div className="bg-slate-50 min-h-screen pb-32 overflow-x-hidden">
       <Helmet>
@@ -397,32 +459,31 @@ export const ProductsPage: React.FC = () => {
       )}
 
       {/* Hero Banner */}
-      <div className="relative h-[450px] md:h-[550px] overflow-hidden flex items-center bg-krenke-purple px-4">
+      <div ref={heroRef} className="relative h-[450px] md:h-[550px] overflow-hidden flex items-center bg-krenke-purple px-4">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-krenke-purple via-vibrant-purple to-vibrant-orange opacity-40 mix-blend-overlay"></div>
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.webp')] opacity-10"></div>
+          <Parallax speed={2} className="absolute inset-0">
+            <div className="absolute -inset-y-[15%] inset-x-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.webp')] opacity-10"></div>
+          </Parallax>
         </div>
 
         <div className="relative z-10 max-w-[85%] mx-auto w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="flex flex-col items-start"
-          >
-            <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-black uppercase tracking-[0.3em] mb-8">
+          <div className="flex flex-col items-start">
+            <div data-hero-tag className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-black uppercase tracking-[0.3em] mb-8">
               <span className="w-2 h-2 rounded-full bg-vibrant-orange animate-pulse shadow-vibrant-orange"></span>
               <TranslatableText>{activeCategory === 'Todos' ? 'Linha Completa 2026' : `Linha ${activeCategory} 2026`}</TranslatableText>
             </div>
 
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.85] tracking-tighter mb-8 uppercase drop-shadow-2xl">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto] animate-gradient-x">
+            {/* O título sobe de dentro da máscara. Não é splitado por caractere
+                porque o `bg-clip-text` do gradiente vive no elemento inteiro. */}
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.85] tracking-tighter mb-8 uppercase drop-shadow-2xl overflow-hidden pb-[0.08em]">
+              <span data-hero-title className="block text-transparent bg-clip-text bg-gradient-to-r from-vibrant-orange via-yellow-400 to-vibrant-orange bg-[length:200%_auto] animate-gradient-x">
                 <TranslatableText>{activeCategory === 'Todos' ? 'DIVERSÃO' : activeCategory}</TranslatableText>
               </span>
             </h1>
 
-            <div className="h-3 w-32 bg-vibrant-orange rounded-full shadow-vibrant-orange"></div>
-          </motion.div>
+            <div data-hero-rule className="h-3 w-32 bg-vibrant-orange rounded-full shadow-vibrant-orange"></div>
+          </div>
         </div>
       </div>
 
@@ -475,23 +536,14 @@ export const ProductsPage: React.FC = () => {
           </div>
         </aside>
 
-        <main className="flex-1">
+        <main ref={gridRef} className="flex-1">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 text-center">{t('common.loading')}</div>
           ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
-              {filteredProducts.map((product, idx) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: (idx % 3) * 0.1 }}
-                  className="group"
-                  onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), produto: product.id })}
-                >
-                  <div 
-                    key={product.id}
+              {filteredProducts.map((product) => (
+                <div key={product.id} data-product-card className="group">
+                  <div
                     id={`btn-product-card-${product.id}`}
                     onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), produto: product.id })}
                     className="bg-white rounded-[2.5rem] overflow-hidden shadow-premium border border-slate-100 cursor-pointer flex flex-col transform transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl h-full group"
@@ -531,7 +583,7 @@ export const ProductsPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           ) : (
