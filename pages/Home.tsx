@@ -235,9 +235,6 @@ const Features = () => (
 );
 
 const CategoryPreview = () => {
-  const pinRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-
   const categories = [
     {
       title: "Playgrounds Padrões",
@@ -301,69 +298,8 @@ const CategoryPreview = () => {
     },
   ];
 
-  useGSAP(
-    () => {
-      const pin = pinRef.current;
-      const track = trackRef.current;
-      if (!pin || !track) return;
-
-      const mm = gsap.matchMedia();
-
-      // Scroll horizontal só no desktop. Em telas menores — e quando o usuário
-      // pede menos movimento — o track continua sendo um carrossel nativo com
-      // snap, então nenhum card fica inacessível se o pin não ativar.
-      mm.add(MQ.desktop, () => {
-        // Distância = quanto o track precisa andar pra revelar o último card.
-        const distance = () => Math.max(0, track.scrollWidth - window.innerWidth + 96);
-
-        // Enquanto o GSAP controla o eixo X, o scroll nativo do track sai de cena.
-        track.style.overflowX = 'hidden';
-
-        const tween = gsap.to(track, {
-          x: () => -distance(),
-          ease: 'none', // obrigatório: mantém scroll e posição 1:1
-          scrollTrigger: {
-            trigger: pin,
-            pin: true,
-            start: 'top top',
-            end: () => `+=${distance()}`,
-            scrub: 1,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        // Barra de progresso do trilho.
-        const bar = gsap.fromTo(
-          '[data-track-progress]',
-          { scaleX: 0 },
-          {
-            scaleX: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: pin,
-              start: 'top top',
-              end: () => `+=${distance()}`,
-              scrub: true,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
-
-        return () => {
-          track.style.overflowX = '';
-          tween.kill();
-          bar.kill();
-        };
-      });
-
-      return () => mm.revert();
-    },
-    { scope: pinRef }
-  );
-
   return (
-    <section className="py-32 bg-gradient-to-b from-white to-slate-100 flex flex-col items-center overflow-hidden">
+    <section className="py-32 bg-gradient-to-b from-white to-slate-100 flex flex-col items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="text-center mb-20">
           <h2 className="text-5xl md:text-7xl font-black text-krenke-purple mb-6 uppercase tracking-tighter">
@@ -379,48 +315,31 @@ const CategoryPreview = () => {
             <div className="h-2 w-[150px] bg-vibrant-orange mx-auto mt-8 rounded-full shadow-[0_0_15px_#FF9F0A]"></div>
           </Reveal>
         </div>
-      </div>
 
-      {/* Trilho horizontal: pinado e puxado pelo scroll no desktop, carrossel com
-          snap no mobile. */}
-      <div
-        ref={pinRef}
-        className="relative w-full lg:h-screen lg:flex lg:flex-col lg:justify-center"
-      >
-        <div
-          ref={trackRef}
-          className="flex gap-8 lg:gap-12 px-6 lg:px-[8vw] overflow-x-auto snap-x snap-mandatory pb-10 lg:pb-0 no-scrollbar"
-        >
+        <Reveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 justify-items-center" stagger={0.1} distance={40}>
           {categories.map((cat, idx) => (
             <ShowcaseCard
               key={idx}
               priority={idx === 0 || idx === 1}
-              className="shrink-0 w-[85vw] sm:w-[420px] snap-center"
-              heightClass="h-[clamp(460px,68vh,640px)]"
               {...cat}
             />
           ))}
-        </div>
-
-        {/* Progresso do trilho (desktop) */}
-        <div className="hidden lg:block max-w-md mx-auto w-full h-1 bg-krenke-purple/10 rounded-full mt-12 overflow-hidden">
-          <div data-track-progress className="h-full w-full origin-left bg-vibrant-orange rounded-full" style={{ transform: 'scaleX(0)' }} />
-        </div>
-      </div>
-
-      <div className="mt-20 text-center">
-        <Reveal direction="scale">
-          <Magnetic strength={0.25}>
-            <Link
-              to="/orcamento"
-              id="btn-home-category-full-quote"
-              className="inline-flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black text-xl rounded-2xl shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 gtm-home-category-button-full-quote"
-            >
-              <TranslatableText>SOLICITAR ORÇAMENTO COMPLETO</TranslatableText>
-              <ArrowRight strokeWidth={3} />
-            </Link>
-          </Magnetic>
         </Reveal>
+
+        <div className="mt-20 text-center">
+          <Reveal direction="scale">
+            <Magnetic strength={0.25}>
+              <Link
+                to="/orcamento"
+                id="btn-home-category-full-quote"
+                className="inline-flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-krenke-orange to-orange-500 text-white font-black text-xl rounded-2xl shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 gtm-home-category-button-full-quote"
+              >
+                <TranslatableText>SOLICITAR ORÇAMENTO COMPLETO</TranslatableText>
+                <ArrowRight strokeWidth={3} />
+              </Link>
+            </Magnetic>
+          </Reveal>
+        </div>
       </div>
     </section>
   );

@@ -602,12 +602,13 @@ const ProductCalculator: React.FC = () => {
   };
 
   /**
-   * CSV com 1 linha por item de cada orçamento salvo — mesmo padrão do
-   * relatório admin (BOM + ';' pra abrir certo, acentuado, no Excel pt-BR).
-   * Uma linha por item (não por orçamento) pra já vir pronto pra somar/filtrar
-   * na planilha sem precisar abrir cada PDF.
+   * CSV com 1 linha por item — mesmo padrão do relatório admin (BOM + ';'
+   * pra abrir certo, acentuado, no Excel pt-BR). Uma linha por item (não por
+   * orçamento) pra já vir pronto pra somar/filtrar na planilha sem precisar
+   * abrir cada PDF. `quotes` com 1 item só = export do orçamento selecionado;
+   * lista inteira = export de todos os orçamentos salvos.
    */
-  const exportSavedQuotesCsv = () => {
+  const exportQuotesCsv = (quotes: ResellerQuote[], filename: string) => {
     const head = [
       'Nº Orçamento', 'Data', 'Cliente', 'CNPJ/CPF', 'Nº Cliente', 'Modelo',
       'Revendedor Associado', 'Forma de Pagamento', 'Margem (%)',
@@ -619,7 +620,7 @@ const ProductCalculator: React.FC = () => {
     const paymentLabel = (p: string | null) => p === 'avista' ? 'À Vista' : 'Entrada + 28 Dias';
 
     const rows: string[] = [];
-    savedQuotes.forEach(q => {
+    quotes.forEach(q => {
       const date = new Date(q.updated_at).toLocaleString('pt-BR');
       const base = [
         q.quote_number,
@@ -653,9 +654,17 @@ const ProductCalculator: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `orcamentos-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const exportSavedQuotesCsv = () =>
+    exportQuotesCsv(savedQuotes, `orcamentos-${new Date().toISOString().slice(0, 10)}.csv`);
+
+  const exportSingleQuoteCsv = (q: ResellerQuote, e: React.MouseEvent) => {
+    e.stopPropagation(); // não abre/carrega o orçamento ao clicar em exportar
+    exportQuotesCsv([q], `orcamento-${q.quote_number}.csv`);
   };
 
   const handleSaveQuote = async () => {
@@ -977,10 +986,13 @@ const ProductCalculator: React.FC = () => {
               ) : (
                 <div className="space-y-2">
                   {savedQuotes.map(q => (
-                    <button
+                    <div
                       key={q.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => handleLoadQuote(q)}
-                      className="w-full text-left rounded-2xl border border-slate-100 px-4 py-3 hover:border-[#312783] hover:bg-slate-50 transition-all"
+                      onKeyDown={e => { if (e.key === 'Enter') handleLoadQuote(q); }}
+                      className="w-full text-left rounded-2xl border border-slate-100 px-4 py-3 hover:border-[#312783] hover:bg-slate-50 transition-all cursor-pointer"
                     >
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span className="font-black text-[#312783] text-sm tabular-nums shrink-0">{q.quote_number}</span>
@@ -988,6 +1000,13 @@ const ProductCalculator: React.FC = () => {
                           Cliente: {q.client_name || '— sem cliente informado —'}
                         </span>
                         <span className="text-sm font-black text-slate-700 tabular-nums shrink-0">{formatBRL(Number(q.total_com_ipi))}</span>
+                        <button
+                          onClick={e => exportSingleQuoteCsv(q, e)}
+                          title="Exportar este orçamento em CSV"
+                          className="shrink-0 flex items-center gap-1 bg-slate-50 border border-slate-200 text-slate-500 px-2.5 py-1 rounded-lg font-bold text-xs hover:border-[#312783] hover:text-[#312783] hover:bg-white transition-all"
+                        >
+                          <Download size={12} /> CSV
+                        </button>
                       </div>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs font-bold text-slate-400">
                         {q.model_name && <span className="truncate max-w-[200px]">Modelo: {q.model_name}</span>}
@@ -999,7 +1018,7 @@ const ProductCalculator: React.FC = () => {
                           })}
                         </span>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               )}
