@@ -7,9 +7,11 @@ interface ProtectedRouteProps {
     allowedRoles?: UserRole[];
     // Extra hardcoded gate on top of role — for pages restricted to specific accounts only.
     allowedUserIds?: string[];
+    // Same idea as allowedUserIds, but matches on the account e-mail (case-insensitive).
+    allowedEmails?: string[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles, allowedUserIds }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles, allowedUserIds, allowedEmails }) => {
     const { user, role, loading } = useAuth();
     const location = useLocation();
 
@@ -33,6 +35,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles,
 
     if (allowedUserIds && !allowedUserIds.includes(user.id)) {
         return <Navigate to="/" replace />;
+    }
+
+    if (allowedEmails) {
+        const email = (user.email || '').toLowerCase();
+        if (!allowedEmails.map(e => e.toLowerCase()).includes(email)) {
+            return <Navigate to="/" replace />;
+        }
     }
 
     return <>{children}</>;

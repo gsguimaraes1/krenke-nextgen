@@ -30,6 +30,13 @@ const CareersPage = React.lazy(() => import('./pages/Careers'));
 const ObrigadoCurriculoPage = React.lazy(() => import('./pages/ObrigadoCurriculo'));
 const MarketingPage = React.lazy(() => import('./pages/Marketing'));
 const RelatorioPage = React.lazy(() => import('./pages/Relatorio'));
+const PowerBIEmbed = React.lazy(() => import('./pages/PowerBIEmbed'));
+
+// Gate por conta — só este e-mail acessa /venda e /faturamento.
+const DASHBOARD_ALLOWED_EMAILS = ['gabriel.gbr.fire@gmail.com'];
+
+const PBI_VENDAS_SRC = 'https://app.powerbi.com/view?r=eyJrIjoiNzE3YzU5NWYtODBjOC00M2M4LWI4NTctOGMxMzBlNTQzMDdiIiwidCI6ImU1ZjY5ZGFiLTdkYWYtNGU1MS04MjdhLTEwNjkxOWE4ZjU5MCJ9&pageName=0f1001c0a555ed00d2e9';
+const PBI_FATURAMENTO_SRC = 'https://app.powerbi.com/view?r=eyJrIjoiNzE3YzU5NWYtODBjOC00M2M4LWI4NTctOGMxMzBlNTQzMDdiIiwidCI6ImU1ZjY5ZGFiLTdkYWYtNGU1MS04MjdhLTEwNjkxOWE4ZjU5MCJ9&pageName=33e48024097eb8674737';
 
 import { captureUTMs } from './lib/utm-tracker';
 import { Analytics } from "@vercel/analytics/react";
@@ -109,6 +116,18 @@ const App: React.FC = () => {
                 ]}
               >
                 <RelatorioPage />
+              </ProtectedRoute>
+            } />
+
+            {/* Dashboards PowerBI crus (só o embed) - restritos a um e-mail */}
+            <Route path="/venda" element={
+              <ProtectedRoute allowedEmails={DASHBOARD_ALLOWED_EMAILS}>
+                <PowerBIEmbed src={PBI_VENDAS_SRC} title="KRENKE_DASHBOARD_VENDAS" />
+              </ProtectedRoute>
+            } />
+            <Route path="/faturamento" element={
+              <ProtectedRoute allowedEmails={DASHBOARD_ALLOWED_EMAILS}>
+                <PowerBIEmbed src={PBI_FATURAMENTO_SRC} title="KRENKE_DASHBOARD_FATURAMENTO" />
               </ProtectedRoute>
             } />
 
