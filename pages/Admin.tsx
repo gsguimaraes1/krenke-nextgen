@@ -41,7 +41,8 @@ import {
     GripVertical,
     Check,
     KeyRound,
-    BarChart3
+    BarChart3,
+    Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -424,15 +425,40 @@ const UsersView = ({
     onCreateUser,
     onResendInvite,
     onDeleteUser,
+    onSetPassword,
 }: {
     users: Profile[],
     onUpdateRole: (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt') => void,
     onCreateUser: (data: { full_name: string; email: string; phone: string; role: string }) => Promise<void>,
     onResendInvite: (email: string) => Promise<void>,
     onDeleteUser: (id: string, email: string) => Promise<void>,
+    onSetPassword: (id: string, newPassword: string) => Promise<void>,
 }) => {
     const [showCreate, setShowCreate] = React.useState(false);
     const [resetingId, setResetingId] = React.useState<string | null>(null);
+    const [passwordModalUser, setPasswordModalUser] = React.useState<{ id: string; email: string } | null>(null);
+    const [newPassword, setNewPassword] = React.useState('');
+    const [confirmPassword, setConfirmPassword] = React.useState('');
+    const [settingPassword, setSettingPassword] = React.useState(false);
+
+    const closePasswordModal = () => {
+        setPasswordModalUser(null);
+        setNewPassword('');
+        setConfirmPassword('');
+    };
+
+    const handleSubmitPassword = async () => {
+        if (!passwordModalUser) return;
+        if (newPassword.length < 6) { alert('A senha precisa ter no mínimo 6 caracteres.'); return; }
+        if (newPassword !== confirmPassword) { alert('As senhas não coincidem.'); return; }
+        setSettingPassword(true);
+        try {
+            await onSetPassword(passwordModalUser.id, newPassword);
+            closePasswordModal();
+        } finally {
+            setSettingPassword(false);
+        }
+    };
 
     const handleResetPassword = async (userId: string, email: string) => {
         if (!confirm(`Enviar e-mail de redefinição de senha para ${email}?`)) return;
@@ -597,7 +623,14 @@ const UsersView = ({
                                             disabled={resetingId === u.id}
                                             className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors disabled:opacity-50"
                                         >
-                                            {resetingId === u.id ? <RefreshCw size={12} className="animate-spin" /> : <KeyRound size={12} />} Senha
+                                            {resetingId === u.id ? <RefreshCw size={12} className="animate-spin" /> : <KeyRound size={12} />} E-mail
+                                        </button>
+                                        <button
+                                            onClick={() => setPasswordModalUser({ id: u.id, email: u.email })}
+                                            title="Definir nova senha manualmente (sem enviar e-mail)"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase text-krenke-blue bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                                        >
+                                            <Lock size={12} /> Definir Senha
                                         </button>
                                         <button
                                             onClick={() => onDeleteUser(u.id, u.email)}
@@ -613,6 +646,53 @@ const UsersView = ({
                     </tbody>
                 </table>
             </div>
+
+            {passwordModalUser && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closePasswordModal}>
+                    <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between">
+                            <h2 className="font-black text-krenke-blue text-lg flex items-center gap-2"><Lock size={18} /> Definir Nova Senha</h2>
+                            <button onClick={closePasswordModal} className="p-1 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                            Define a senha de <span className="font-bold text-gray-700">{passwordModalUser.email}</span> direto no banco —
+                            não depende de e-mail. Avise o usuário a nova senha por um canal seguro.
+                        </p>
+                        <div className="space-y-1">
+                            <label className="text-xs font-black text-gray-400 uppercase">Nova Senha</label>
+                            <input
+                                type="password"
+                                autoFocus
+                                className="w-full p-3 bg-gray-50 border rounded-xl"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="Mínimo 6 caracteres"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-black text-gray-400 uppercase">Confirmar Senha</label>
+                            <input
+                                type="password"
+                                className="w-full p-3 bg-gray-50 border rounded-xl"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Repita a senha"
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleSubmitPassword(); }}
+                            />
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                onClick={handleSubmitPassword}
+                                disabled={settingPassword}
+                                className="px-6 py-2.5 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {settingPassword ? <RefreshCw size={16} className="animate-spin" /> : <Lock size={16} />} Salvar Senha
+                            </button>
+                            <button onClick={closePasswordModal} className="px-6 py-2.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -1584,6 +1664,20 @@ const AdminPage: React.FC = () => {
         alert('Convite reenviado para ' + email + '!');
     };
 
+    const handleSetPassword = async (id: string, newPassword: string) => {
+        if (!supabase) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { alert('Sessão expirada.'); return; }
+        const res = await fetch('/api/set-user-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify({ userId: id, newPassword }),
+        });
+        const json = await res.json();
+        if (!res.ok) { alert('Erro ao definir senha: ' + json.error); return; }
+        alert('Senha definida com sucesso!');
+    };
+
     const handleDeleteUser = async (id: string, email: string) => {
         if (!supabase) return;
         if (!confirm(`Excluir o usuário ${email}? Esta ação não pode ser desfeita.`)) return;
@@ -2227,7 +2321,7 @@ const AdminPage: React.FC = () => {
                         }} />
                     )}
                     {activeView === 'usuarios' && (
-                        <UsersView users={profiles} onUpdateRole={updateUserRole} onCreateUser={handleCreateUser} onResendInvite={handleResendInvite} onDeleteUser={handleDeleteUser} />
+                        <UsersView users={profiles} onUpdateRole={updateUserRole} onCreateUser={handleCreateUser} onResendInvite={handleResendInvite} onDeleteUser={handleDeleteUser} onSetPassword={handleSetPassword} />
                     )}
                     {/*
                       Relatório de orçamentos da calculadora do revendedor. Restrito a `super`:
