@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   if (callerProfile?.role !== 'super') return res.status(403).json({ error: 'Forbidden: super admin only' });
 
   const { action } = req.body || {};
-  const siteUrl = process.env.SITE_URL || 'https://krenke.com.br';
+  const siteUrl = process.env.SITE_URL || 'https://site.krenke.com.br';
 
   if (action === 'create') {
     const { full_name, email, phone, role } = req.body;

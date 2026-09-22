@@ -73,7 +73,7 @@ export default async function handler(req, res) {
 
     // Notificação pra equipe SAC — falha aqui não invalida o chamado, já salvo.
     if (process.env.SAC_NOTIFY_EMAIL) {
-      const appUrl = process.env.SITE_URL || 'https://krenke.com.br';
+      const appUrl = process.env.SITE_URL || 'https://site.krenke.com.br';
       sendEmail({
         to: process.env.SAC_NOTIFY_EMAIL,
         subject: `Novo chamado SAC: ${data.title} (${inserted.ticket_number})`,
