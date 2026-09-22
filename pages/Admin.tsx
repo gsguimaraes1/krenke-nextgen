@@ -1671,10 +1671,10 @@ const AdminPage: React.FC = () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) { alert('Sessão expirada. Faça login novamente.'); return; }
 
-        const res = await fetch('/api/create-user', {
+        const res = await fetch('/api/manage-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ action: 'create', ...data }),
         });
         const json = await res.json();
         if (!res.ok) { alert('Erro ao criar usuário: ' + json.error); return; }
@@ -1686,10 +1686,10 @@ const AdminPage: React.FC = () => {
         if (!supabase) return;
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) { alert('Sessão expirada.'); return; }
-        const res = await fetch('/api/resend-invite', {
+        const res = await fetch('/api/manage-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({ action: 'resend-invite', email }),
         });
         const json = await res.json();
         if (!res.ok) { alert('Erro ao enviar convite: ' + json.error); return; }
@@ -1700,10 +1700,10 @@ const AdminPage: React.FC = () => {
         if (!supabase) return;
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) { alert('Sessão expirada.'); return; }
-        const res = await fetch('/api/set-user-password', {
+        const res = await fetch('/api/manage-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-            body: JSON.stringify({ userId: id, newPassword }),
+            body: JSON.stringify({ action: 'set-password', userId: id, newPassword }),
         });
         const json = await res.json();
         if (!res.ok) { alert('Erro ao definir senha: ' + json.error); return; }
@@ -1715,10 +1715,10 @@ const AdminPage: React.FC = () => {
         if (!confirm(`Excluir o usuário ${email}? Esta ação não pode ser desfeita.`)) return;
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) { alert('Sessão expirada.'); return; }
-        const res = await fetch('/api/delete-user', {
+        const res = await fetch('/api/manage-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-            body: JSON.stringify({ userId: id }),
+            body: JSON.stringify({ action: 'delete', userId: id }),
         });
         const json = await res.json();
         if (!res.ok) { alert('Erro ao excluir usuário: ' + json.error); return; }
