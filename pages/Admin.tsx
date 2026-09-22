@@ -428,13 +428,14 @@ const UsersView = ({
     onSetPassword,
 }: {
     users: Profile[],
-    onUpdateRole: (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt') => void,
+    onUpdateRole: (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt' | 'sac') => void,
     onCreateUser: (data: { full_name: string; email: string; phone: string; role: string }) => Promise<void>,
     onResendInvite: (email: string) => Promise<void>,
     onDeleteUser: (id: string, email: string) => Promise<void>,
     onSetPassword: (id: string, newPassword: string) => Promise<void>,
 }) => {
     const [showCreate, setShowCreate] = React.useState(false);
+    const [search, setSearch] = React.useState('');
     const [resetingId, setResetingId] = React.useState<string | null>(null);
     const [passwordModalUser, setPasswordModalUser] = React.useState<{ id: string; email: string } | null>(null);
     const [newPassword, setNewPassword] = React.useState('');
@@ -496,19 +497,41 @@ const UsersView = ({
         if (role === 'reseller') return 'bg-green-100 text-green-600';
         if (role === 'hr') return 'bg-purple-100 text-purple-600';
         if (role === 'mkt') return 'bg-pink-100 text-pink-600';
+        if (role === 'sac') return 'bg-teal-100 text-teal-600';
         return 'bg-blue-100 text-krenke-blue';
     };
 
+    const filteredUsers = React.useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return users;
+        return users.filter((u) =>
+            (u.full_name || '').toLowerCase().includes(q) ||
+            u.email.toLowerCase().includes(q)
+        );
+    }, [users, search]);
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
                 <h1 className="text-2xl font-black text-krenke-blue">Gestão de Usuários</h1>
-                <button
-                    onClick={() => setShowCreate(v => !v)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 transition-colors"
-                >
-                    <Plus size={18} /> Novo Usuário
-                </button>
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Buscar por nome ou e-mail..."
+                            className="pl-10 pr-4 py-2.5 bg-gray-50 border rounded-xl text-sm font-semibold w-64 focus:outline-none focus:ring-2 focus:ring-krenke-orange/20"
+                        />
+                    </div>
+                    <button
+                        onClick={() => setShowCreate(v => !v)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 transition-colors whitespace-nowrap"
+                    >
+                        <Plus size={18} /> Novo Usuário
+                    </button>
+                </div>
             </div>
 
             {showCreate && (
@@ -534,6 +557,7 @@ const UsersView = ({
                                 <option value="hr">RH (Vagas e Candidaturas)</option>
                                 <option value="mkt">Marketing</option>
                                 <option value="reseller">Revendedor</option>
+                                <option value="sac">SAC</option>
                                 <option value="restricted">Acesso Restrito</option>
                             </select>
                         </div>
@@ -559,7 +583,14 @@ const UsersView = ({
                         </tr>
                     </thead>
                     <tbody className="divide-y">
-                        {users.map((u) => (
+                        {filteredUsers.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-10 text-center text-sm font-semibold text-gray-400">
+                                    Nenhum usuário encontrado para "{search}".
+                                </td>
+                            </tr>
+                        )}
+                        {filteredUsers.map((u) => (
                             <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
@@ -590,6 +621,7 @@ const UsersView = ({
                                         <option value="hr">RH</option>
                                         <option value="mkt">Marketing</option>
                                         <option value="reseller">Revendedor</option>
+                                        <option value="sac">SAC</option>
                                         <option value="restricted">Acesso Restrito</option>
                                     </select>
                                 </td>
@@ -1694,9 +1726,9 @@ const AdminPage: React.FC = () => {
         fetchProfiles();
     };
 
-    const updateUserRole = async (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt') => {
+    const updateUserRole = async (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt' | 'sac') => {
         if (!supabase) return;
-        const roleLabel = role === 'super' ? 'Super Admin' : role === 'reseller' ? 'Revendedor' : role === 'hr' ? 'RH' : role === 'mkt' ? 'Marketing' : 'Acesso Restrito';
+        const roleLabel = role === 'super' ? 'Super Admin' : role === 'reseller' ? 'Revendedor' : role === 'hr' ? 'RH' : role === 'mkt' ? 'Marketing' : role === 'sac' ? 'SAC' : 'Acesso Restrito';
         if (!confirm(`Deseja alterar o nível de acesso deste usuário para ${roleLabel}?`)) return;
 
         try {

@@ -106,7 +106,7 @@ export interface ResellerFile {
 export interface Profile {
   id: string;
   email: string;
-  role: 'super' | 'restricted' | 'reseller' | 'hr';
+  role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt' | 'sac';
   full_name: string | null;
   avatar_url: string | null;
   phone: string | null;
