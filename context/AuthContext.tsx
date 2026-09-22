@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
-export type UserRole = 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt';
+export type UserRole = 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt' | 'sac';
 
 interface AuthContextType {
     user: User | null;
@@ -105,6 +105,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         return () => subscription.unsubscribe();
+    }, []);
+
+    // Logout forçado às 20h (horário de Brasília), todo dia — enquanto a aba
+    // estiver aberta. Sessão fica encerrada até novo login manual.
+    useEffect(() => {
+        const isPastCutoff = () => {
+            const hour = parseInt(
+                new Intl.DateTimeFormat('en-US', {
+                    timeZone: 'America/Sao_Paulo',
+                    hour: 'numeric',
+                    hour12: false,
+                }).format(new Date()),
+                10
+            );
+            return hour >= 20;
+        };
+
+        const checkCutoff = () => {
+            if (supabase && isPastCutoff()) {
+                supabase.auth.getSession().then(({ data: { session } }) => {
+                    if (session) signOut();
+                });
+            }
+        };
+
+        checkCutoff();
+        const interval = setInterval(checkCutoff, 60 * 1000);
+        return () => clearInterval(interval);
     }, []);
 
     const signOut = async () => {

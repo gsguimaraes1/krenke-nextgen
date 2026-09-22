@@ -57,6 +57,36 @@ export function callerIp(req) {
   return (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || undefined;
 }
 
+export function normalizePhone(v) {
+  return (v || '').replace(/\D/g, '');
+}
+
+// E-mail via Resend (HTTP API direto, sem SDK — mesmo padrão do fetch ao
+// Turnstile/Goalfy). Sem RESEND_API_KEY, só loga e segue (não falha o request
+// que chamou, igual verifyTurnstile sem secret).
+export async function sendEmail({ to, subject, text }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('RESEND_API_KEY not set — skipping email notification');
+    return;
+  }
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: process.env.SAC_NOTIFY_FROM || 'SAC Krenke <sac@krenke.com.br>',
+        to,
+        subject,
+        text,
+      }),
+    });
+    if (!r.ok) console.error('Resend send failed:', r.status, await r.text().catch(() => ''));
+  } catch (err) {
+    console.error('Resend send error:', err);
+  }
+}
+
 // Resolve the caller's role from the Bearer token, or null if unauthenticated.
 export async function getCallerRole(req) {
   const authHeader = req.headers.authorization;

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1137.0",
     "@gsap/react": "^2.1.2",
     "@marsidev/react-turnstile": "^1.5.3",
     "@supabase/supabase-js": "^2.91.0",

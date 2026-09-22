@@ -30,8 +30,10 @@ export default async function handler(req, res) {
   const allowedRoles = ['super', 'restricted', 'reseller', 'hr', 'mkt'];
   if (role && !allowedRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' });
 
+  const siteUrl = process.env.SITE_URL || 'https://krenke.com.br';
   const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
     data: { full_name: full_name || '' },
+    redirectTo: `${siteUrl}/login`,
   });
 
   if (error) {

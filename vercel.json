@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "sac.krenke.com.br" }],
+      "destination": "/abrir-chamado",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/translate_api/:path*",

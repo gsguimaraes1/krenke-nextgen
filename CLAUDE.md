@@ -30,7 +30,7 @@ admin da Krenke Brinquedos. Mantenha este arquivo atualizado quando a arquitetur
 
 ## Rotas & papéis (App.tsx)
 
-Papéis (`profiles.role`, tipo `UserRole`): `super` | `restricted` | `reseller` | `hr` | `mkt`.
+Papéis (`profiles.role`, tipo `UserRole`): `super` | `restricted` | `reseller` | `hr` | `mkt` | `sac`.
 
 Autorização client-side via `context/AuthContext.tsx` + `components/ProtectedRoute.tsx`
 (`allowedRoles` e `allowedUserIds` p/ allowlist por conta). **Sem perfil = sem papel** —
@@ -46,6 +46,8 @@ não há mais fallback de papel no cliente (autorização real vive no RLS/servi
 | `/revendedor` | `super`, `reseller` (`reseller-area/pages/ResellerArea.tsx`) |
 | `/marketing` | `super`, `mkt` |
 | `/relatorio` | `super` **+ allowlist de userIds** (PowerBI) |
+| `/abrir-chamado`, `/abrir-chamado/obrigado`, `/meus-chamados` | público, sem Layout — SAC (`sac-area/pages/`) |
+| `/sac`, `/sac/dashboard` | `super`, `sac` — painel SAC (Kanban/Dashboard, `sac-area/pages/`) |
 
 > "pgadmin" = painel admin PRÓPRIO da Krenke (`/pgadmin`), NÃO o dashboard do Supabase nem pgAdmin do Postgres.
 
@@ -65,6 +67,9 @@ Ações privilegiadas do painel rodam **server-side** com service role (bypassa 
 | `report-url.js` | Bearer + allowlist userIds | resolve URL PowerBI (não expõe no bundle) |
 | `upload-to-r2.js`, `r2-ops.js`, `r2-sync.js` | ⚠️ ver auditoria | R2 upload/delete/sync |
 | `proxy-logo.js` | n/a | fetch estático |
+| `submit-ticket.js` | público + Turnstile | abre chamado SAC (`sac_tickets` + anexos) |
+| `lookup-tickets.js` | público + Turnstile | cliente consulta próprios chamados (`/meus-chamados`) |
+| `upload-attachment.js` | público (limitado) / staff `sac`+`super` | anexo de chamado pro R2, prefixo `sac-anexos/` |
 
 ## Banco (Supabase, schema `public`, RLS habilitado em todas)
 
@@ -74,7 +79,10 @@ Ações privilegiadas do painel rodam **server-side** com service role (bypassa 
 `orcamento_revendas` (log de orçamentos da calculadora do revendedor — DDL em `sql/orcamento_revendas.sql`;
 RLS: dono OU `public.is_super_admin()`; `upsert` por `quote_number`, então reeditar não gera linha nova),
 `associated_resellers` (lista manual de revendas p/ campo "Revendedor Associado" da calculadora — DDL em
-`sql/associated_resellers.sql`; select livre p/ autenticado, insert só allowlist fixa + `super`, update/delete só `super`).
+`sql/associated_resellers.sql`; select livre p/ autenticado, insert só allowlist fixa + `super`, update/delete só `super`),
+`sac_tickets`/`sac_ticket_events`/`sac_ticket_attachments` (módulo SAC — chamados de instalação/manutenção/
+garantia; RLS via `public.is_sac_staff()`, role `sac` ou `super`; `due_at` calculado por trigger de SLA por
+`priority`; realtime ligado em `sac_tickets`).
 
 - **Ferramentas Supabase disponíveis via MCP** (`Supabase- Krenke Brinquedos`): `execute_sql`,
   `apply_migration`, `list_tables`, `get_advisors`, `get_logs` etc. Use pra inspecionar/alterar o banco.
@@ -91,7 +99,10 @@ RLS: dono OU `public.is_super_admin()`; `upsert` por `quote_number`, então reed
   dashboard Supabase (Auth → SMTP Settings), **não há código** — `inviteUserByEmail`/`resetPasswordForEmail`
   seguem iguais, só a rota de entrega mudou. Domínio `krenke.com.br` verificado no Resend (SPF/DKIM).
   Rate limit de email subiu 2/1h → 30. **Pendente:** trocar sender pra `no-reply@krenke.com.br` e
-  traduzir/branding os templates (Auth → Emails → Templates, ainda em inglês default do Supabase).
+  aplicar os templates com a marca (Auth → Emails → Templates, corpo ainda em inglês default do
+  Supabase apesar do subject do invite já estar em PT-BR) — HTML pronto em `email-templates/*.supabase.html`
+  (invite, reset-password, confirm-signup; ver gotcha abaixo). Config de template/sender só existe no
+  dashboard, não em código.
 - **n8n** — `n8n.krenke.com.br` (webhooks legados; leads migraram pra Goalfy direto).
 - **PowerBI** — dashboards embedados em `/relatorio` e `/marketing`.
 - **Chatwoot** — `chat.krenke.com.br` (widget de chat).
@@ -126,6 +137,46 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
+- **SAC unificado no site principal** (2026-09-22): módulo SAC (Kanban de chamados de instalação/
+  manutenção/garantia) era app Vite **separado** (`Krenke-SAC/`, deploy próprio, domínio
+  `sac.krenke.com.br`) — migrado pra dentro deste repo. Público: `/abrir-chamado`, `/abrir-chamado/obrigado`
+  (renomeado de `/obrigado` pra não colidir com o `/obrigado` do site, que é do form de orçamento/vaga),
+  `/meus-chamados`. Painel: `/sac` (Kanban) e `/sac/dashboard`, `allowedRoles={['super','sac']}`. Código em
+  `sac-area/pages/` e `sac-area/components/` (mesmo padrão isolado de `reseller-area/`), tipos em
+  `sac-area/types.ts`, helpers em `sac-area/lib/`. Reusa `context/AuthContext.tsx` e `lib/supabase.ts` do
+  site (mesmo projeto Supabase já usava desde a migração original — role `sac` já existia no check
+  constraint de `profiles`, nenhuma migration nova). Endpoints `submit-ticket.js`, `lookup-tickets.js`,
+  `upload-attachment.js` movidos pra `api/` na raiz (Vercel só roteia serverless function direto ali);
+  `api/_utils.js` ganhou `sendEmail` (notificação via Resend) e `normalizePhone` do `_utils.js` do SAC.
+  `vercel.json` ganhou redirect condicional por host: `sac.krenke.com.br` + `/` → `/abrir-chamado` (domínio
+  próprio preservado, mesmo deploy). **Pendente (manual, fora do alcance do Claude aqui):**
+  (1) anexar domínio `sac.krenke.com.br` neste projeto Vercel e remover do projeto `Krenke-SAC` antigo depois
+  de validar o cutover; (2) env vars deste projeto Vercel precisam de `SAC_NOTIFY_EMAIL`/`SAC_NOTIFY_FROM`
+  (as de R2/Turnstile/Supabase já são compartilhadas); (3) pasta `Krenke-SAC/` (repo separado, não commitado
+  aqui) fica como está até confirmar que o merge funciona em produção — decomissionar depois.
+  `@aws-sdk/client-s3` foi adicionado ao `package.json` (faltava — `upload-to-r2.js`/`r2-sync.js`/`r2-ops.js`
+  já importavam sem estar declarado, gap pré-existente).
+- **Convite de usuário caindo em `/revendedor`** (2026-09-22): `api/create-user.js` e `api/resend-invite.js`
+  chamavam `inviteUserByEmail` sem `redirectTo` → caía no Site URL padrão do Supabase (área revendedor).
+  Corrigido: `redirectTo: `${SITE_URL}/login`` (env `SITE_URL`, default `https://krenke.com.br`).
+  ⚠️ **Pendente (dashboard):** adicionar `https://krenke.com.br/login` em Auth → URL Configuration →
+  Redirect URLs — sem isso o Supabase ignora o `redirectTo` e mantém o comportamento antigo.
+- **Templates de e-mail do Auth (Resend)**: `email-templates/*.supabase.html` (raiz do projeto, desde
+  2026-07-23 — `invite.supabase.html` e `reset-password.supabase.html`; `confirm-signup.supabase.html`
+  adicionado 2026-09-22 pro terceiro template padrão do Supabase) tem HTML de e-mail de verdade com a
+  marca da Krenke (tabela, hack MSO, preheader oculto, laranja `#F39200`, navy `#0F0C29`, logo
+  `site.krenke.com.br/favicon.png`). **Aplicar manualmente** (dashboard Supabase, MCP desta sessão
+  aponta pro projeto errado — Kinderplay, não Krenke): Auth → Emails → Templates → colar o HTML no
+  template correspondente ("Invite user", "Reset Password", "Confirm signup") — variáveis
+  `{{ .ConfirmationURL }}` já no formato que o Supabase espera. Aproveitar e trocar o sender (Auth →
+  SMTP Settings) de `gabriel@krenke.com.br` pra `no-reply@krenke.com.br` (domínio já verificado no
+  Resend, cobre qualquer local-part). Confirmado via Resend MCP (2026-09-22): domínio `krenke.com.br`
+  verificado/sending habilitado, zero suppressions, e-mails de convite/reset realmente entregues e
+  clicados — a integração Resend↔Supabase já funciona ponta a ponta, só falta aplicar o HTML acima.
+- **Logout forçado às 20h** (2026-09-22): `context/AuthContext.tsx` checa a cada 60s (e no mount) se já
+  passou das 20h em `America/Sao_Paulo`; se sim e há sessão ativa, desloga (`signOut()`). Roda só client-side
+  enquanto a aba está aberta — não é expiração de JWT no servidor. Sessão fica encerrada até login manual
+  (não volta sozinho antes das 20h do dia seguinte).
 - **Margem + forma de pagamento na calculadora** (2026-08-04): `reseller-area/components/ProductCalculator.tsx`
   tinha bug — campo "Margem" calculava markup sobre custo (`preço × (1+margem/100)`) em vez de margem sobre
   o preço de venda. Corrigido pra `preço = custo / (1 - margem/100)` (`MAX_MARGIN = 90` trava o input pra

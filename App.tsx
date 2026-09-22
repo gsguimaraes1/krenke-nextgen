@@ -31,6 +31,11 @@ const ObrigadoCurriculoPage = React.lazy(() => import('./pages/ObrigadoCurriculo
 const MarketingPage = React.lazy(() => import('./pages/Marketing'));
 const RelatorioPage = React.lazy(() => import('./pages/Relatorio'));
 const PowerBIEmbed = React.lazy(() => import('./pages/PowerBIEmbed'));
+const SacTicketFormPage = React.lazy(() => import('./sac-area/pages/PublicTicketForm'));
+const SacObrigadoPage = React.lazy(() => import('./sac-area/pages/Obrigado'));
+const SacMeusChamadosPage = React.lazy(() => import('./sac-area/pages/MeusChamados'));
+const SacKanbanPage = React.lazy(() => import('./sac-area/pages/Kanban'));
+const SacDashboardPage = React.lazy(() => import('./sac-area/pages/Dashboard'));
 
 // Gate por conta — só este e-mail acessa /venda e /faturamento.
 const DASHBOARD_ALLOWED_EMAILS = ['gabriel.gbr.fire@gmail.com'];
@@ -149,6 +154,23 @@ const App: React.FC = () => {
                 <Layout bare>
                   <ResellerArea />
                 </Layout>
+              </ProtectedRoute>
+            } />
+
+            {/* SAC — chamados de instalação/manutenção/garantia. Público abre e
+                consulta chamado; painel (Kanban/Dashboard) é só super/sac.
+                sac.krenke.com.br aponta pro mesmo deploy (ver vercel.json). */}
+            <Route path="/abrir-chamado" element={<SacTicketFormPage />} />
+            <Route path="/abrir-chamado/obrigado" element={<SacObrigadoPage />} />
+            <Route path="/meus-chamados" element={<SacMeusChamadosPage />} />
+            <Route path="/sac" element={
+              <ProtectedRoute allowedRoles={['super', 'sac']}>
+                <SacKanbanPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/sac/dashboard" element={
+              <ProtectedRoute allowedRoles={['super', 'sac']}>
+                <SacDashboardPage />
               </ProtectedRoute>
             } />
 
