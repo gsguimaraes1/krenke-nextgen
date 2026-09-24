@@ -116,39 +116,6 @@ const ResellerArea: React.FC = () => {
 
   const ALL_ROLES = ['super', 'restricted', 'reseller', 'hr', 'mkt'] as const;
 
-  const STATIC_FILES: ResellerFile[] = [
-    {
-      id: 'static-1',
-      name: 'Catálogo Krenke 2026',
-      file_url: 'https://s3.krenke.com.br/CataloVFINAL-%20digital.pdf',
-      file_type: 'pdf',
-      folder_id: null,
-      size: 0,
-      created_at: '',
-      allowed_roles: null,
-    },
-    {
-      id: 'static-2',
-      name: 'Produtos Krenke Atualizado AVULSOS 2026',
-      file_url: 'https://s3.krenke.com.br/Produtos%20Krenke%20%20Atualizado%20AVULSOS%202026.pdf',
-      file_type: 'pdf',
-      folder_id: null,
-      size: 0,
-      created_at: '',
-      allowed_roles: null,
-    },
-    {
-      id: 'static-3',
-      name: 'Tabela Playgrounds Matriz Revenda Atualizada 2026',
-      file_url: 'https://s3.krenke.com.br/TABELA%20%20PLAYGROUNDS%20MATRIZ%20REVENDA%20%20ATUALIZADA%202026.pdf',
-      file_type: 'pdf',
-      folder_id: null,
-      size: 0,
-      created_at: '',
-      allowed_roles: null,
-    },
-  ];
-
   const isRoleAllowed = (allowedRoles: string[] | null) => {
     if (!allowedRoles || allowedRoles.length === 0) return true;
     if (isSuperAdmin) return true;
@@ -177,15 +144,10 @@ const ResellerArea: React.FC = () => {
       const { data: filesResult } = await fileQuery.order('name');
       const visibleFiles = (filesResult || []).filter(f => isRoleAllowed(f.allowed_roles));
 
-      if (!currentFolderId) {
-        setFiles([...STATIC_FILES, ...visibleFiles]);
-      } else {
-        setFiles(visibleFiles);
-      }
+      setFiles(visibleFiles);
     } catch (error) {
       console.error('Error fetching content:', error);
-      if (!currentFolderId) setFiles(STATIC_FILES);
-      else setFiles([]);
+      setFiles([]);
     } finally {
       setLoading(false);
     }
@@ -686,7 +648,7 @@ const ResellerArea: React.FC = () => {
 
                   {/* File List */}
                   {filteredFiles.map(file => {
-                    const isDraggable = isSuperAdmin && !file.id.startsWith('static-');
+                    const isDraggable = isSuperAdmin;
                     const isDragging = draggedFile?.id === file.id;
                     return (
                     <motion.div
