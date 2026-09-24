@@ -140,6 +140,26 @@ export interface CalculatorProduct {
   updated_at: string;
 }
 
+/** Peça da composição padrão de um parque (tabela park_compositions). */
+export interface ParkComposition {
+  park_id: string;
+  product_code: string;
+  product_description: string;
+  qty: number;
+  sort_order: number;
+}
+
+/** Divergência de preço/nome entre planilha KMP e calculadora — só super admin lê. */
+export interface CalculatorProductReview {
+  id: string;
+  product_code: string;
+  product_description: string;
+  reference_price: number | null;
+  reference_description: string | null;
+  note: string | null;
+  resolved: boolean;
+}
+
 /** Item de orçamento persistido — snapshot textual, sem imagens. */
 export interface QuoteItem {
   code: string;

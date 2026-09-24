@@ -137,6 +137,19 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
+- **Parques padrão na calculadora** (2026-09-24): toggle "Parques Padrão | Produtos Avulsos" no topo de
+  `reseller-area/components/ProductCalculator.tsx`. Modo parque = galeria de miniaturas (`products` categoria
+  "Playgrounds Padrões" com composição; imagem = `images` com "perspectiva" → `image`). Clicar carrega a composição de
+  `park_compositions` (park_id → `products.id`, peça = `product_code` + `product_description` exata, porque código 200565
+  é compartilhado) no carrinho, com **preço sempre de `calculator_products`**; galeria recolhe numa barra "Editando parque"
+  (badge Padrão/Modificado, Restaurar padrão, Trocar parque) e a tabela filtra "No orçamento" (chip "Todos" pra inserir;
+  digitar na busca volta pra "Todos"). Resumo também tem −/+/lixeira. Modo avulsos = fluxo antigo (montagem livre).
+  Divergências planilha KMP × calculadora ficam em `calculator_product_reviews` (RLS só `super`) → badge
+  "Avisar Samuel" (tooltip com os 2 preços; clique marca `resolved`). DDL + seed em `sql/park_compositions.sql`, gerado
+  do `Produtos-KMP - Produtos KMP.json` (19 parques; KMP 0302/0305 sem composição). O seed também cadastra a peça
+  203380 (Taco chumbado), que faltava. ⚠️ **Rodar o SQL manualmente no SQL Editor** (o Claude não tem acesso de DDL:
+  MCP Supabase sem auth e nenhuma RPC de SQL). Antes de rodar, o card fica vazio (falha silenciosa).
+
 - **SAC unificado no site principal** (2026-09-22): módulo SAC (Kanban de chamados de instalação/
   manutenção/garantia) era app Vite **separado** (`Krenke-SAC/`, deploy próprio, domínio
   `sac.krenke.com.br`) — migrado pra dentro deste repo. Público: `/abrir-chamado`, `/abrir-chamado/obrigado`

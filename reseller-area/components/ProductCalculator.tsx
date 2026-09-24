@@ -3,13 +3,15 @@ import {
   Search, FileDown, Trash2, Calculator, Package, AlertCircle,
   Plus, Edit2, Check, X, Loader2, ImagePlus, Image as ImageIcon,
   User, FileText, ChevronDown, ChevronUp, History as HistoryIcon, FilePlus, Save,
-  Download,
+  Download, AlertTriangle, LayoutGrid, RotateCcw, Boxes, Pencil,
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import CreatableSelect from 'react-select/creatable';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { CalculatorProduct, QuoteItem, ResellerQuote } from '../../types';
+import {
+  CalculatorProduct, CalculatorProductReview, ParkComposition, QuoteItem, ResellerQuote,
+} from '../../types';
 
 const IPI_RATE = 0.065;
 const AVISTA_DISCOUNT_RATE = 0.05;
@@ -49,6 +51,12 @@ Guaramirim, ${today}`;
 interface CartItem extends CalculatorProduct { qty: number }
 
 interface ModelOption { value: string; label: string }
+interface StandardPark { id: string; name: string; image: string | null }
+
+const STANDARD_PARKS_CATEGORY = 'Playgrounds Padrões';
+
+// Código não é único em calculator_products (200565 = 4 telhados) — chave é código + descrição.
+const productKey = (code: string, description: string) => `${code}|${description}`;
 interface ModelGroup { label: string; options: ModelOption[] }
 
 function formatBRL(val: number): string {
@@ -137,6 +145,21 @@ const ProductCalculator: React.FC = () => {
   // Anexos de imagem do parque — SEMPRE locais à sessão, nunca vão pra tabela
   const [parkImages, setParkImages] = useState<string[]>([]);
   const parkImageInputRef = useRef<HTMLInputElement>(null);
+
+  // Parques padrão (products categoria "Playgrounds Padrões") + composição (park_compositions)
+  const [parks, setParks] = useState<StandardPark[]>([]);
+  const [compositions, setCompositions] = useState<ParkComposition[]>([]);
+  const [parksError, setParksError] = useState<string | null>(null);
+  const [selectedParkId, setSelectedParkId] = useState('');
+
+  // Modo de montagem: parque padrão (galeria → edita composição) ou avulsos (montagem livre)
+  const [buildMode, setBuildMode] = useState<'park' | 'avulsos'>('park');
+  const [parkGalleryOpen, setParkGalleryOpen] = useState(true);
+  // Tabela de produtos: catálogo inteiro ou só o que está no orçamento
+  const [productFilter, setProductFilter] = useState<'all' | 'cart'>('all');
+
+  // Divergências planilha KMP × calculadora — RLS só libera pro super admin
+  const [reviews, setReviews] = useState<CalculatorProductReview[]>([]);
 
   // Admin CRUD state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -231,7 +254,59 @@ const ProductCalculator: React.FC = () => {
     }
   };
 
-  useEffect(() => { loadProducts(); loadModelOptions(); loadAssociatedResellers(); }, []);
+  // Erro vira aviso no bloco de parques — o modo avulsos continua funcionando.
+  const loadParks = async () => {
+    setParksError(null);
+    try {
+      const [parksRes, compRes] = await Promise.all([
+        supabase.from('products').select('id, name, image, images').eq('category', STANDARD_PARKS_CATEGORY).order('name'),
+        supabase
+          .from('park_compositions')
+          .select('park_id, product_code, product_description, qty, sort_order')
+          .order('sort_order'),
+      ]);
+      if (parksRes.error) throw parksRes.error;
+      if (compRes.error) throw compRes.error;
+      const rows = (parksRes.data || []) as { id: string; name: string; image: string | null; images: string[] | null }[];
+      setParks(rows.map(p => ({
+        id: p.id,
+        name: p.name,
+        // vista em perspectiva é a que melhor mostra o parque inteiro na miniatura
+        image: p.images?.find(i => i.includes('perspectiva')) || p.image || p.images?.[0] || null,
+      })));
+      setCompositions((compRes.data || []) as ParkComposition[]);
+    } catch (e: any) {
+      setParks([]);
+      setCompositions([]);
+      setParksError(e?.message || 'erro desconhecido');
+    }
+  };
+
+  const loadReviews = async () => {
+    try {
+      const { data, error: err } = await supabase
+        .from('calculator_product_reviews')
+        .select('id, product_code, product_description, reference_price, reference_description, note, resolved')
+        .eq('resolved', false);
+      if (err) throw err;
+      setReviews((data || []) as CalculatorProductReview[]);
+    } catch {
+      setReviews([]);
+    }
+  };
+
+  const resolveReview = async (review: CalculatorProductReview) => {
+    if (!confirm(`Marcar "${review.product_description}" como resolvido? O aviso some pra essa peça.`)) return;
+    const { error: err } = await supabase
+      .from('calculator_product_reviews')
+      .update({ resolved: true, resolved_at: new Date().toISOString() })
+      .eq('id', review.id);
+    if (err) { alert('Erro ao marcar como resolvido: ' + err.message); return; }
+    setReviews(prev => prev.filter(r => r.id !== review.id));
+  };
+
+  useEffect(() => { loadProducts(); loadModelOptions(); loadAssociatedResellers(); loadParks(); }, []);
+  useEffect(() => { if (isSuperAdmin) loadReviews(); else setReviews([]); }, [isSuperAdmin]);
 
   // Pre-fill disclaimer when toggled on or when profile loads
   useEffect(() => {
@@ -242,11 +317,13 @@ const ProductCalculator: React.FC = () => {
     }
   }, [useFullDisclaimer, profile, user]);
 
-  const filtered = useMemo(() =>
-    products.filter(p =>
-      p.description.toLowerCase().includes(search.toLowerCase()) ||
-      p.code.includes(search)
-    ), [products, search]);
+  const filtered = useMemo(() => {
+    const inCart = new Set(cart.map(i => i.id));
+    return products.filter(p =>
+      (productFilter === 'all' || inCart.has(p.id)) &&
+      (p.description.toLowerCase().includes(search.toLowerCase()) || p.code.includes(search))
+    );
+  }, [products, search, productFilter, cart]);
 
   const cartMap = useMemo(() => {
     const m: Record<string, CartItem> = {};
@@ -279,6 +356,124 @@ const ProductCalculator: React.FC = () => {
   // Entrada + 28 dias: sem desconto. Os dois pagam IPI integral.
   const avistaDiscount = paymentTerm === 'avista' ? totalBruto * AVISTA_DISCOUNT_RATE : 0;
   const totalComIPI = totalBruto - avistaDiscount + totalIPI;
+
+  // ── Parques padrão ─────────────────────────────────
+  const productByKey = useMemo(() => {
+    const m: Record<string, CalculatorProduct> = {};
+    products.forEach(p => { m[productKey(p.code, p.description)] = p; });
+    return m;
+  }, [products]);
+
+  const reviewByKey = useMemo(() => {
+    const m: Record<string, CalculatorProductReview> = {};
+    reviews.forEach(r => { m[productKey(r.product_code, r.product_description)] = r; });
+    return m;
+  }, [reviews]);
+
+  // Só parques com composição cadastrada entram na galeria
+  const compositionsByPark = useMemo(() => {
+    const m: Record<string, ParkComposition[]> = {};
+    compositions.forEach(c => { (m[c.park_id] ||= []).push(c); });
+    return m;
+  }, [compositions]);
+
+  const galleryParks = useMemo(
+    () => parks.filter(p => compositionsByPark[p.id]?.length),
+    [parks, compositionsByPark]);
+
+  // Total padrão (preço da calculadora × qtd) + nº de flags, por parque — alimenta as miniaturas
+  const parkSummary = (parkId: string) => {
+    const items = compositionsByPark[parkId] || [];
+    let total = 0;
+    let flags = 0;
+    items.forEach(c => {
+      const key = productKey(c.product_code, c.product_description);
+      const product = productByKey[key];
+      if (product) total += effectivePrice(product.unit_price) * c.qty;
+      if (reviewByKey[key]) flags++;
+    });
+    return { total, flags, count: items.length };
+  };
+
+  const selectedPark = parks.find(p => p.id === selectedParkId);
+
+  // Orçamento ainda igual à composição padrão? (mesmas peças, mesmas qtds)
+  const parkModified = useMemo(() => {
+    const items = compositionsByPark[selectedParkId];
+    if (!items) return false;
+    if (items.length !== cart.length) return true;
+    return items.some(c => {
+      const product = productByKey[productKey(c.product_code, c.product_description)];
+      return !product || cartMap[product.id]?.qty !== c.qty;
+    });
+  }, [compositionsByPark, selectedParkId, cart, cartMap, productByKey]);
+
+  // Substitui o carrinho pela composição padrão; depois o usuário tira/põe peças normalmente.
+  const loadParkIntoCart = (parkId: string) => {
+    const park = parks.find(p => p.id === parkId);
+    const items = compositionsByPark[parkId] || [];
+    if (!park || items.length === 0) return;
+    if (cart.length > 0 && !confirm(`Carregar a composição padrão do ${park.name}? Os itens atuais do orçamento serão substituídos.`)) {
+      return;
+    }
+
+    const next: CartItem[] = [];
+    const missing: string[] = [];
+    items.forEach(c => {
+      const product = productByKey[productKey(c.product_code, c.product_description)];
+      if (product) next.push({ ...product, qty: c.qty });
+      else missing.push(`${c.product_code} — ${c.product_description}`);
+    });
+
+    setSelectedParkId(parkId);
+    setCart(next);
+    setModelName(park.name);
+    setSavedAt(null);
+    // Recolhe a galeria e mostra só as peças do parque pra editar
+    setParkGalleryOpen(false);
+    setProductFilter('cart');
+    setSearch('');
+
+    if (missing.length > 0) {
+      alert(
+        `${missing.length} peça(s) do ${park.name} não estão ativas na calculadora e ficaram de fora:\n` +
+        missing.join('\n')
+      );
+    }
+  };
+
+  // Troca de modo não mexe no carrinho — só no que a tela mostra.
+  const switchBuildMode = (mode: 'park' | 'avulsos') => {
+    setBuildMode(mode);
+    if (mode === 'avulsos') {
+      setSelectedParkId('');
+      setProductFilter('all');
+    } else {
+      setParkGalleryOpen(!selectedParkId);
+    }
+  };
+
+  // Aviso "avisar Samuel" — só existe review pra super admin (RLS), então nada aparece pros demais.
+  const renderReviewFlag = (code: string, description: string, currentPrice?: number) => {
+    const review = reviewByKey[productKey(code, description)];
+    if (!review) return null;
+    const lines = [
+      review.reference_price != null ? `Planilha KMP: ${formatBRL(Number(review.reference_price))}` : null,
+      currentPrice != null ? `Calculadora: ${formatBRL(currentPrice)}` : null,
+      review.note,
+      'Clique para marcar como resolvido.',
+    ].filter(Boolean);
+    return (
+      <button
+        type="button"
+        onClick={e => { e.stopPropagation(); resolveReview(review); }}
+        title={lines.join('\n')}
+        className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide bg-amber-100 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-md hover:bg-amber-200 transition-colors align-middle"
+      >
+        <AlertTriangle size={10} /> Avisar Samuel
+      </button>
+    );
+  };
 
   // ── CNPJ lookup ────────────────────────────────────
   const lookupCnpj = async (raw: string) => {
@@ -780,6 +975,10 @@ const ProductCalculator: React.FC = () => {
     setUseFullDisclaimer(quote.use_full_disclaimer);
     if (quote.disclaimer_text) setDisclaimerText(quote.disclaimer_text);
     setCart(restored);
+    // Orçamento salvo não guarda o parque de origem — abre como montagem livre
+    setSelectedParkId('');
+    setBuildMode('avulsos');
+    setProductFilter('all');
     setParkImages([]); // imagens não são persistidas — precisam ser reanexadas
     setSavedAt(null);
     setQuotesOpen(false);
@@ -813,6 +1012,9 @@ const ProductCalculator: React.FC = () => {
     setMargin(0);
     setPaymentTerm('entrada');
     setParkImages([]);
+    setSelectedParkId('');
+    setParkGalleryOpen(true);
+    setProductFilter('all');
     setSavedAt(null);
     setQuotesOpen(false);
   };
@@ -953,7 +1155,11 @@ const ProductCalculator: React.FC = () => {
               placeholder="Buscar por nome ou código..."
               className="w-full pl-11 pr-4 py-2.5 rounded-2xl bg-white border border-slate-200 outline-none focus:ring-2 focus:ring-[#312783] transition-all shadow-sm font-bold text-sm"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => {
+                setSearch(e.target.value);
+                // buscar = procurar peça pra inserir → mostra o catálogo inteiro
+                if (e.target.value && productFilter === 'cart') setProductFilter('all');
+              }}
             />
           </div>
         </div>
@@ -1033,14 +1239,172 @@ const ProductCalculator: React.FC = () => {
         </div>
       )}
 
+      {/* ── Modo de montagem: parque padrão (galeria) ou produtos avulsos */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div role="tablist" aria-label="Modo de montagem" className="inline-flex p-1 bg-slate-100 rounded-2xl self-start">
+            {([
+              { mode: 'park', label: 'Parques Padrão', Icon: LayoutGrid },
+              { mode: 'avulsos', label: 'Produtos Avulsos', Icon: Boxes },
+            ] as const).map(({ mode, label, Icon }) => (
+              <button
+                key={mode}
+                role="tab"
+                aria-selected={buildMode === mode}
+                onClick={() => switchBuildMode(mode)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black transition-all ${
+                  buildMode === mode ? 'bg-[#312783] text-white shadow-sm' : 'text-slate-500 hover:text-[#312783]'
+                }`}
+              >
+                <Icon size={16} /> {label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs font-bold text-slate-400 sm:ml-2">
+            {buildMode === 'park'
+              ? 'Escolha um parque e ajuste as peças — tire, troque ou acrescente.'
+              : 'Monte o orçamento livremente pela Tabela de Produtos.'}
+          </p>
+        </div>
+
+        {buildMode === 'park' && (
+          <div className="border-t border-slate-100">
+            {parksError ? (
+              <p className="m-6 text-sm font-bold text-red-500 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
+                Erro ao carregar os parques padrão: {parksError}
+              </p>
+            ) : selectedPark && !parkGalleryOpen ? (
+              // Parque escolhido: barra compacta; a edição acontece na tabela + resumo abaixo
+              <div className="px-6 py-4 flex flex-wrap items-center gap-4">
+                {selectedPark.image && (
+                  <img src={selectedPark.image} alt="" className="w-20 h-14 object-contain rounded-xl bg-slate-50 border border-slate-100" />
+                )}
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+                    <Pencil size={12} /> Editando parque
+                  </p>
+                  <p className="font-black text-[#312783] text-lg leading-tight flex items-center gap-2">
+                    {selectedPark.name}
+                    <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full ${
+                      parkModified ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-700'
+                    }`}>
+                      {parkModified ? 'Modificado' : 'Padrão'}
+                    </span>
+                  </p>
+                  {!hideUnitPrices && (
+                    <p className="text-xs font-bold text-slate-400">
+                      Padrão: {formatBRL(parkSummary(selectedPark.id).total)} • Atual: {formatBRL(totalBruto)} (sem IPI)
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2 sm:ml-auto">
+                  {parkModified && (
+                    <button
+                      onClick={() => loadParkIntoCart(selectedPark.id)}
+                      className="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-600 px-3 py-2 rounded-xl font-bold text-xs hover:border-[#312783] hover:text-[#312783] transition-all"
+                    >
+                      <RotateCcw size={14} /> Restaurar padrão
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setParkGalleryOpen(true)}
+                    className="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-600 px-3 py-2 rounded-xl font-bold text-xs hover:border-[#312783] hover:text-[#312783] transition-all"
+                  >
+                    <LayoutGrid size={14} /> Trocar parque
+                  </button>
+                </div>
+              </div>
+            ) : galleryParks.length === 0 ? (
+              <p className="p-6 text-sm font-bold text-slate-400 text-center">Nenhum parque padrão cadastrado.</p>
+            ) : (
+              <div className="p-6">
+                {selectedPark && (
+                  <button
+                    onClick={() => setParkGalleryOpen(false)}
+                    className="mb-4 flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#312783]"
+                  >
+                    <ChevronUp size={14} /> Voltar para {selectedPark.name}
+                  </button>
+                )}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-3">
+                  {galleryParks.map(park => {
+                    const { total, flags, count } = parkSummary(park.id);
+                    const active = park.id === selectedParkId;
+                    return (
+                      <button
+                        key={park.id}
+                        onClick={() => loadParkIntoCart(park.id)}
+                        className={`group text-left rounded-2xl border-2 overflow-hidden transition-all hover:shadow-md ${
+                          active ? 'border-[#312783] ring-2 ring-[#312783]/20' : 'border-slate-100 hover:border-[#312783]/50'
+                        }`}
+                      >
+                        <div className="aspect-[4/3] bg-slate-50 flex items-center justify-center overflow-hidden">
+                          {park.image ? (
+                            <img
+                              src={park.image}
+                              alt={park.name}
+                              loading="lazy"
+                              className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <LayoutGrid size={32} className="text-slate-200" />
+                          )}
+                        </div>
+                        <div className="px-3 py-2.5">
+                          <p className="font-black text-slate-800 text-sm">{park.name}</p>
+                          <p className="text-[11px] font-bold text-slate-400">{count} peças</p>
+                          {!hideUnitPrices && (
+                            <p className="text-sm font-black text-[#312783] tabular-nums mt-0.5">{formatBRL(total)}</p>
+                          )}
+                          {isSuperAdmin && flags > 0 && (
+                            <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md">
+                              <AlertTriangle size={10} /> {flags} p/ Samuel
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* ── Product table */}
         <div className="xl:col-span-7 xl:self-start bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
             <Package size={18} className="text-[#312783]" />
-            <span className="font-black text-slate-700">Tabela de Produtos</span>
-            <span className="ml-auto text-xs text-slate-400 font-bold">{filtered.length} itens</span>
+            <span className="font-black text-slate-700">
+              {productFilter === 'cart' ? 'Peças do Orçamento' : 'Tabela de Produtos'}
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <div className="inline-flex p-0.5 bg-slate-100 rounded-xl">
+                {([
+                  { value: 'cart', label: `No orçamento (${cart.length})` },
+                  { value: 'all', label: 'Todos' },
+                ] as const).map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setProductFilter(opt.value)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                      productFilter === opt.value ? 'bg-white text-[#312783] shadow-sm' : 'text-slate-500 hover:text-[#312783]'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs text-slate-400 font-bold hidden sm:inline">{filtered.length} itens</span>
+            </div>
           </div>
+          {productFilter === 'cart' && (
+            <p className="px-6 py-2 text-xs font-bold text-slate-500 bg-slate-50 border-b border-slate-100">
+              Ajuste as quantidades ou zere para remover. Para inserir outra peça, clique em <b>Todos</b>.
+            </p>
+          )}
 
           {isSuperAdmin && addingNew && (
             <div className="flex items-center gap-2 px-6 py-3 bg-blue-50 border-b border-blue-100">
@@ -1115,6 +1479,9 @@ const ProductCalculator: React.FC = () => {
                     <p className="font-black text-slate-800 text-sm leading-snug line-clamp-2 break-words" title={product.description}>{product.description}</p>
                     <p className="text-xs text-slate-400 font-bold mt-0.5">
                       Cód. {product.code}{!hideUnitPrices && ` • ${formatBRL(effectivePrice(product.unit_price))}`}
+                      {reviewByKey[productKey(product.code, product.description)] && (
+                        <span className="ml-2">{renderReviewFlag(product.code, product.description, product.unit_price)}</span>
+                      )}
                     </p>
                   </div>
 
@@ -1354,11 +1721,34 @@ const ProductCalculator: React.FC = () => {
                   <div className="space-y-2.5 max-h-72 overflow-y-auto pr-2 -mr-1">
                     {cart.map(item => (
                       <div key={item.id} className="rounded-xl bg-slate-50/70 px-3 py-2.5">
-                        <p className="text-[13px] font-black text-slate-700 leading-snug break-words" title={item.description}>
-                          {item.description}
-                        </p>
-                        <div className="flex justify-between items-baseline gap-2 mt-1">
-                          <span className="text-xs text-slate-400 font-bold">
+                        <div className="flex items-start gap-2">
+                          <p className="flex-1 min-w-0 text-[13px] font-black text-slate-700 leading-snug break-words" title={item.description}>
+                            {item.description}
+                          </p>
+                          <button
+                            onClick={() => setQty(item, 0)}
+                            title="Remover peça do orçamento"
+                            aria-label={`Remover ${item.description}`}
+                            className="shrink-0 p-1 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                        {reviewByKey[productKey(item.code, item.description)] && (
+                          <div className="mt-1">{renderReviewFlag(item.code, item.description, item.unit_price)}</div>
+                        )}
+                        <div className="flex justify-between items-center gap-2 mt-1">
+                          <span className="flex items-center gap-1.5 text-xs text-slate-400 font-bold">
+                            <button
+                              onClick={() => setQty(item, item.qty - 1)}
+                              aria-label="Diminuir quantidade"
+                              className="w-5 h-5 rounded-md bg-slate-200/70 hover:bg-slate-200 text-slate-600 font-black flex items-center justify-center transition-colors"
+                            >−</button>
+                            <button
+                              onClick={() => setQty(item, item.qty + 1)}
+                              aria-label="Aumentar quantidade"
+                              className="w-5 h-5 rounded-md bg-slate-200/70 hover:bg-slate-200 text-slate-600 font-black flex items-center justify-center transition-colors"
+                            >+</button>
                             {hideUnitPrices ? `${item.qty} un.` : `${item.qty}× ${formatBRL(effectivePrice(item.unit_price))}`}
                           </span>
                           {!hideUnitPrices && (
