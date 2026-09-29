@@ -15,7 +15,7 @@ import {
 
 const IPI_RATE = 0.065;
 const AVISTA_DISCOUNT_RATE = 0.05;
-const MAX_MARGIN = 90; // acima disso a fórmula margem-sobre-venda diverge (1 - margin/100 → 0)
+const MAX_MARGIN = 99; // teto pra fórmula margem-sobre-venda não divergir (1 - margin/100 → 0 em 100%)
 const MAX_PARK_IMAGES = 5;
 const LOGO_URL = 'https://cdn.awsli.com.br/2185/2185627/arquivos/krenke-brinquedos-logo-branco-d__fogmt.webp';
 
@@ -130,6 +130,11 @@ const ProductCalculator: React.FC = () => {
 
   // Margin
   const [margin, setMargin] = useState(0);
+  // 'venda' = margem sobre o preço de venda (preço = custo / (1 - margem/100),
+  // diverge em 100%, capada em MAX_MARGIN); 'markup' = markup sobre o custo
+  // (preço = custo × (1 + margem/100)), sem teto matemático — pra cliente que
+  // pensa em "200%" como multiplicador de custo, não margem sobre venda.
+  const [marginMode, setMarginMode] = useState<'venda' | 'markup'>('venda');
 
   // Forma de pagamento: à vista concede 5% de desconto (sobre o total bruto,
   // antes do IPI); Entrada + 28 dias mantém preço cheio. Ambos têm IPI.
@@ -346,8 +351,13 @@ const ProductCalculator: React.FC = () => {
 
   // Margem sobre o preço de venda (não markup sobre o custo): margem 20%
   // sobre custo R$100 → venda R$125 (lucro R$25 = 20% de R$125, bate com o
-  // que foi digitado). Fórmula: venda = custo / (1 - margem/100).
-  const marginMult = margin > 0 ? 1 / (1 - Math.min(margin, MAX_MARGIN) / 100) : 1;
+  // que foi digitado). Fórmula: venda = custo / (1 - margem/100). Modo
+  // 'markup' é o inverso — venda = custo × (1 + margem/100), sem teto.
+  const marginMult = margin <= 0
+    ? 1
+    : marginMode === 'markup'
+      ? 1 + margin / 100
+      : 1 / (1 - Math.min(margin, MAX_MARGIN) / 100);
   const effectivePrice = (p: number) => p * marginMult;
 
   const totalBruto = useMemo(() => cart.reduce((s, i) => s + effectivePrice(i.unit_price) * i.qty, 0), [cart, margin]);
@@ -806,7 +816,7 @@ const ProductCalculator: React.FC = () => {
   const exportQuotesCsv = (quotes: ResellerQuote[], filename: string) => {
     const head = [
       'Nº Orçamento', 'Data', 'Cliente', 'CNPJ/CPF', 'Nº Cliente', 'Modelo',
-      'Revendedor Associado', 'Forma de Pagamento', 'Margem (%)',
+      'Revendedor Associado', 'Forma de Pagamento', 'Margem (%)', 'Tipo Margem',
       'Código do Produto', 'Descrição do Produto', 'Qtd', 'Preço Unit.', 'Subtotal Item',
       'Total do Orçamento (c/ IPI)',
     ];
@@ -827,6 +837,7 @@ const ProductCalculator: React.FC = () => {
         q.associated_reseller_name || '',
         paymentLabel(q.payment_term),
         num2(Number(q.margin) || 0),
+        q.margin_mode === 'markup' ? 'Markup s/ Custo' : 'Margem s/ Venda',
       ];
       const items = q.items && q.items.length > 0 ? q.items : [null];
       items.forEach(item => {
@@ -889,6 +900,7 @@ const ProductCalculator: React.FC = () => {
           client_cnpj: clientCnpj || null,
           client_number: clientNumber || null,
           margin,
+          margin_mode: marginMode,
           payment_term: paymentTerm,
           items,
           total_bruto: totalBruto,
@@ -971,6 +983,7 @@ const ProductCalculator: React.FC = () => {
     setClientCnpj(quote.client_cnpj || '');
     setClientNumber(quote.client_number || '');
     setMargin(Number(quote.margin) || 0);
+    setMarginMode(quote.margin_mode === 'markup' ? 'markup' : 'venda');
     setPaymentTerm(quote.payment_term === 'avista' ? 'avista' : 'entrada');
     setUseFullDisclaimer(quote.use_full_disclaimer);
     if (quote.disclaimer_text) setDisclaimerText(quote.disclaimer_text);
@@ -1624,29 +1637,60 @@ const ProductCalculator: React.FC = () => {
           </div>
 
           {/* Margin */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-6 py-4 flex items-center gap-4">
-            <div className="flex-1">
-              <label className={labelCls}>Margem</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min={0}
-                  max={MAX_MARGIN}
-                  step={0.5}
-                  value={margin === 0 ? '' : margin}
-                  placeholder="0"
-                  onChange={e => setMargin(Math.min(MAX_MARGIN, Math.max(0, parseFloat(e.target.value) || 0)))}
-                  className="w-full pr-8 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm font-black outline-none focus:ring-2 focus:ring-[#312783] transition-all"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">%</span>
-              </div>
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-6 py-4 flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setMarginMode('venda')}
+                className={`rounded-lg px-2 py-1.5 text-xs font-black transition-all border-2 ${
+                  marginMode === 'venda'
+                    ? 'bg-[#312783] border-[#312783] text-white'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-[#312783] hover:text-[#312783]'
+                }`}
+                title="Margem sobre o preço de venda — lucro é a % digitada sobre o preço final. Teto matemático de 99%."
+              >
+                Margem s/ Venda
+              </button>
+              <button
+                type="button"
+                onClick={() => setMarginMode('markup')}
+                className={`rounded-lg px-2 py-1.5 text-xs font-black transition-all border-2 ${
+                  marginMode === 'markup'
+                    ? 'bg-[#312783] border-[#312783] text-white'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-[#312783] hover:text-[#312783]'
+                }`}
+                title="Markup sobre o custo — preço final = custo × (1 + %). Sem teto, aceita 200% e mais."
+              >
+                Markup s/ Custo
+              </button>
             </div>
-            {margin > 0 && (
-              <div className="text-right shrink-0">
-                <p className="text-xs text-slate-400 font-bold">Multiplicador</p>
-                <p className="text-sm font-black text-[#312783]">×{marginMult.toFixed(3)}</p>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <label className={labelCls}>{marginMode === 'markup' ? 'Markup' : 'Margem'}</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    max={marginMode === 'markup' ? undefined : MAX_MARGIN}
+                    step={0.5}
+                    value={margin === 0 ? '' : margin}
+                    placeholder="0"
+                    onChange={e => {
+                      const raw = Math.max(0, parseFloat(e.target.value) || 0);
+                      setMargin(marginMode === 'markup' ? raw : Math.min(MAX_MARGIN, raw));
+                    }}
+                    className="w-full pr-8 pl-3 py-2.5 rounded-xl border border-slate-200 text-sm font-black outline-none focus:ring-2 focus:ring-[#312783] transition-all"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">%</span>
+                </div>
               </div>
-            )}
+              {margin > 0 && (
+                <div className="text-right shrink-0">
+                  <p className="text-xs text-slate-400 font-bold">Multiplicador</p>
+                  <p className="text-sm font-black text-[#312783]">×{marginMult.toFixed(3)}</p>
+                </div>
+              )}
+            </div>
           </div>
           {margin === 0 && cart.length > 0 && (
             <p className="-mt-2 text-xs font-bold text-orange-500 bg-orange-50 border border-orange-100 rounded-2xl px-4 py-2">

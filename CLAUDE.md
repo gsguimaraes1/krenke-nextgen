@@ -137,6 +137,17 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 ## Estado / gotchas atuais
 
+- **Modo de margem (Margem s/ Venda × Markup s/ Custo)** (2026-09-29):
+  `reseller-area/components/ProductCalculator.tsx` — campo "Margem" ganhou toggle de modo (`marginMode`).
+  'venda' = fórmula original (preço = custo / (1 − margem/100)), matematicamente diverge em 100%, capada em
+  `MAX_MARGIN = 99`. 'markup' = preço = custo × (1 + margem/100), sem teto real — pra revendedor que digita
+  "200%" pensando em multiplicador de custo, não margem sobre o preço final (os dois têm resultado bem
+  diferente pro mesmo número). Persistido em `orcamento_revendas.margin_mode` (nova coluna, migration
+  `sql/orcamento_revendas_margin_mode.sql`, default `'venda'`). ⚠️ Migration não aplicada pelo Claude — MCP
+  Supabase desta sessão aponta pra outro projeto (Kinderplay, não Krenke). Rodar manualmente no projeto certo
+  (`rkimlgpwshntyzaoqxpb`). Até rodar, `upsert` grava a coluna normalmente assim que existir; orçamentos
+  salvos antes da migration não tinham esse campo — `handleLoadQuote` já tem fallback (`quote.margin_mode
+  === 'markup' ? 'markup' : 'venda'`), então carregam como 'venda' (comportamento antigo).
 - **Parques padrão na calculadora** (2026-09-24): toggle "Parques Padrão | Produtos Avulsos" no topo de
   `reseller-area/components/ProductCalculator.tsx`. Modo parque = galeria de miniaturas (`products` categoria
   "Playgrounds Padrões" com composição; imagem = `images` com "perspectiva" → `image`). Clicar carrega a composição de

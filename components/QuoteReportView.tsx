@@ -217,7 +217,7 @@ const QuoteReportView: React.FC = () => {
     const exportCsv = () => {
         const head = [
             'Numero', 'Data', 'Revendedor', 'Cliente', 'CNPJ', 'Modelo',
-            'Itens', 'Pecas', 'Margem (%)', 'Total bruto', 'Total c/ IPI',
+            'Itens', 'Pecas', 'Margem (%)', 'Tipo Margem', 'Total bruto', 'Total c/ IPI',
         ];
         const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
         const lines = filtered.map(r => [
@@ -230,6 +230,7 @@ const QuoteReportView: React.FC = () => {
             (r.items || []).length,
             (r.items || []).reduce((s, i) => s + (Number(i.qty) || 0), 0),
             num(r.margin).toFixed(2).replace('.', ','),
+            r.margin_mode === 'markup' ? 'Markup s/ Custo' : 'Margem s/ Venda',
             num(r.total_bruto).toFixed(2).replace('.', ','),
             num(r.total_com_ipi).toFixed(2).replace('.', ','),
         ].map(esc).join(';'));
