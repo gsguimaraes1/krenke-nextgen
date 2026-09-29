@@ -637,8 +637,24 @@ const ProductCalculator: React.FC = () => {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.text('PROPOSTA COMERCIAL — TABELA DE PRODUTOS', margin, subtitleY + 5);
+      if (hideUnitPrices) {
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(100, 100, 120);
+        doc.text('valores unitários sob consulta — total ao final', pageW - margin, subtitleY + 5, { align: 'right' });
+      }
 
       // ── Table
+      // Layout de colunas recalculado por modo — sem VL.UNIT/SUBTOTAL, QTD vai
+      // pra borda direita em vez de deixar um vão vazio no lugar das colunas ocultas.
+      const rightEdge = margin + contentW;
+      const showPrices = !hideUnitPrices;
+      const qtdX = showPrices ? rightEdge - 66 : rightEdge - 2;
+      const priceX = rightEdge - 40;
+      const subtotalX = rightEdge;
+      const descMaxLen = showPrices ? 60 : 95;
+      const colDividerX = showPrices ? rightEdge - 76 : rightEdge - 22;
+
       let y = subtitleY + 14;
 
       doc.setFillColor(49, 39, 131);
@@ -648,10 +664,10 @@ const ProductCalculator: React.FC = () => {
       doc.setFont('helvetica', 'bold');
       doc.text('CÓD.', margin + 2, y + 5.5);
       doc.text('DESCRIÇÃO', margin + 22, y + 5.5);
-      doc.text('QTD', margin + contentW - 66, y + 5.5, { align: 'right' });
-      if (!hideUnitPrices) {
-        doc.text('VL. UNIT.', margin + contentW - 40, y + 5.5, { align: 'right' });
-        doc.text('SUBTOTAL', margin + contentW, y + 5.5, { align: 'right' });
+      doc.text('QTD', qtdX, y + 5.5, { align: 'right' });
+      if (showPrices) {
+        doc.text('VL. UNIT.', priceX, y + 5.5, { align: 'right' });
+        doc.text('SUBTOTAL', subtotalX, y + 5.5, { align: 'right' });
       }
       y += 8;
 
@@ -665,13 +681,23 @@ const ProductCalculator: React.FC = () => {
         doc.setTextColor(70, 70, 70);
         const ep = item.unit_price * marginMult;
         doc.text(item.code, margin + 2, y + 5);
-        const desc = item.description.length > 60 ? item.description.substring(0, 57) + '...' : item.description;
+        const desc = item.description.length > descMaxLen
+          ? item.description.substring(0, descMaxLen - 3) + '...'
+          : item.description;
         doc.text(desc, margin + 22, y + 5);
-        doc.text(String(item.qty), margin + contentW - 66, y + 5, { align: 'right' });
-        if (!hideUnitPrices) {
-          doc.text(formatBRL(ep), margin + contentW - 40, y + 5, { align: 'right' });
-          doc.text(formatBRL(ep * item.qty), margin + contentW, y + 5, { align: 'right' });
+        doc.text(String(item.qty), qtdX, y + 5, { align: 'right' });
+        if (showPrices) {
+          doc.text(formatBRL(ep), priceX, y + 5, { align: 'right' });
+          doc.text(formatBRL(ep * item.qty), subtotalX, y + 5, { align: 'right' });
         }
+        // divisória vertical sutil antes da(s) coluna(s) numérica(s) + bordas da linha
+        // (desenhadas por linha, não numa moldura só no fim — a tabela pode quebrar página)
+        doc.setDrawColor(228, 227, 240);
+        doc.setLineWidth(0.2);
+        doc.line(colDividerX, y, colDividerX, y + 7.5);
+        doc.line(margin, y, margin, y + 7.5);
+        doc.line(rightEdge, y, rightEdge, y + 7.5);
+        doc.line(margin, y + 7.5, rightEdge, y + 7.5);
         y += 7.5;
       });
 
