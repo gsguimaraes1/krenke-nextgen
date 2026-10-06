@@ -93,7 +93,7 @@ export const ImageCarousel: React.FC = () => {
                                     whileHover={{ scale: 1.02, y: -20 }}
                                     transition={{ duration: 0.4 }}
                                 >
-                                    <img src={img} alt={`Projeto ${idx + 1}`} className="w-full h-full object-cover" />
+                                    <img src={img} alt={`Projeto ${idx + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-krenke-purple/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10">
                                         <motion.span
                                             initial={{ y: 20, opacity: 0 }}

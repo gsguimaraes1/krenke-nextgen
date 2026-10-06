@@ -20,12 +20,14 @@ export const useTranslatedText = (text: string) => {
   useEffect(() => {
     if (!text) return;
 
-    if (i18n.language === 'pt') {
+    // 'pt-BR' também é português: sem isso cada texto vira uma chamada ao Google Translate.
+    const lang = (i18n.language || 'pt').split('-')[0];
+    if (lang === 'pt') {
       setTranslated(text);
       return;
     }
 
-    const cacheKey = `${i18n.language}:${text}`;
+    const cacheKey = `${lang}:${text}`;
     const cached = translationCache.get(cacheKey);
     if (cached) {
       setTranslated(cached);
@@ -35,7 +37,7 @@ export const useTranslatedText = (text: string) => {
     let cancelled = false;
     setIsLoading(true);
 
-    translateText(text, i18n.language)
+    translateText(text, lang)
       .then(result => {
         if (cancelled) return;
         translationCache.set(cacheKey, result);

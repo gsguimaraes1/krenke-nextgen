@@ -105,7 +105,7 @@ garantia; RLS via `public.is_sac_staff()`, role `sac` ou `super`; `due_at` calcu
   dashboard, não em código.
 - **n8n** — `n8n.krenke.com.br` (webhooks legados; leads migraram pra Goalfy direto).
 - **PowerBI** — dashboards embedados em `/relatorio` e `/marketing`.
-- **Chatwoot** — `chat.krenke.com.br` (widget de chat).
+- **Chatwoot** — REMOVIDO do site (widget + CSP). O botão flutuante (`components/ContactLauncher.tsx`) agora abre só o form de WhatsApp.
 - **GTM / Vercel Analytics / Speed Insights** — analytics. UTMs capturados em `lib/utm-tracker.ts`.
 
 ## Env vars
@@ -118,7 +118,7 @@ Frontend (`VITE_*`, embarcado no bundle): `VITE_SUPABASE_URL`, `VITE_SUPABASE_AN
 
 - Headers em `vercel.json`: HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy.
 - **CSP enforcada** (2026-08-05, era `Content-Security-Policy-Report-Only`): allowlist já
-  inclui `challenges.cloudflare.com`, Supabase, GTM, PowerBI, n8n, Chatwoot, unpkg. Sem endpoint
+  inclui `challenges.cloudflare.com`, Supabase, GTM, PowerBI, n8n, unpkg. Sem endpoint
   `report-to`/`report-uri` configurado — se algo quebrar (script/iframe bloqueado), checar console
   do navegador por página violada e ajustar allowlist em `vercel.json`.
 - `X-XSS-Protection: 1; mode=block` adicionado (2026-08-05) — header legado, mas recomendado

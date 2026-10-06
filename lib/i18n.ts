@@ -111,6 +111,10 @@ i18n
   .init({
     resources,
     fallbackLng: 'pt',
+    // pt-BR (tag lang do HTML) vira 'pt'; sem isso i18n.language === 'pt' nunca bate.
+    supportedLngs: ['pt', 'en', 'es'],
+    nonExplicitSupportedLngs: true,
+    load: 'languageOnly',
     interpolation: {
       escapeValue: false,
     },
@@ -125,10 +129,12 @@ i18n
  * Uses an unofficial Google Translate endpoint for dynamic content
  */
 export const translateText = async (text: string, targetLang: string) => {
-  if (!text || targetLang === 'pt') return text;
-  
+  // O detector devolve 'pt-BR' (tag lang do HTML), então compara só o prefixo.
+  const base = targetLang.split('-')[0];
+  if (!text || base === 'pt') return text;
+
   try {
-    const url = `/translate_api/translate_a/single?client=gtx&sl=pt&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+    const url = `/translate_api/translate_a/single?client=gtx&sl=pt&tl=${base}&dt=t&q=${encodeURIComponent(text)}`;
     const response = await fetch(url);
     const data = await response.json();
     return data[0].map((item: any) => item[0]).join('');

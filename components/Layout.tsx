@@ -10,7 +10,6 @@ import { CookieConsent } from './CookieConsent';
 import { SecurityGuard } from './SecurityGuard';
 import { ScriptInjector } from './ScriptInjector';
 import { ContactLauncher } from './ContactLauncher';
-import { ChatwootWidget } from './ChatwootWidget';
 import { supabase } from '../lib/supabase';
 import { NavItem } from '../types';
 import { useTranslation } from 'react-i18next';
@@ -568,7 +567,6 @@ export const Layout: React.FC<{ children: React.ReactNode; bare?: boolean }> = (
       </main>
       {!bare && (
         <>
-          <ChatwootWidget />
           <ContactLauncher />
           {location.pathname === '/' && <MapSection />}
           <Footer />

@@ -26,6 +26,18 @@ import { TranslatableText } from '../components/TranslatableText';
 
 const HeroSection = () => {
   const root = useRef<HTMLDivElement>(null);
+  // Iframe do YouTube só depois do load + idle: ~1MB de JS/vídeo não pode competir com o LCP.
+  const [videoReady, setVideoReady] = useState(false);
+
+  useEffect(() => {
+    const start = () => {
+      const idle = (window as any).requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1500));
+      idle(() => setVideoReady(true));
+    };
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+    return () => window.removeEventListener('load', start);
+  }, []);
 
   useGSAP(
     () => {
@@ -89,13 +101,15 @@ const HeroSection = () => {
         data-hero-media
         className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden"
       >
-        <iframe
-          className="absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-70"
-          src={`https://www.youtube.com/embed/${HERO_YOUTUBE_ID}?autoplay=1&mute=1&loop=1&playlist=${HERO_YOUTUBE_ID}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-          title="Krenke Brinquedos"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
+        {videoReady && (
+          <iframe
+            className="absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-70"
+            src={`https://www.youtube-nocookie.com/embed/${HERO_YOUTUBE_ID}?autoplay=1&mute=1&loop=1&playlist=${HERO_YOUTUBE_ID}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+            title="Krenke Brinquedos"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          />
+        )}
       </div>
 
       {/* Overlays */}
@@ -534,7 +548,7 @@ const ComparativeTable = () => {
         .from('site_settings')
         .select('value')
         .eq('key', 'site_logo_white')
-        .single();
+        .maybeSingle();
       if (data?.value) setLogoUrl(data.value);
     };
     fetchSettings();
