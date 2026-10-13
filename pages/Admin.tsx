@@ -42,7 +42,8 @@ import {
     Check,
     KeyRound,
     BarChart3,
-    Lock
+    Lock,
+    Pencil
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -426,6 +427,7 @@ const UsersView = ({
     onResendInvite,
     onDeleteUser,
     onSetPassword,
+    onUpdateProfile,
 }: {
     users: Profile[],
     onUpdateRole: (id: string, role: 'super' | 'restricted' | 'reseller' | 'hr' | 'mkt' | 'sac') => void,
@@ -433,6 +435,7 @@ const UsersView = ({
     onResendInvite: (email: string) => Promise<void>,
     onDeleteUser: (id: string, email: string) => Promise<void>,
     onSetPassword: (id: string, newPassword: string) => Promise<void>,
+    onUpdateProfile: (id: string, data: { full_name: string; phone: string }) => Promise<void>,
 }) => {
     const [showCreate, setShowCreate] = React.useState(false);
     const [search, setSearch] = React.useState('');
@@ -441,6 +444,19 @@ const UsersView = ({
     const [newPassword, setNewPassword] = React.useState('');
     const [confirmPassword, setConfirmPassword] = React.useState('');
     const [settingPassword, setSettingPassword] = React.useState(false);
+    const [editModalUser, setEditModalUser] = React.useState<{ id: string; full_name: string; phone: string } | null>(null);
+    const [savingProfile, setSavingProfile] = React.useState(false);
+
+    const handleSubmitProfileEdit = async () => {
+        if (!editModalUser) return;
+        setSavingProfile(true);
+        try {
+            await onUpdateProfile(editModalUser.id, { full_name: editModalUser.full_name, phone: editModalUser.phone });
+            setEditModalUser(null);
+        } finally {
+            setSavingProfile(false);
+        }
+    };
 
     const closePasswordModal = () => {
         setPasswordModalUser(null);
@@ -665,6 +681,13 @@ const UsersView = ({
                                             <Lock size={12} /> Definir Senha
                                         </button>
                                         <button
+                                            onClick={() => setEditModalUser({ id: u.id, full_name: u.full_name || '', phone: u.phone || '' })}
+                                            title="Editar nome e telefone"
+                                            className="p-1.5 text-gray-300 hover:text-krenke-blue hover:bg-blue-50 rounded-lg transition-colors"
+                                        >
+                                            <Pencil size={14} />
+                                        </button>
+                                        <button
                                             onClick={() => onDeleteUser(u.id, u.email)}
                                             title="Excluir usuário"
                                             className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -721,6 +744,49 @@ const UsersView = ({
                                 {settingPassword ? <RefreshCw size={16} className="animate-spin" /> : <Lock size={16} />} Salvar Senha
                             </button>
                             <button onClick={closePasswordModal} className="px-6 py-2.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {editModalUser && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setEditModalUser(null)}>
+                    <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between">
+                            <h2 className="font-black text-krenke-blue text-lg flex items-center gap-2"><Pencil size={18} /> Editar Usuário</h2>
+                            <button onClick={() => setEditModalUser(null)} className="p-1 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-black text-gray-400 uppercase">Nome Completo</label>
+                            <input
+                                type="text"
+                                autoFocus
+                                className="w-full p-3 bg-gray-50 border rounded-xl font-bold"
+                                value={editModalUser.full_name}
+                                onChange={(e) => setEditModalUser(u => u && ({ ...u, full_name: e.target.value }))}
+                                placeholder="Nome completo"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-black text-gray-400 uppercase">Telefone / WhatsApp</label>
+                            <input
+                                type="text"
+                                className="w-full p-3 bg-gray-50 border rounded-xl"
+                                value={editModalUser.phone}
+                                onChange={(e) => setEditModalUser(u => u && ({ ...u, phone: e.target.value }))}
+                                placeholder="(00) 00000-0000"
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleSubmitProfileEdit(); }}
+                            />
+                        </div>
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                onClick={handleSubmitProfileEdit}
+                                disabled={savingProfile}
+                                className="px-6 py-2.5 bg-krenke-orange text-white font-black rounded-xl hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {savingProfile ? <RefreshCw size={16} className="animate-spin" /> : <Pencil size={16} />} Salvar
+                            </button>
+                            <button onClick={() => setEditModalUser(null)} className="px-6 py-2.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200">Cancelar</button>
                         </div>
                     </div>
                 </div>
@@ -1665,14 +1731,22 @@ const AdminPage: React.FC = () => {
         }
     };
 
+    const getFreshAccessToken = async (): Promise<string | null> => {
+        if (!supabase) return null;
+        const { data, error } = await supabase.auth.refreshSession();
+        if (!error && data.session) return data.session.access_token;
+        const { data: { session } } = await supabase.auth.getSession();
+        return session?.access_token || null;
+    };
+
     const handleCreateUser = async (data: { full_name: string; email: string; phone: string; role: string }) => {
         if (!supabase) return;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { alert('Sessão expirada. Faça login novamente.'); return; }
+        const token = await getFreshAccessToken();
+        if (!token) { alert('Sessão expirada. Faça login novamente.'); return; }
 
         const res = await fetch('/api/manage-user', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ action: 'create', ...data }),
         });
         const json = await res.json();
@@ -1683,11 +1757,11 @@ const AdminPage: React.FC = () => {
 
     const handleResendInvite = async (email: string) => {
         if (!supabase) return;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { alert('Sessão expirada.'); return; }
+        const token = await getFreshAccessToken();
+        if (!token) { alert('Sessão expirada.'); return; }
         const res = await fetch('/api/manage-user', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ action: 'resend-invite', email }),
         });
         const json = await res.json();
@@ -1697,11 +1771,11 @@ const AdminPage: React.FC = () => {
 
     const handleSetPassword = async (id: string, newPassword: string) => {
         if (!supabase) return;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { alert('Sessão expirada.'); return; }
+        const token = await getFreshAccessToken();
+        if (!token) { alert('Sessão expirada.'); return; }
         const res = await fetch('/api/manage-user', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ action: 'set-password', userId: id, newPassword }),
         });
         const json = await res.json();
@@ -1712,11 +1786,11 @@ const AdminPage: React.FC = () => {
     const handleDeleteUser = async (id: string, email: string) => {
         if (!supabase) return;
         if (!confirm(`Excluir o usuário ${email}? Esta ação não pode ser desfeita.`)) return;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { alert('Sessão expirada.'); return; }
+        const token = await getFreshAccessToken();
+        if (!token) { alert('Sessão expirada.'); return; }
         const res = await fetch('/api/manage-user', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ action: 'delete', userId: id }),
         });
         const json = await res.json();
@@ -1737,6 +1811,18 @@ const AdminPage: React.FC = () => {
             fetchProfiles();
         } catch (err: any) {
             alert('Erro ao atualizar permissão: ' + err.message);
+        }
+    };
+
+    const updateUserProfile = async (id: string, data: { full_name: string; phone: string }) => {
+        if (!supabase) return;
+        try {
+            const { error } = await supabase.from('profiles').update(data).eq('id', id);
+            if (error) throw error;
+            fetchProfiles();
+        } catch (err: any) {
+            alert('Erro ao atualizar usuário: ' + err.message);
+            throw err;
         }
     };
 
@@ -2352,7 +2438,7 @@ const AdminPage: React.FC = () => {
                         }} />
                     )}
                     {activeView === 'usuarios' && (
-                        <UsersView users={profiles} onUpdateRole={updateUserRole} onCreateUser={handleCreateUser} onResendInvite={handleResendInvite} onDeleteUser={handleDeleteUser} onSetPassword={handleSetPassword} />
+                        <UsersView users={profiles} onUpdateRole={updateUserRole} onCreateUser={handleCreateUser} onResendInvite={handleResendInvite} onDeleteUser={handleDeleteUser} onSetPassword={handleSetPassword} onUpdateProfile={updateUserProfile} />
                     )}
                     {/*
                       Relatório de orçamentos da calculadora do revendedor. Restrito a `super`:

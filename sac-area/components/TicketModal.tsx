@@ -86,7 +86,7 @@ const TicketModal: React.FC<Props> = ({ ticket, staff, onClose, onUpdated, onDel
     const { error } = await supabase.from('sac_tickets').delete().eq('id', ticket.id);
     setDeleting(false);
     if (error) {
-      window.alert('Erro ao excluir chamado.');
+      window.alert('Erro ao excluir chamado: ' + error.message);
       return;
     }
     onDeleted(ticket.id);
