@@ -1632,11 +1632,10 @@ const AdminPage: React.FC = () => {
         if (!supabase) return;
         const form = editingOpening ? { ...jobOpeningForm } : { ...jobOpeningForm };
         if (!form.title?.trim()) { alert('Informe o título da vaga.'); return; }
-        if (editingOpening) {
-            await supabase.from('job_openings').update(form).eq('id', editingOpening.id);
-        } else {
-            await supabase.from('job_openings').insert([form]);
-        }
+        const { error } = editingOpening
+            ? await supabase.from('job_openings').update(form).eq('id', editingOpening.id)
+            : await supabase.from('job_openings').insert([form]);
+        if (error) { alert('Erro ao salvar vaga: ' + error.message); return; }
         setEditingOpening(null);
         setJobOpeningForm({ contract_types: [], is_active: true });
         fetchJobOpenings();
