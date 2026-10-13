@@ -13,7 +13,8 @@ import {
     User,
     LayoutTemplate,
     Briefcase,
-    TrendingUp
+    TrendingUp,
+    LifeBuoy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -46,6 +47,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
     // Adiciona menus exclusivos para Super Admin
     if (role === 'super') {
+        menuItems.push({ icon: LifeBuoy, label: 'Painel SAC', path: 'https://sac.krenke.com.br', testId: 'nav-sac', isExternal: true });
         menuItems.push({ icon: TrendingUp, label: 'Rel. Orçamentos', path: '/pgadmin/relatorio-orcamentos', testId: 'nav-relatorio-orcamentos' });
         menuItems.push({ icon: Settings, label: 'Scripts', path: '/pgadmin/scripts', testId: 'nav-scripts' });
         menuItems.push({ icon: Settings, label: 'Configurações', path: '/pgadmin/configuracoes', testId: 'nav-configuracoes' });
@@ -82,31 +84,58 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
                 <nav className="flex-1 px-4 py-6 space-y-2">
                     {menuItems.map((item) => (
-                        <NavLink
-                            key={item.path}
-                            to={item.path}
-                            id={item.testId}
-                            data-testid={item.testId}
-                            aria-label={item.label}
-                            className={({ isActive }) => `
+                        item.isExternal ? (
+                            <a
+                                key={item.path}
+                                href={item.path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                id={item.testId}
+                                data-testid={item.testId}
+                                aria-label={item.label}
+                                className="flex items-center gap-4 px-4 py-3 rounded-xl transition-all group hover:bg-white/5 text-gray-400 hover:text-white"
+                            >
+                                <item.icon size={22} className="shrink-0" />
+                                {isSidebarOpen && (
+                                    <motion.span
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="font-medium"
+                                    >
+                                        {item.label}
+                                    </motion.span>
+                                )}
+                                {isSidebarOpen && (
+                                    <ChevronRight size={16} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                                )}
+                            </a>
+                        ) : (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                id={item.testId}
+                                data-testid={item.testId}
+                                aria-label={item.label}
+                                className={({ isActive }) => `
                 flex items-center gap-4 px-4 py-3 rounded-xl transition-all group
                 ${isActive ? 'bg-krenke-orange text-white shadow-lg shadow-orange-500/20' : 'hover:bg-white/5 text-gray-400 hover:text-white'}
               `}
-                        >
-                            <item.icon size={22} className="shrink-0" />
-                            {isSidebarOpen && (
-                                <motion.span
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    className="font-medium"
-                                >
-                                    {item.label}
-                                </motion.span>
-                            )}
-                            {isSidebarOpen && (
-                                <ChevronRight size={16} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                            )}
-                        </NavLink>
+                            >
+                                <item.icon size={22} className="shrink-0" />
+                                {isSidebarOpen && (
+                                    <motion.span
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="font-medium"
+                                    >
+                                        {item.label}
+                                    </motion.span>
+                                )}
+                                {isSidebarOpen && (
+                                    <ChevronRight size={16} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                                )}
+                            </NavLink>
+                        )
                     ))}
                 </nav>
 
